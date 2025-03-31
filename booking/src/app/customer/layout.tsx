@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { FiMenu } from "react-icons/fi";
 import { FaHome, FaUser, FaPhone, FaTools } from "react-icons/fa";
 import SideNavButton from "@/components/SideNavButton";
-import "./../_styles/scrollbar.css";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [expandSideNav, toggleSideNav] = useState(false);

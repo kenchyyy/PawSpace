@@ -1,4 +1,4 @@
-/* "use client";
+"use client";
 
 //basic functionality. no design and error handling
 
@@ -44,4 +44,3 @@ export default function LoginPage() {
     </div>
   );
 }
- */
