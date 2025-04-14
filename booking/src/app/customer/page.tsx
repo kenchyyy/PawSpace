@@ -1,8 +1,14 @@
-"use client";
-
 import ScreenSizeTool from "@/components/ScreenSizeTool";
+import UserSessionHandler from "@/components/serverSide/SessionChecker";
+import {redirect} from "next/navigation";
 
-const Root = () => {
+export default async function CustomerDashboard() {
+  const isLoggedIn = await UserSessionHandler({portal: "customer"})
+
+  if (!isLoggedIn) {
+    redirect("/login");
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold">Main Content</h1>
@@ -55,4 +61,3 @@ const Root = () => {
 
   );
 }
-export default Root;

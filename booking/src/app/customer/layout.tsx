@@ -2,14 +2,23 @@
 
 import { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaUser, FaPhone, FaTools } from "react-icons/fa";
+import { FaHome, FaUser } from "react-icons/fa";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import SideNavButton from "@/components/SideNavButton";
+import { Button } from "@/components/ui/Button";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [expandSideNav, toggleSideNav] = useState(false);
     const [navBState, setNavBState] = useState('Home');
     const [isLg, setIsLg] = useState(false);
     const navRef = useRef<HTMLDivElement | null>(null);
+
+    function handleLogOut() {
+      const supabase = createClientComponentClient();
+      supabase.auth.signOut().then(() => {
+        window.location.href = "/login";
+      });
+    }
   
     useEffect(() => {
       if (typeof window === "undefined") return;
@@ -57,32 +66,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   
           <h2 className={`text-2xl font-bold mb-4 transition-opacity duration-300 ${expandSideNav ? 'opacity-100 block' : 'opacity-0 hidden'} lg:block lg:opacity-100`}>
             Pawspace
+            <Button onClick={handleLogOut}>Log-out</Button>
           </h2>
   
           <SideNavButton 
             icon={FiMenu} 
             text="" 
-            onClick={() => toggleSideNav(!expandSideNav)} 
+            onClick={() => toggleSideNav(!expandSideNav)}
+            color="purple"
             className={`lg:hidden ${expandSideNav ? 'hidden' : ''}`}
             isCurrent={false}
           />
   
           <ul className="space-y-4">
-
-            <SideNavButton icon={FaHome} text="Home" isCurrent={navBState === "Home"} showText={expandSideNav} href="/customer"
-                onClick={() => { 
-                    setNavBState("Home"); 
-                    toggleSideNav(false); 
-                    }
-                }
+            {/* Add side navigation buttons here. Use SideNavButton Component */}
+            <SideNavButton icon={FaHome} 
+              text="Home" 
+              isCurrent={navBState === "Home"} 
+              showText={expandSideNav} 
+              href="/customer"
+              color="purple"
+              onClick={() => { 
+                  setNavBState("Home"); 
+                  toggleSideNav(false); 
+                  }
+              }
             />
 
-            <SideNavButton icon={FaUser} text="About Us" isCurrent={navBState === "About"} showText={expandSideNav} href="/customer/about-us"
-                onClick={() => { 
-                    setNavBState("About"); 
-                    toggleSideNav(false); 
-                    }
-                }
+            <SideNavButton 
+              icon={FaUser} 
+              text="About Us" 
+              isCurrent={navBState === "About"} 
+              showText={expandSideNav} 
+              href="/customer/about-us"
+              color="purple"
+              onClick={() => { 
+                  setNavBState("About"); 
+                  toggleSideNav(false); 
+                  }
+              }
             />
 
           </ul>
