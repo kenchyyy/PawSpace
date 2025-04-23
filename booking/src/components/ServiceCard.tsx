@@ -1,4 +1,5 @@
 import { PetService } from "@/types/services-list";
+import { Button } from "@/components/ui/Button";
 
 export function ServiceCard({ service }: { service: PetService }) {
   return (
@@ -23,12 +24,11 @@ export function ServiceCard({ service }: { service: PetService }) {
             </p>
             <p className="text-sm text-gray-500">{service.duration}</p>
           </div>
-          <button 
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          <Button 
             aria-label={`Book ${service.name}`}
           >
             Book Now
-          </button>
+          </Button>
         </div>
       </div>
     </article>
@@ -36,3 +36,22 @@ export function ServiceCard({ service }: { service: PetService }) {
 }
 
 export default ServiceCard;
+
+
+// this is what you put in page.tsx to run the ServiceCard component
+
+// import ServiceCard from "@/components/ServiceCard";
+// import { petServices } from "@/data/pet-services"; 
+
+// export default function ServicePage() {
+//   return (
+//     <main className="p-8">
+//       <h1 className="text-4xl font-bold text-center mb-8">Our Services</h1>
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+//         {petServices.map((service, index) => (
+//           <ServiceCard key={index} service={service} />
+//         ))}
+//       </div>
+//     </main>
+//   );
+// }
