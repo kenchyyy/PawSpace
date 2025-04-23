@@ -1,6 +1,6 @@
 "use client";
 
-import ScreenSizeTool from "@/components/ScreenSizeTool";
+// import ScreenSizeTool from "@/components/ScreenSizeTool";
 
 const Root = () => {
   return (
