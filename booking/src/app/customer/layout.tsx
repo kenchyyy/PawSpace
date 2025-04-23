@@ -2,16 +2,18 @@
 
 import { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaUser } from "react-icons/fa";
+import { FaHome, FaUser, FaCalendar } from "react-icons/fa";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import SideNavButton from "@/components/SideNavButton";
 import { Button } from "@/components/ui/Button";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [expandSideNav, toggleSideNav] = useState(false);
-    const [navBState, setNavBState] = useState('Home');
-    const [isLg, setIsLg] = useState(false);
+    const [isLg, setIsLg] = useState<null|boolean>(null);
     const navRef = useRef<HTMLDivElement | null>(null);
+
+    const pathname = usePathname();
 
     function handleLogOut() {
       const supabase = createClientComponentClient();
@@ -54,6 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [expandSideNav]);
+
+  
   
     return (
       <div className="h-screen w-screen flex bg-[linear-gradient(to_top_right,#1a011f,#2b0231,#220127,#240132,#2e0249,#5b0d6d,#921f38,#7a1d31)]">
@@ -82,29 +86,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Add side navigation buttons here. Use SideNavButton Component */}
             <SideNavButton icon={FaHome} 
               text="Home" 
-              isCurrent={navBState === "Home"} 
+              isCurrent={pathname === "/customer"} 
               showText={expandSideNav} 
               href="/customer"
               color="purple"
-              onClick={() => { 
-                  setNavBState("Home"); 
-                  toggleSideNav(false); 
-                  }
-              }
+              onClick={() => {toggleSideNav(false)}}
+            />
+
+            <SideNavButton 
+              icon={FaCalendar} 
+              text="History" 
+              isCurrent={pathname === "/customer/history"} 
+              showText={expandSideNav} 
+              href="/customer/history"
+              color="purple"
+              onClick={() => {toggleSideNav(false)}}
             />
 
             <SideNavButton 
               icon={FaUser} 
               text="About Us" 
-              isCurrent={navBState === "About"} 
+              isCurrent={pathname === "/customer/about-us"} 
               showText={expandSideNav} 
               href="/customer/about-us"
               color="purple"
-              onClick={() => { 
-                  setNavBState("About"); 
-                  toggleSideNav(false); 
-                  }
-              }
+              onClick={() => {toggleSideNav(false)}}
             />
 
           </ul>

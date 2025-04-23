@@ -1,63 +1,66 @@
-import ScreenSizeTool from "@/components/ScreenSizeTool";
-import UserSessionHandler from "@/components/serverSide/SessionChecker";
-import {redirect} from "next/navigation";
+//Customer Dashboard Page
 
-export default async function CustomerDashboard() {
-  const isLoggedIn = await UserSessionHandler({portal: "customer"})
+'use client';
+import { ReactNode } from 'react';
+import { FiPlus} from 'react-icons/fi';
+import CustomerDashboardHeader from '@/components/Customer Dashoard/Header';
+import { useState } from 'react';
+import { Booking } from '@/_components/Booking Form/types';
+import { useRouter } from 'next/navigation';
+import Modal from '@/_components/Modal';
+import BookingForm from '@/_components/Booking Form/BookingForm';
 
-  if (!isLoggedIn) {
-    redirect("/login");
+interface DashboardLayoutProps {
+  children: ReactNode;
+  activeTab: string;
+  setActiveTab: (tab: 'home' | 'history' | 'about') => void;
+}
+
+const CustomerPage = ({ children, activeTab, setActiveTab }: DashboardLayoutProps) => {
+  const router = useRouter();
+
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
+
+  function handleNewBooking(newBookings: Booking[]) {
+    setBookings([...bookings, ...newBookings]);
+    setShowBookingForm(false);
+    
+    const encoded = encodeURIComponent(JSON.stringify(newBookings));
+    router.push(`/customer/history?bookings=${encoded}`);
   }
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold">Main Content</h1>
-        <ScreenSizeTool />
-        <p className="mt-4">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Amet similique odio ducimus. Beatae quisquam neque velit impedit officiis natus, facilis molestias culpa at iste repellat, obcaecati esse non quidem nesciunt?
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis quam sed repellendus doloremque saepe. Nostrum quos, numquam omnis accusamus blanditiis voluptatibus corporis molestias natus, reprehenderit minus quisquam dolores distinctio officia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis suscipit unde, quia facilis soluta harum doloremque voluptates eaque. Labore necessitatibus, excepturi ducimus ad nam voluptates deserunt maxime error quidem voluptate.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus, odio nostrum? Placeat aperiam at quibusdam, impedit dicta facilis odit tempora quasi ab nisi nobis ipsa sed illo dignissimos debitis reprehenderit.
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis exercitationem quam assumenda consectetur, quibusdam velit sint neque repudiandae. In quas doloribus consequuntur suscipit quam illo sunt aut nam ipsam? Ea.
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corporis enim laboriosam ut quasi commodi nemo, et accusamus consequuntur reiciendis ipsa voluptates necessitatibus, quibusdam ipsum, praesentium quisquam inventore. Cumque, placeat rem?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil tempore repellendus animi blanditiis velit voluptatem soluta sunt fugiat officia. Aliquid cupiditate ipsam ut molestiae quae neque praesentium aspernatur vel mollitia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus sit quae optio, saepe, ipsam harum cum quos, tenetur iusto atque ratione voluptas id vitae ipsum placeat eius quaerat earum officia?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut libero asperiores neque iste unde corrupti dolorem debitis. Expedita reprehenderit est cupiditate nulla, doloremque eum dicta corporis nobis, magni amet ducimus.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quod in harum error perspiciatis itaque excepturi blanditiis quaerat est officia quasi ducimus, hic minus laborum amet similique. Numquam, eius commodi!
+    <div className="container mx-auto px-4 py-8">
+      <CustomerDashboardHeader onOpenBookingForm={() => setShowBookingForm(true)} />
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
+        <p className="mb-6 text-gray-600">
+          Book professional grooming or overnight stay services for your pets.
         </p>
-        <p className="mt-4">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Amet similique odio ducimus. Beatae quisquam neque velit impedit officiis natus, facilis molestias culpa at iste repellat, obcaecati esse non quidem nesciunt?
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis quam sed repellendus doloremque saepe. Nostrum quos, numquam omnis accusamus blanditiis voluptatibus corporis molestias natus, reprehenderit minus quisquam dolores distinctio officia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis suscipit unde, quia facilis soluta harum doloremque voluptates eaque. Labore necessitatibus, excepturi ducimus ad nam voluptates deserunt maxime error quidem voluptate.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus, odio nostrum? Placeat aperiam at quibusdam, impedit dicta facilis odit tempora quasi ab nisi nobis ipsa sed illo dignissimos debitis reprehenderit.
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis exercitationem quam assumenda consectetur, quibusdam velit sint neque repudiandae. In quas doloribus consequuntur suscipit quam illo sunt aut nam ipsam? Ea.
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corporis enim laboriosam ut quasi commodi nemo, et accusamus consequuntur reiciendis ipsa voluptates necessitatibus, quibusdam ipsum, praesentium quisquam inventore. Cumque, placeat rem?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil tempore repellendus animi blanditiis velit voluptatem soluta sunt fugiat officia. Aliquid cupiditate ipsam ut molestiae quae neque praesentium aspernatur vel mollitia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus sit quae optio, saepe, ipsam harum cum quos, tenetur iusto atque ratione voluptas id vitae ipsum placeat eius quaerat earum officia?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut libero asperiores neque iste unde corrupti dolorem debitis. Expedita reprehenderit est cupiditate nulla, doloremque eum dicta corporis nobis, magni amet ducimus.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quod in harum error perspiciatis itaque excepturi blanditiis quaerat est officia quasi ducimus, hic minus laborum amet similique. Numquam, eius commodi!
-        </p>
-        <p className="mt-4">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Amet similique odio ducimus. Beatae quisquam neque velit impedit officiis natus, facilis molestias culpa at iste repellat, obcaecati esse non quidem nesciunt?
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis quam sed repellendus doloremque saepe. Nostrum quos, numquam omnis accusamus blanditiis voluptatibus corporis molestias natus, reprehenderit minus quisquam dolores distinctio officia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis suscipit unde, quia facilis soluta harum doloremque voluptates eaque. Labore necessitatibus, excepturi ducimus ad nam voluptates deserunt maxime error quidem voluptate.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus, odio nostrum? Placeat aperiam at quibusdam, impedit dicta facilis odit tempora quasi ab nisi nobis ipsa sed illo dignissimos debitis reprehenderit.
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis exercitationem quam assumenda consectetur, quibusdam velit sint neque repudiandae. In quas doloribus consequuntur suscipit quam illo sunt aut nam ipsam? Ea.
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corporis enim laboriosam ut quasi commodi nemo, et accusamus consequuntur reiciendis ipsa voluptates necessitatibus, quibusdam ipsum, praesentium quisquam inventore. Cumque, placeat rem?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil tempore repellendus animi blanditiis velit voluptatem soluta sunt fugiat officia. Aliquid cupiditate ipsam ut molestiae quae neque praesentium aspernatur vel mollitia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus sit quae optio, saepe, ipsam harum cum quos, tenetur iusto atque ratione voluptas id vitae ipsum placeat eius quaerat earum officia?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut libero asperiores neque iste unde corrupti dolorem debitis. Expedita reprehenderit est cupiditate nulla, doloremque eum dicta corporis nobis, magni amet ducimus.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quod in harum error perspiciatis itaque excepturi blanditiis quaerat est officia quasi ducimus, hic minus laborum amet similique. Numquam, eius commodi!
-        </p>
-        <p className="mt-4">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Amet similique odio ducimus. Beatae quisquam neque velit impedit officiis natus, facilis molestias culpa at iste repellat, obcaecati esse non quidem nesciunt?
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis quam sed repellendus doloremque saepe. Nostrum quos, numquam omnis accusamus blanditiis voluptatibus corporis molestias natus, reprehenderit minus quisquam dolores distinctio officia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis suscipit unde, quia facilis soluta harum doloremque voluptates eaque. Labore necessitatibus, excepturi ducimus ad nam voluptates deserunt maxime error quidem voluptate.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Possimus, odio nostrum? Placeat aperiam at quibusdam, impedit dicta facilis odit tempora quasi ab nisi nobis ipsa sed illo dignissimos debitis reprehenderit.
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facilis exercitationem quam assumenda consectetur, quibusdam velit sint neque repudiandae. In quas doloribus consequuntur suscipit quam illo sunt aut nam ipsam? Ea.
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Corporis enim laboriosam ut quasi commodi nemo, et accusamus consequuntur reiciendis ipsa voluptates necessitatibus, quibusdam ipsum, praesentium quisquam inventore. Cumque, placeat rem?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil tempore repellendus animi blanditiis velit voluptatem soluta sunt fugiat officia. Aliquid cupiditate ipsam ut molestiae quae neque praesentium aspernatur vel mollitia.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Delectus sit quae optio, saepe, ipsam harum cum quos, tenetur iusto atque ratione voluptas id vitae ipsum placeat eius quaerat earum officia?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut libero asperiores neque iste unde corrupti dolorem debitis. Expedita reprehenderit est cupiditate nulla, doloremque eum dicta corporis nobis, magni amet ducimus.
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad quod in harum error perspiciatis itaque excepturi blanditiis quaerat est officia quasi ducimus, hic minus laborum amet similique. Numquam, eius commodi!
-        </p>
+        <button
+          onClick={() => setShowBookingForm(true)}
+          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center transition-colors"
+        >
+          <FiPlus className="mr-2" />
+          Create New Booking
+        </button>
+      </div>
+      <Modal 
+          isOpen={showBookingForm} 
+          onClose={() => setShowBookingForm(false)}
+        >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl">
+            <BookingForm 
+              onConfirmBooking={handleNewBooking}
+              onClose={() => setShowBookingForm(false)}
+            />
+          </div>
+        </Modal>
     </div>
 
   );
-}
+};
+
+export default CustomerPage;
