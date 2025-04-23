@@ -1,5 +1,5 @@
 // these are just sample data for the pet services.
-import { PetService } from "@/types/services-list";
+import { PetService } from "@/components/Services/services-list";
 
 export const petServices: PetService[] = [
   // ACCOMMODATIONS

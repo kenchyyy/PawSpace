@@ -1,4 +1,4 @@
-import { PetService } from "@/types/services-list";
+import { PetService } from "@/components/Services/services-list";
 import { Button } from "@/components/ui/Button";
 
 export function ServiceCard({ service }: { service: PetService }) {
