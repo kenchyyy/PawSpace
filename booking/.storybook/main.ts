@@ -1,22 +1,30 @@
-import type { StorybookConfig } from "@storybook/experimental-nextjs-vite";
+import type { StorybookConfig } from '@storybook/nextjs'; // Changed import
 
 const config: StorybookConfig = {
-  "stories": [
+  stories: [
     "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
-  "addons": [
+
+  addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-onboarding",
     "@chromatic-com/storybook",
-    "@storybook/experimental-addon-test"
+    // Removed experimental test addon
   ],
-  "framework": {
-    "name": "@storybook/experimental-nextjs-vite",
-    "options": {}
+
+  // Simplified framework declaration
+  framework: {
+    name: "@storybook/nextjs",
+    options: {}
   },
-  "staticDirs": [
-    "..\\public"
-  ]
+
+  staticDirs: ["../public"],
+
+  docs: {},
+
+  typescript: {
+    reactDocgen: "react-docgen-typescript"
+  }
 };
 export default config;
