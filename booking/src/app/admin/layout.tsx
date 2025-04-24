@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ${expandSideNav ? 'w-64 shadow-2xl' : isLg ? 'w-64 shadow-2xl' : 'w-20 shadow-lg'}
         transition-width duration-300 ease-in-out`}>
 
-        <h2 className={`text-2xl font-bold mb-4 transition-opacity duration-300 ${expandSideNav ? 'opacity-100 block' : 'opacity-0 hidden'} lg:block lg:opacity-100`}>
+        <h2 className={`text-2xl text-black font-bold mb-4 transition-opacity duration-300 ${expandSideNav ? 'opacity-100 block' : 'opacity-0 hidden'} lg:block lg:opacity-100`}>
           Pawspace
           <div>
             <Button onClick={handleLogOut}>Log-out</Button>
@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             isCurrent={pathname === "/admin"} 
             showText={expandSideNav} 
             href="/admin"
-            color="purple"
+            color="gray"
             onClick={() => { 
                 toggleSideNav(false); 
               }}
@@ -99,7 +99,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             isCurrent={pathname === "/admin/manageAccess"} 
             showText={expandSideNav} 
             href="/admin/manageAccess"
-            color="purple"
+            color="gray"
             onClick={() => { 
                 toggleSideNav(false); 
               }}
@@ -111,7 +111,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             isCurrent={pathname === "/admin/inbox"} 
             showText={expandSideNav} 
             href="/admin/inbox"
-            color="purple"
+            color="gray"
             onClick={() => { 
                 toggleSideNav(false); 
               }}
