@@ -30,13 +30,14 @@ const SideNavButton: React.FC<sideNavButtonProps> = ({ icon: Icon, text, onClick
         <div className="flex items-center gap-3 lg:justify-start lg:w-full">
             <Icon className={`text-lg
               ${isCurrent? (color === "purple"? "text-orange-600" : "text-white"):""}
-              ${color === "gray"? "text-black":"text-white"}
+              ${color === "gray"? "text-black":""}
               `} />
             <span className={`
               ${showText? "":"hidden"}
               ${overrideWindowSizeConstraint? "":"lg:inline"}
-              ${color === "gray"? "text-black":"text-white"}
-              ${isCurrent? (color === "purple"? "text-orange-600" : "text-white") : ""}`}>{text}</span>
+              ${isCurrent? (color === "purple"? "text-orange-600" : "text-white") : ""}
+              ${color === "gray"? "text-black":""}
+              `}>{text}</span>
         </div>
     </Link>
   );
