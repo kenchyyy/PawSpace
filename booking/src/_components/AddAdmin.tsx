@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/_components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "./ui/card";
-import { addAdmin } from "@/components/serverSide/AdminDataHandler";
+import { addAdmin } from "@/_components/serverSide/AdminDataHandler";
 import { useState } from "react";
 
 interface AddAdminProps {

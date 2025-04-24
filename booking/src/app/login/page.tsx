@@ -1,17 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/_components/ui/Button';
+import { Card, CardHeader, CardTitle, CardFooter } from '@/_components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-
+import { createClientSideClient } from '@/lib/supabase/CreateClientSideClient';
 export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const supabase = createClientComponentClient();
+  const supabase = createClientSideClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2,24 +2,20 @@
 
 import { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaBox } from "react-icons/fa";
-import SideNavButton from "@/components/SideNavButton";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { FaHome, FaBox, FaList} from "react-icons/fa";
+import SideNavButton from "@/_components/SideNavButton";
+import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/_components/ui/Button";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [expandSideNav, toggleSideNav] = useState(false);
-  const [navBState, setNavBState] = useState('Home');
   const [isLg, setIsLg] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
 
-  const noLayoutPages = ["/admin/login", "/admin/callback"];
-  const isNoLayoutPage = noLayoutPages.includes(pathname);
-
   function handleLogOut() {
-    const supabase = createClientComponentClient();
+    const supabase = createClientSideClient();
     supabase.auth.signOut().then(() => {
       window.location.href = "/login";
     });
@@ -60,14 +56,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [expandSideNav]);
 
-  if (isNoLayoutPage) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-slate-300">
-        {children}
-      </div>
-    );
-  }
-
   return (
     <div className="h-screen w-screen flex bg-slate-300">
       {/* Sidebar */}
@@ -96,12 +84,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <ul className="space-y-4">
           <SideNavButton icon={FaHome} 
             text="Home" 
-            isCurrent={navBState === "Home"} 
+            isCurrent={pathname === "/admin"} 
             showText={expandSideNav} 
             href="/admin"
             color="purple"
             onClick={() => { 
-                setNavBState("Home"); 
+                toggleSideNav(false); 
+              }}
+          />
+
+          <SideNavButton 
+            icon={FaList} 
+            text="Manage Access" 
+            isCurrent={pathname === "/admin/manageAccess"} 
+            showText={expandSideNav} 
+            href="/admin/manageAccess"
+            color="purple"
+            onClick={() => { 
                 toggleSideNav(false); 
               }}
           />
@@ -109,12 +108,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <SideNavButton 
             icon={FaBox} 
             text="Inbox" 
-            isCurrent={navBState === "Inbox"} 
+            isCurrent={pathname === "/admin/inbox"} 
             showText={expandSideNav} 
             href="/admin/inbox"
             color="purple"
             onClick={() => { 
-                setNavBState("Inbox"); 
                 toggleSideNav(false); 
               }}
           />

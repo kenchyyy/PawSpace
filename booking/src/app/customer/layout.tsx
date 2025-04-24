@@ -3,9 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
 import { FaHome, FaUser, FaCalendar } from "react-icons/fa";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import SideNavButton from "@/components/SideNavButton";
-import { Button } from "@/components/ui/Button";
+import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
+import SideNavButton from "@/_components/SideNavButton";
+import { Button } from "@/_components/ui/Button";
 import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const pathname = usePathname();
 
     function handleLogOut() {
-      const supabase = createClientComponentClient();
+      const supabase = createClientSideClient();
       supabase.auth.signOut().then(() => {
         window.location.href = "/login";
       });

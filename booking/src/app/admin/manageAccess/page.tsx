@@ -1,7 +1,7 @@
 "use server"
 
 import { createServerSideClient } from "@/lib/supabase/CreateServerSideClient";
-import AdminAccessTable from "@/components/AdminAccessTable";
+import AdminAccessTable from "@/_components/AdminAccessTable";
 
 type AdminAccessUser = {
   name: string;

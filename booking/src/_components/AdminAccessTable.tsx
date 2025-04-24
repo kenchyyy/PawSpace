@@ -7,12 +7,12 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from "@/components/ui/table";
+  } from "@/_components/ui/table";
 
 import { useEffect, useState} from "react";
 import { Trash } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/_components/ui/Button";
 import AddAdmin from "./AddAdmin";
 
 type AdminAccessUser = {

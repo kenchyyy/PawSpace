@@ -2,10 +2,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientSideClient } from '@/lib/supabase/CreateClientSideClient';
 import { Loader2 } from 'lucide-react';
 
-const supabase = createClientComponentClient(); 
+const supabase = createClientSideClient(); 
 
 export default function Callback() {
   const router = useRouter();

@@ -1,19 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
 
 // Initialize Supabase client directly
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: false, // Disable cookie persistence
-      autoRefreshToken: false // Disable token refresh
-    }
-  }
-);
+
 
 export async function POST(request: Request) {
+  const supabase = await createServerSideClient()
+
   try {
     const { email } = await request.json();
 

@@ -3,7 +3,7 @@
 'use client';
 import { ReactNode } from 'react';
 import { FiPlus} from 'react-icons/fi';
-import CustomerDashboardHeader from '@/components/Customer Dashoard/Header';
+import CustomerDashboardHeader from '@/_components/Customer Dashoard/Header';
 import { useState } from 'react';
 import { Booking } from '@/_components/Booking Form/types';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ const CustomerPage = ({ children, activeTab, setActiveTab }: DashboardLayoutProp
   function handleNewBooking(newBookings: Booking[]) {
     setBookings([...bookings, ...newBookings]);
     setShowBookingForm(false);
-    
+
     const encoded = encodeURIComponent(JSON.stringify(newBookings));
     router.push(`/customer/history?bookings=${encoded}`);
   }
