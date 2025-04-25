@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/_components/ui/Button';
-import { Card, CardHeader, CardTitle, CardFooter } from '@/_components/ui/card';
+import { Card, CardHeader, CardTitle, CardFooter } from '@/_components/ui/Card';
 import { Loader2 } from 'lucide-react';
 import { createClientSideClient } from '@/lib/supabase/CreateClientSideClient';
 

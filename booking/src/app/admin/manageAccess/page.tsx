@@ -2,6 +2,8 @@
 
 import { createServerSideClient } from "@/lib/supabase/CreateServerSideClient";
 import AdminAccessTable from "@/_components/AdminAccessTable";
+import { removeAdmin } from "@/_components/serverSide/AdminDataHandler";
+
 
 type AdminAccessUser = {
   name: string;
@@ -16,6 +18,11 @@ export default async function AdminPage() {
     .select("*");
   if (error) {
     return( <div> {error.message} </div>  )
+  }
+
+  async function processRemoveAdmin(email: string) {
+    const { success, message } = await removeAdmin(email);
+    
   }
 
   return (

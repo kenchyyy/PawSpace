@@ -1,24 +1,43 @@
-'use client';
+"use client";
 
-import React from 'react';
+import { AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/_components/ui/alert-dialog";
+import { Trash } from "lucide-react";
+import { Button } from "@/_components/ui/Button";
 
-type OverlayProps = {
-  message: string;
-  onClose?: () => void;
-};
+interface ConfirmationMessageProps {
+  onConfirm: () => void;
+  title: string;
+  description: string;
+  
+}
 
-export default function Overlay({ message, onClose }: OverlayProps) {
+export default function ConfirmationMessage({ onConfirm, title, description }: ConfirmationMessageProps) {
   return (
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white p-6 rounded-xl shadow-2xl max-w-lg w-full"
-        onClick={(e) => e.stopPropagation()} 
-      >
-        
-      </div>
-    </div>
-  );
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline"><Trash></Trash></Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
 }

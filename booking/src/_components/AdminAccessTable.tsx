@@ -10,10 +10,10 @@ import {
   } from "@/_components/ui/table";
 
 import { useEffect, useState} from "react";
-import { Trash } from "lucide-react";
-
+import ConfirmationMessage from "./ConfirmationMessage";
 import { Button } from "@/_components/ui/Button";
 import AddAdmin from "./AddAdmin";
+import AlertMessage from "./Alertmessage";
 
 type AdminAccessUser = {
     name: string;
@@ -21,13 +21,27 @@ type AdminAccessUser = {
     role: string
 }
 
-export default function AdminAccessTable({ data }: { data: AdminAccessUser[] }) {
+interface AdminAccessTableProps {
+    data: AdminAccessUser[];
+}
+
+
+export default function AdminAccessTable({ data }: AdminAccessTableProps) {
     const [showOverlay, setShowOverlay] = useState(false);
     const [message, setMessage] = useState("");
     const [users, setUsers] = useState(data);
 
-    function handleRemoveAdmin(email: string) {
-        
+    function showMessage(msg: string) {
+        setMessage(msg);
+        setTimeout(() => {
+            setMessage("");
+        }, 5000);
+
+    }
+
+    async function handleRemoveAdmin() {
+
+        showMessage("Admin removed successfully!");
     }
 
     return (
@@ -52,9 +66,7 @@ export default function AdminAccessTable({ data }: { data: AdminAccessUser[] }) 
                     <TableCell>{user.role}</TableCell>
                     {user.role !== "owner"?
                     <TableCell className="w-0">
-                        <Button variant="outline" size="icon">
-                            <Trash></Trash>
-                        </Button>
+                        <ConfirmationMessage onConfirm={handleRemoveAdmin} title="Are You sure?" description="Removing an admin is irreversersible. However, you can add the same user when you decide to add them again"></ConfirmationMessage>
                     </TableCell>
                     :
                     ""}
@@ -63,6 +75,7 @@ export default function AdminAccessTable({ data }: { data: AdminAccessUser[] }) 
                 </TableBody>
             </Table>
             {showOverlay && <AddAdmin onClose={() => setShowOverlay(false)} />}
+            {message && <AlertMessage message={message} borderColor="green"/>}
         </main>
 
   );
