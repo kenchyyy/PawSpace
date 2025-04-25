@@ -1,107 +1,83 @@
 'use client';
 import React from 'react';
-
-interface OwnerDetails {
-    name: string;
-    address: string;
-    contactNumber: string;
-}
+import { OwnerDetails } from './types';
 
 interface CustomerFormProps {
-    ownerDetails: OwnerDetails;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    errors: Record<string, string>;
-    isValidating?: boolean;
+  ownerDetails: OwnerDetails;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  errors: Record<string, string>;
+  isValidating?: boolean;
+  onNext: () => void;
 }
 
-const CustomerForm: React.FC<CustomerFormProps> = ({ 
-    ownerDetails, 
-    onChange, 
-    errors,
-    isValidating = false 
+const CustomerForm: React.FC<CustomerFormProps> = ({
+  ownerDetails, 
+  onChange, 
+  errors,
+  isValidating = false, 
+  onNext 
 }) => {
-    return (
-        <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Owner Information</h2>
-            
-            <div className="space-y-5">
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Full Name *</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={ownerDetails.name}
-                        onChange={onChange}
-                        placeholder="Vhea Asesor"
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-black ${
-                            errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        } ${isValidating ? 'opacity-75 cursor-not-allowed' : ''}`}
-                        required
-                        disabled={isValidating}
-                    />
-                    {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Phone Number *</label>
-                    <input
-                        type="tel"
-                        name="contactNumber"
-                        value={ownerDetails.contactNumber}
-                        onChange={onChange}
-                        placeholder="09361135195"
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200 focus:border-purple-200 transition-all text-black ${
-                            errors.contactNumber ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        } ${isValidating ? 'opacity-75 cursor-not-allowed' : ''}`}
-                        required
-                        disabled={isValidating}
-                    />
-                    {errors.contactNumber && (
-                        <p className="text-red-600 text-sm mt-1">
-                            {errors.contactNumber}
-                            {errors.contactNumber.includes('valid') && (
-                                <span className="block text-gray-500 mt-1">
-                                    Example: 09611234567 (Philippine format)
-                                </span>
-                            )}
-                        </p>
-                    )}
-                </div>
-                
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Address *</label>
-                    <input
-                        type="text"
-                        name="address"
-                        value={ownerDetails.address}
-                        onChange={onChange}
-                        placeholder="Block 5, Tabuc Suba, La Paz, Iloilo City"
-                        className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200 focus:border-purple-200 transition-all text-black ${
-                            errors.address ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-gray-400'
-                        } ${isValidating ? 'opacity-75 cursor-not-allowed' : ''}`}
-                        required
-                        disabled={isValidating}
-                    />
-                    {errors.address && (
-                        <p className="text-red-600 text-sm mt-1">
-                            {errors.address}
-                            {errors.address.includes('valid') && (
-                                <span className="block text-gray-500 mt-1">
-                                    Example: 123 Main Street, Barangay, City, Province
-                                </span>
-                            )}
-                        </p>
-                    )}
-                </div>
-
-                {isValidating && (
-                    <div className="text-center py-2 text-purple-600">
-                        <p>Validating information...</p>
-                    </div>
-                )}
-            </div>
+  return (
+    <div className="space-y-6">
+      <div className="bg-gray-50 p-6 rounded-lg">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Full Name *</label>
+            <input
+              type="text"
+              name="name"
+              value={ownerDetails.name}
+              onChange={onChange}
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
+                errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              disabled={isValidating}
+            />
+            {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Contact Number *</label>
+            <input
+              type="text"
+              name="contactNumber"
+              value={ownerDetails.contactNumber}
+              onChange={onChange}
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
+                errors.contactNumber ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              disabled={isValidating}
+            />
+            {errors.contactNumber && <p className="text-red-600 text-sm mt-1">{errors.contactNumber}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Address *</label>
+            <input
+              type="text"
+              name="address"
+              value={ownerDetails.address}
+              onChange={onChange}
+              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500 ${
+                errors.address ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              }`}
+              disabled={isValidating}
+            />
+            {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+          </div>
         </div>
-    );
+      </div>
+      <div className="flex justify-end pt-4">
+        <button
+          onClick={onNext}
+          disabled={isValidating}
+          className={`px-5 py-2.5 rounded-lg transition-colors flex items-center ${
+            isValidating ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white'
+          }`}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default CustomerForm;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -57,3 +58,22 @@ function Button({
 }
 
 export { Button, buttonVariants }
+=======
+'use client';
+import React from 'react';
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const Card: React.FC<CardProps> = ({ children, className = '' }) => {
+  return (
+    <div className={`bg-gray-50 p-6 rounded-lg ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+export default Card;
+>>>>>>> BookingForm
