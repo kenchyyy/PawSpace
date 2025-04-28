@@ -9,28 +9,28 @@ interface SessionCheckerProps {
 
 export default async function SessionChecker({portal}: SessionCheckerProps): Promise<boolean> {
     const supabase = await createServerSideClient();
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getUser();
 
     if (error) {
         return false;
     }
 
-    if (!session) {
+    if (!data) {
         return false;
     }
 
     if(portal === "admin") {
-        const { data, error } = await supabase
+        const { data: data2, error } = await supabase
             .from('admin_access_users')
             .select('email')
-            .eq('email', session.user.email)
+            .eq('email', data.user.email)
             .maybeSingle();
 
         if (error) {
             return false;
         }
 
-        if (!data) {
+        if (!data2) {
             return false; 
         }
     }
