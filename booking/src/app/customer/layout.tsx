@@ -16,7 +16,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
     <DashboardLayout colorTheme="purple"
     buttons={[
       {icon: "FaHome", text: "Home", href: "/customer"},
-      {icon: "Facalendar", text: "History", href: "/customer/history"},
+      {icon: "FaCalendar", text: "History", href: "/customer/history"},
       {icon: "FaUser", text: "About Us", href: "/customer/about-us"},
     ]}>
       {children}

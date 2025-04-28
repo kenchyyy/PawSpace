@@ -9,7 +9,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const sessionCheck = await SessionChecker({ portal: "admin" });
 
   if(!sessionCheck) {
-    redirect("/login");
+    redirect("/customer");
   }
 
   return (

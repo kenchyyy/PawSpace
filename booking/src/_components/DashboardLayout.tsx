@@ -9,30 +9,30 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/_components/ui/Button";
 
 interface ButtonData {
-    icon: string;
+    icon: keyof typeof Icons;
     text: string;
     href: string;
   }
   
-  interface SideNavProps {
-    children: React.ReactNode;
-    colorTheme: "purple" | "gray";
-    buttons: ButtonData[];
-  }
+interface SideNavProps {
+  children: React.ReactNode;
+  colorTheme: "purple" | "gray";  
+  buttons: ButtonData[];
+}
+
+const Icons = {
+  "FaHome": FaHome,
+  "FaList": FaList,
+  "FaBox": FaBox,
+  "FaCalendar": FaCalendar,
+  "FaUser": FaUser,
+}
 
 export default function DashboardLayout({ children, colorTheme , buttons}: SideNavProps) {
   const [expandSideNav, toggleSideNav] = useState(false);
   const [isLg, setIsLg] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
-
-  const Icons = {
-    "FaHome": FaHome,
-    "FaList": FaList,
-    "FaBox": FaBox,
-    "Facalendar": FaCalendar,
-    "FaUser": FaUser,
-  }
 
   function handleLogOut() {
     const supabase = createClientSideClient();
