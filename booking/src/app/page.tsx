@@ -1,89 +1,102 @@
 // app/page.tsx
 'use client';
-import { useState } from 'react';
-import BookingForm from '../_components/Booking Form/BookingForm';
-import CustomerPage from '../app/customer/page';
-import BookingHistory from '../_components/Booking History/BookingHistory';
-import CustomerDashboardHeader from '../_components/Customer Dashoard/Header';
-import Modal from '../_components/Modal';
-import { Booking } from '../_components/Booking Form/types';
-import { FiPlus } from 'react-icons/fi';
 
-export default function Home() {
-  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'about'>('home');
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [showBookingForm, setShowBookingForm] = useState(false);
+import { useState } from "react";
+import ServiceDetailsModal from "../components/Services/ServiceDetailsModal";
+import ServiceSection from "../components/Services/ServiceSelection";
+import Link from "next/link";
 
-  const handleNewBooking = (newBookings: Booking[]) => {
-    setBookings([...bookings, ...newBookings]);
-    setActiveTab('history');
-    setShowBookingForm(false);
+
+export default function HomePage() {
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+
+  type ServiceDetails = {
+    title: string;
+    inclusions: string[];
+    prices: { size?: string; price: number }[] | { allSizes: number };
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'home':
-        return (
-          <div className="container mx-auto px-4 py-8">
-            <CustomerDashboardHeader onOpenBookingForm={() => setShowBookingForm(true)} />
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
-              <p className="mb-6 text-gray-600">
-                Book professional grooming or overnight stay services for your pets.
-              </p>
-              <button
-                onClick={() => setShowBookingForm(true)}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center transition-colors"
-              >
-                <FiPlus className="mr-2" />
-                Create New Booking
-              </button>
-            </div>
-          </div>
-        );
-      case 'history':
-        return <BookingHistory bookings={bookings} />;
-      case 'about':
-        return <AboutPage />;
-    }
+  const serviceDetailsMap: Record<string, ServiceDetails> = {
+    Basic: {
+      title: "Basic",
+      inclusions: ["Bath & Blow Dry", "Ear Cleaning", "Nail Trim", "Cologne"],
+      prices: [
+        { size: "Teacup", price: 250 },
+        { size: "Small", price: 300 },
+        { size: "Medium", price: 400 },
+        { size: "Large", price: 500 },
+        { size: "X-Large", price: 600 },
+      ],
+    },
+    Deluxe: {
+      title: "Deluxe",
+      inclusions: [
+        "Hair Cut (additional charge for special cut)",
+        "Bath & Blow Dry",
+        "Ear Cleaning",
+        "Nail Trim",
+        "Teeth Brushing",
+        "Cologne",
+      ],
+      prices: [
+        { size: "Teacup", price: 250 },
+        { size: "Small", price: 300 },
+        { size: "Medium", price: 400 },
+        { size: "Large", price: 500 },
+        { size: "X-Large", price: 600 },
+      ],
+    },
+    Cats: {
+      title: "Cats",
+      inclusions: [
+        "Hair Cut (additional charge for special cut)",
+        "Bath & Blow Dry",
+        "Ear Cleaning",
+        "Nail Trim",
+        "Teeth Brushing",
+        "Cologne",
+      ],
+      prices: { allSizes: 450 },
+    },
   };
+
+  const overnightServices = [
+    { label: "Dogs", icon: "🐶", bgColor: "bg-orange-500" },
+    { label: "Cats", icon: "🐱", bgColor: "bg-pink-500" },
+  ];
+
+  const groomingServices = [
+    { label: "Basic", icon: "🐶", bgColor: "bg-orange-500" },
+    { label: "Deluxe", icon: "🐶", bgColor: "bg-lime-500", glow: true },
+    { label: "Cats", icon: "🐱", bgColor: "bg-pink-500" },
+  ];
 
   return (
-    <CustomerPage 
-      activeTab={activeTab} 
-      setActiveTab={(tab: 'home' | 'history' | 'about') => setActiveTab(tab)}
-    >
-      <main className="min-h-screen bg-gray-100">
-        {renderContent()}
-        
-        <Modal 
-          isOpen={showBookingForm} 
-          onClose={() => setShowBookingForm(false)}
-        >
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl">
-            <BookingForm 
-              onConfirmBooking={handleNewBooking}
-              onClose={() => setShowBookingForm(false)}
-            />
-          </div>
-        </Modal>
-      </main>
-    </CustomerPage>
+    <main className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 p-8 text-white">
+      <Link href="/login" className="flex items-center justify-center h-0 text-2xl font-bold text-blue-500 hover:text-blue-700 transition-colors duration-300">
+      Click me for Login
+      </Link>
+  
+      
+      <h1 className="text-3xl font-bold mb-6">Pet Services</h1>
+      <ServiceSection title="Overnight Services" services={overnightServices} columns={2} />
+      <ServiceSection
+        title="Grooming Services"
+        services={groomingServices.map((s) => ({
+          ...s,
+          onClick: () => setSelectedService(s.label),
+        }))}
+        columns={3}
+      />
+      <ServiceDetailsModal
+        isOpen={!!selectedService}
+        onClose={() => setSelectedService(null)}
+        details={selectedService ? serviceDetailsMap[selectedService] : null}
+      />
+    </main>
   );
 }
 
-const AboutPage = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-4">About Us</h1>
-        <p className="mb-4">
-          We are a premium pet care service dedicated to providing the best care for your furry friends.
-        </p>
-        <p>
-          Our team of certified professionals ensures your pets receive the highest quality service in a safe and comfortable environment.
-        </p>
-      </div>
-    </div>
-  );
-};
+
+
+

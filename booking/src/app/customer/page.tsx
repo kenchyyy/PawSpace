@@ -1,6 +1,14 @@
+//Customer Dashboard Page
+
 'use client';
 import { ReactNode } from 'react';
-import { FiHome, FiCalendar, FiInfo, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiPlus} from 'react-icons/fi';
+import CustomerDashboardHeader from '@/_components/Customer Dashoard/Header';
+import { useState } from 'react';
+import { Booking } from '@/_components/Booking Form/types';
+import { useRouter } from 'next/navigation';
+import Modal from '@/_components/Modal';
+import BookingForm from '@/_components/Booking Form/BookingForm';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -9,57 +17,49 @@ interface DashboardLayoutProps {
 }
 
 const CustomerPage = ({ children, activeTab, setActiveTab }: DashboardLayoutProps) => {
-  return (
-    <div className="flex">
-      {/* sidebar */}
-      <div className="w-64 min-h-screen bg-gray-800 text-white">
-        <div className="p-4 border-b border-gray-700">
-          <h1 className="text-xl font-bold">Pawspace</h1>
-        </div>
-        <nav className="p-4">
-          <ul className="space-y-2">
-            <li>
-              <button
-                onClick={() => setActiveTab('home')}
-                className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'home' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-              >
-                <FiHome className="mr-3" />
-                Home
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveTab('history')}
-                className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'history' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-              >
-                <FiCalendar className="mr-3" />
-                Booking History
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => setActiveTab('about')}
-                className={`flex items-center w-full p-2 rounded-lg ${activeTab === 'about' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
-              >
-                <FiInfo className="mr-3" />
-                About Us
-              </button>
-            </li>
-            <li className="pt-4 border-t border-gray-700">
-              <button className="flex items-center w-full p-2 rounded-lg hover:bg-gray-700">
-                <FiLogOut className="mr-3" />
-                Logout
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
+  const router = useRouter();
 
-      {/* Main Content */}
-      <div className="flex-1">
-        {children}
+  const [showBookingForm, setShowBookingForm] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
+
+  function handleNewBooking(newBookings: Booking[]) {
+    setBookings([...bookings, ...newBookings]);
+    setShowBookingForm(false);
+
+    const encoded = encodeURIComponent(JSON.stringify(newBookings));
+    router.push(`/customer/history?bookings=${encoded}`);
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <CustomerDashboardHeader onOpenBookingForm={() => setShowBookingForm(true)} />
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
+        <p className="mb-6 text-gray-600">
+          Book professional grooming or overnight stay services for your pets.
+        </p>
+        <button
+          onClick={() => setShowBookingForm(true)}
+          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center transition-colors"
+        >
+          <FiPlus className="mr-2" />
+          Create New Booking
+        </button>
       </div>
+      <Modal 
+          isOpen={showBookingForm} 
+          onClose={() => setShowBookingForm(false)}
+        >
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl">
+            <BookingForm 
+              onConfirmBooking={handleNewBooking}
+              onClose={() => setShowBookingForm(false)}
+            />
+          </div>
+        </Modal>
     </div>
+
   );
 };
 
