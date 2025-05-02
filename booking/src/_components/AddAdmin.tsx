@@ -1,13 +1,12 @@
 "use client";
 
 import { Button } from "@/_components/ui/Button";
-import { Card, CardContent} from "@/_components/ui/Card";
+import { Card, CardContent} from "@/_components/ui/card";
 import { addAdmin } from "@/_components/serverSide/AdminDataHandler";
 import { useState } from "react";
 
 interface AddAdminProps {
-    onClose: (email: string) => void;
-
+    onClose: (name: string, email: string) => void;
 }
 
 export default function AddAdmin({onClose} : AddAdminProps) {
@@ -37,7 +36,7 @@ export default function AddAdmin({onClose} : AddAdminProps) {
 
         if (success) {
             setStatusMessage("Admin added successfully!");
-            onClose(email);
+            onClose(name, email);
             setName("");
             setEmail("");
         } else {
@@ -58,7 +57,7 @@ export default function AddAdmin({onClose} : AddAdminProps) {
                         <p className="text-sm text-red-700">{statusMessage}</p>
                         <div className="flex self-end gap-2">
                             <Button type="submit">Add Admin</Button>
-                            <Button onClick={() => onClose("")} >
+                            <Button onClick={() => onClose("","")} >
                                 Cancel
                             </Button>
                         </div>

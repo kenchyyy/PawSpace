@@ -11,7 +11,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
   if(!sessionCheck) {
     redirect("/customer");
   }
-
   return (
     <DashboardLayout colorTheme="gray"
     buttons={[

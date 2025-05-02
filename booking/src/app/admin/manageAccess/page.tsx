@@ -20,11 +20,6 @@ export default async function AdminPage() {
     return( <div> {error.message} </div>  )
   }
 
-  async function processRemoveAdmin(email: string) {
-    const { success, message } = await removeAdmin(email);
-    
-  }
-
   return (
     <AdminAccessTable data={AdminAccessUser} />
   );
