@@ -11,7 +11,8 @@ export default function HomePage() {
     title: string;
     type: "grooming" | "overnight";
     inclusions: string[];
-    prices: { size?: string; price: number }[] | { allSizes: number };
+    prices: { size?: string; price: number; weightRange?: string }[] | { allSizes: number };
+    note?: string;
   };
 
   const serviceDetailsMap: Record<string, ServiceDetails> = {
@@ -20,11 +21,11 @@ export default function HomePage() {
       type: "grooming",
       inclusions: ["Bath & Blow Dry", "Ear Cleaning", "Nail Trim", "Cologne"],
       prices: [
-        { size: "Teacup", price: 250 },
-        { size: "Small", price: 300 },
-        { size: "Medium", price: 400 },
-        { size: "Large", price: 500 },
-        { size: "X-Large", price: 600 },
+        { size: "Teacup", price: 250, weightRange: "1-3kg" },
+        { size: "Small", price: 300, weightRange: "3.1-7kg" },
+        { size: "Medium", price: 400, weightRange: "7.1-13kg" },
+        { size: "Large", price: 500, weightRange: "13.1-19kg" },
+        { size: "X-Large", price: 600, weightRange: "19kg & up" },
       ],
     },
     Deluxe: {
@@ -39,12 +40,13 @@ export default function HomePage() {
         "Cologne",
       ],
       prices: [
-        { size: "Teacup", price: 250 },
-        { size: "Small", price: 300 },
-        { size: "Medium", price: 400 },
-        { size: "Large", price: 500 },
-        { size: "X-Large", price: 600 },
+        { size: "Teacup", price: 350, weightRange: "1-3kg" },
+        { size: "Small", price: 400, weightRange: "3.1-7kg" },
+        { size: "Medium", price: 500, weightRange: "7.1-13kg" },
+        { size: "Large", price: 600, weightRange: "13.1-19kg" },
+        { size: "X-Large", price: 750, weightRange: "19kg & up" },
       ],
+      note: "Additional charge for special cut",
     },
     Cats: {
       title: "Cats",
@@ -58,19 +60,35 @@ export default function HomePage() {
         "Cologne",
       ],
       prices: { allSizes: 450 },
+      note: "Additional charge for special cut",
     },
-
     DogsOvernight: {
       title: "Dogs Overnight",
       type: "overnight",
-      inclusions: ["Comfortable Bed", "24/7 Monitoring", "Playtime"],
-      prices: { allSizes: 1000 },
+      inclusions: [
+        "Comfortable Bed", 
+        "24/7 Monitoring", 
+        "Playtime",
+        "Free Food",
+        "Free Basic Grooming (Bath & Brush)"
+      ],
+      prices: [
+        { size: "Small", price: 450 },
+        { size: "Medium", price: 600 },
+        { size: "Large", price: 800 },
+      ],
     },
     CatsOvernight: {
       title: "Cats Overnight",
       type: "overnight",
-      inclusions: ["Comfortable Bed", "24/7 Monitoring", "Quiet Room"],
-      prices: { allSizes: 800 },
+      inclusions: [
+        "Comfortable Bed", 
+        "24/7 Monitoring", 
+        "Quiet Room",
+        "Free Food",
+        "Free Basic Grooming (Bath & Brush)"
+      ],
+      prices: { allSizes: 450 },
     },
   };
 
@@ -87,7 +105,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 p-8 text-white">
-
       <h1 className="text-3xl font-bold mb-6">Pet Services</h1>
 
       <ServiceSection

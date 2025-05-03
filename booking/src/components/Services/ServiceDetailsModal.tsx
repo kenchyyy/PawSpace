@@ -3,6 +3,7 @@ import { AddBookingButton } from "../ui/button/Button";
 type Detail = {
   size?: string;
   price: number;
+  weightRange?: string; // Keep for grooming
 };
 
 type ServiceDetails = {
@@ -10,6 +11,7 @@ type ServiceDetails = {
   type: "grooming" | "overnight";
   inclusions: string[];
   prices: Detail[] | { allSizes: number };
+  note?: string;
 };
 
 type Props = {
@@ -25,7 +27,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
   const typeEmoji = details.type === "grooming" ? "✂️" : "🛏️";
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-900/70 via-purple-900/60 to-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
       <div className="bg-white text-black p-6 rounded-2xl w-full max-w-md shadow-2xl animate-fade-in">
         <div className="flex items-center justify-between mb-4">
           <h2 className={`text-2xl font-bold ${typeColor}`}>
@@ -38,8 +40,11 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
           >
             ✖
           </button>
-
         </div>
+
+        {details.note && (
+          <p className="text-sm italic text-red-500 mb-3">{details.note}</p>
+        )}
 
         <ul className="mb-4 list-disc list-inside text-sm">
           {details.inclusions.map((item, index) => (
@@ -50,13 +55,26 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
         <div className="mb-4">
           <h3 className="font-semibold mb-2 text-lg">Prices:</h3>
           {Array.isArray(details.prices) ? (
-            <ul className="space-y-1 text-sm">
-              {details.prices.map((p, i) => (
-                <li key={i}>
-                  <span className="font-semibold">{p.size}:</span> ₱{p.price}
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2">Size</th>
+                    {details.type === "grooming" && <th className="text-left py-2">Weight</th>}
+                    <th className="text-right py-2">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {details.prices.map((p, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="py-2">{p.size}</td>
+                      {details.type === "grooming" && <td className="py-2">{p.weightRange}</td>}
+                      <td className="text-right py-2">₱{p.price}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
             <p className="text-sm font-semibold">All Sizes: ₱{details.prices.allSizes}</p>
           )}
