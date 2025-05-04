@@ -5,6 +5,7 @@ type Service = {
   icon: string;
   bgColor: string;
   glow?: boolean;
+  onClick?: () => void;
 };
 
 type ServiceSectionProps = {
