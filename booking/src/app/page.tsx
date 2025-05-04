@@ -1,4 +1,5 @@
-"use client";
+// app/page.tsx
+'use client';
 
 import ViewServicesButton from "@/components/ui/ViewServicesButton";
 
