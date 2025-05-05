@@ -1,135 +1,96 @@
 'use client';
 
-import { useState } from "react";
-import ServiceDetailsModal from "../components/Services/ServiceDetailsModal";
-import ServiceSection from "../components/Services/ServiceSelection";
+import ViewServicesButton from "@/components/ui/ViewServicesButton";
 
-export default function HomePage() {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
 
-  type ServiceDetails = {
-    title: string;
-    type: "grooming" | "overnight";
-    inclusions: string[];
-    prices: { size?: string; price: number; weightRange?: string }[] | { allSizes: number };
-    note?: string;
-  };
-
-  const serviceDetailsMap: Record<string, ServiceDetails> = {
-    Basic: {
-      title: "Basic",
-      type: "grooming",
-      inclusions: ["Bath & Blow Dry", "Ear Cleaning", "Nail Trim", "Cologne"],
-      prices: [
-        { size: "Teacup", price: 250, weightRange: "1-3kg" },
-        { size: "Small", price: 300, weightRange: "3.1-7kg" },
-        { size: "Medium", price: 400, weightRange: "7.1-13kg" },
-        { size: "Large", price: 500, weightRange: "13.1-19kg" },
-        { size: "X-Large", price: 600, weightRange: "19kg & up" },
-      ],
-    },
-    Deluxe: {
-      title: "Deluxe",
-      type: "grooming",
-      inclusions: [
-        "Hair Cut (additional charge for special cut)",
-        "Bath & Blow Dry",
-        "Ear Cleaning",
-        "Nail Trim",
-        "Teeth Brushing",
-        "Cologne",
-      ],
-      prices: [
-        { size: "Teacup", price: 350, weightRange: "1-3kg" },
-        { size: "Small", price: 400, weightRange: "3.1-7kg" },
-        { size: "Medium", price: 500, weightRange: "7.1-13kg" },
-        { size: "Large", price: 600, weightRange: "13.1-19kg" },
-        { size: "X-Large", price: 750, weightRange: "19kg & up" },
-      ],
-      note: "Additional charge for special cut",
-    },
-    Cats: {
-      title: "Cats",
-      type: "grooming",
-      inclusions: [
-        "Hair Cut (additional charge for special cut)",
-        "Bath & Blow Dry",
-        "Ear Cleaning",
-        "Nail Trim",
-        "Teeth Brushing",
-        "Cologne",
-      ],
-      prices: { allSizes: 450 },
-      note: "Additional charge for special cut",
-    },
-    DogsOvernight: {
-      title: "Dogs Overnight",
-      type: "overnight",
-      inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
-        "Playtime",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
-      ],
-      prices: [
-        { size: "Small", price: 450 },
-        { size: "Medium", price: 600 },
-        { size: "Large", price: 800 },
-      ],
-    },
-    CatsOvernight: {
-      title: "Cats Overnight",
-      type: "overnight",
-      inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
-        "Quiet Room",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
-      ],
-      prices: { allSizes: 450 },
-    },
-  };
-
-  const overnightServices = [
-    { label: "DogsOvernight", icon: "🐶", bgColor: "bg-orange-500" },
-    { label: "CatsOvernight", icon: "🐱", bgColor: "bg-pink-500" },
-  ];
-
-  const groomingServices = [
-    { label: "Basic", icon: "🐶", bgColor: "bg-orange-500" },
-    { label: "Deluxe", icon: "🐶", bgColor: "bg-lime-500", glow: true },
-    { label: "Cats", icon: "🐱", bgColor: "bg-pink-500" },
-  ];
-
+export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 p-8 text-white">
-      <h1 className="text-3xl font-bold mb-6">Pet Services</h1>
+    <main className="container mx-auto px-4 py-12">
+      {/* Hero Section */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          PawSpace Pet Hotel and Grooming
+        </h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          Your best friend’s new best friend!
+        </p>
+      </section>
 
-      <ServiceSection
-        title="Overnight Services"
-        services={overnightServices.map((s) => ({
-          ...s,
-          onClick: () => setSelectedService(s.label),
-        }))}
-        columns={2}
-      />
+      {/* Mission Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-6">Our Mission</h2>
+          <p className="text-gray-600 mb-4">
+            At PawSpace Pet Hotel and Grooming, we aim to provide top-tier care and comfort
+            for your beloved pets. With expert grooming services and cozy accommodations,
+            we ensure your furry friends feel safe, clean, and loved.
+          </p>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start">
+              <span className="text-blue-500 mr-2">✓</span>
+              <span>Friendly and professional pet care staff</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-500 mr-2">✓</span>
+              <span>Clean, secure, and pet-friendly facilities</span>
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-500 mr-2">✓</span>
+              <span>All-day service from Monday to Sunday</span>
+            </li>
+          </ul>
+        </div>
 
-      <ServiceSection
-        title="Grooming Services"
-        services={groomingServices.map((s) => ({
-          ...s,
-          onClick: () => setSelectedService(s.label),
-        }))}
-        columns={3}
-      />
+        {/* Contact and Info Section */}
+        <div className="bg-gray-100 rounded-lg p-6 shadow">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-4">Visit or Contact Us</h3>
+          <p className="text-gray-700 mb-2">
+            📍 2nd Floor, AMJB Building, Aguinaldo Highway, Palico 4, Imus, Philippines
+          </p>
+          <p className="text-gray-700 mb-2">📞 0945 302 7955</p>
+          <p className="text-gray-700 mb-2">📧 pawspace2023@gmail.com</p>
+          <p className="text-gray-700 mb-2">📱 Instagram: @pawspace_amjb</p>
+          <p className="text-gray-700 mb-2">📘 Facebook: PawSpace Pet Hotel and Grooming</p>
+          <p className="text-gray-700">🕘 Open daily from 9:00 AM to 6:00 PM</p>
+        </div>
+      </section>
 
-      <ServiceDetailsModal
-        isOpen={!!selectedService}
-        onClose={() => setSelectedService(null)}
-        details={selectedService ? serviceDetailsMap[selectedService] : null}
-      />
+      {/* Facilities Section */}
+      <section className="mb-16">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
+          Our Services
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {[
+            {
+              title: "Accommodations",
+              description: "Comfortable and safe boarding for your pets",
+              icon: "🏨",
+            },
+            {
+              title: "Grooming",
+              description: "Professional grooming using safe and quality products",
+              icon: "✂️",
+            },
+          ].map((item) => (
+            <div key={item.title} className="text-center p-6 border rounded-lg">
+              <span className="text-4xl mb-4 inline-block">{item.icon}</span>
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p className="text-gray-600">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-blue-50 rounded-xl p-8 text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          Ready to book a stay or grooming for your pet?
+        </h2>
+
+        <ViewServicesButton />
+
+      </section>
     </main>
   );
 }
