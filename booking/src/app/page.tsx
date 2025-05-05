@@ -62,12 +62,12 @@ export default function HomePage() {
       prices: { allSizes: 450 },
       note: "Additional charge for special cut",
     },
-    DogsOvernight: {
-      title: "Dogs Overnight",
+    Dog: {
+      title: "Dog",
       type: "overnight",
       inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
+        "Comfortable Bed",
+        "24/7 Monitoring",
         "Playtime",
         "Free Food",
         "Free Basic Grooming (Bath & Brush)"
@@ -77,24 +77,29 @@ export default function HomePage() {
         { size: "Medium", price: 600 },
         { size: "Large", price: 800 },
       ],
+      note: "Good for 24 hours",
     },
-    CatsOvernight: {
-      title: "Cats Overnight",
+    Cat: {
+      title: "Cat",
       type: "overnight",
       inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
+        "Comfortable Bed",
+        "24/7 Monitoring",
         "Quiet Room",
         "Free Food",
         "Free Basic Grooming (Bath & Brush)"
       ],
-      prices: { allSizes: 450 },
+      prices: [
+        { size: "Small", price: 450 },
+        { size: "Large", price: 600 },
+      ],
+      note: "Good for 24 hours",
     },
   };
 
   const overnightServices = [
-    { label: "DogsOvernight", icon: "🐶", bgColor: "bg-orange-500" },
-    { label: "CatsOvernight", icon: "🐱", bgColor: "bg-pink-500" },
+    { label: "Dog", icon: "🐶", bgColor: "bg-orange-500" },
+    { label: "Cat", icon: "🐱", bgColor: "bg-pink-500" },
   ];
 
   const groomingServices = [

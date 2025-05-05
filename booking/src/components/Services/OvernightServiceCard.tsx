@@ -14,10 +14,10 @@ export default function OvernightServiceCard({
   return (
     <div
       onClick={onClick}
-      className={`cursor-pointer rounded-lg p-6 text-center text-xl font-bold flex flex-col items-center justify-center ${bgColor} hover:scale-105 hover:shadow-xl transition duration-300 ease-in-out`}
+      className={`cursor-pointer rounded-lg p-6 text-center text-xl font-bold flex flex-col items-center justify-center ${bgColor} hover:scale-105 hover:shadow-xl transition duration-300 ease-in-out h-full`}
     >
       <div className="text-4xl mb-2">{icon}</div>
-      <h3>{label}</h3>
+      <h3>{label.replace('Overnight', '')}</h3>
     </div>
   );
 }
