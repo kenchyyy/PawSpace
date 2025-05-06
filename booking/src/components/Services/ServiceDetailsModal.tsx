@@ -56,28 +56,8 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
         )}
 
         <div className="mb-4">
-          <h3 className="font-semibold mb-2">Inclusions:</h3>
-          <ul className="list-disc list-inside text-sm space-y-1">
-            {details.inclusions.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        </div>
-
-        {specialOffers.length > 0 && (
-          <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
-            <h3 className="font-semibold mb-2 text-blue-700">Special Offers:</h3>
-            <ul className="list-disc list-inside text-sm space-y-1">
-              {specialOffers.map((offer, index) => (
-                <li key={index} className="text-blue-800">{offer}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2 text-lg">
-            {details.type === "grooming" ? "Service Prices" : "Overnight Rates (24 hours)"}
+          <h3 className="font-semibold mb-2 text-lg text-blue-800">
+            {details.type === "grooming" ? "Service Prices" : "Overnight"}
           </h3>
           {Array.isArray(details.prices) ? (
             <div className="overflow-x-auto">
@@ -105,9 +85,29 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
           )}
         </div>
 
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">Inclusions:</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {details.inclusions.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        </div>
+
+        {specialOffers.length > 0 && (
+          <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
+            <h3 className="font-semibold mb-2 text-red-600">Special Offers:</h3>
+            <ul className="list-disc list-inside text-sm space-y-1">
+              {specialOffers.map((offer, index) => (
+                <li key={index} className="text-red-600">{offer}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {(isDogOvernight || isCatOvernight) && (
           <div className="mt-6 pt-4 border-t">
-            <h3 className="font-semibold mb-2 text-lg text-amber-600">Dayboarding Rates</h3>
+            <h3 className="font-semibold mb-2 text-lg text-amber-600">Dayboarding</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
