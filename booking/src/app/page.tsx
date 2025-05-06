@@ -32,7 +32,7 @@ export default function HomePage() {
       title: "Deluxe",
       type: "grooming",
       inclusions: [
-        "Hair Cut (additional charge for special cut)",
+        "Hair Cut",
         "Bath & Blow Dry",
         "Ear Cleaning",
         "Nail Trim",
@@ -52,7 +52,7 @@ export default function HomePage() {
       title: "Cats",
       type: "grooming",
       inclusions: [
-        "Hair Cut (additional charge for special cut)",
+        "Hair Cut",
         "Bath & Blow Dry",
         "Ear Cleaning",
         "Nail Trim",
