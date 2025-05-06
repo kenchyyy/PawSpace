@@ -1,4 +1,4 @@
-import { AddBookingButton } from "../ui/button/Button";
+import { AddBookingButton } from "../../stories/button/Button";
 
 type Detail = {
   size?: string;
@@ -44,7 +44,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+            className="text-gray-500 hover:text-gray-700 text-xl font-bold cursor-pointer transition duration-300 ease-in-out transform hover:scale-110 hover:bg-gray-200 rounded-full p-1"
             aria-label="Close"
           >
             ✖
@@ -147,7 +147,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
 
         <AddBookingButton
           onClick={onClose}
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium mt-6"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium mt-6 cursor-pointer transition duration-300 ease-in-out"
         >
           Book Now
         </AddBookingButton>
