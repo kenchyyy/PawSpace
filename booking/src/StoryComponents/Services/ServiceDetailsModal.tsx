@@ -1,4 +1,4 @@
-import { AddBookingButton } from "../../stories/button/Button";
+import { AddBookingButton } from "../ui/button/Button";
 
 type Detail = {
   size?: string;
