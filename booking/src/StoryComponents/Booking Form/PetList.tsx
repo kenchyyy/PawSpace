@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { FiCheck, FiEdit2, FiTrash2 } from 'react-icons/fi';
-import { Pet } from './types';
+import { Pet } from '@/_components/Booking Form/types';
 
 interface PetListProps {
   pets: Pet[];

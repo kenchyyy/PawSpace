@@ -1,11 +1,10 @@
 // app/page.tsx
-'use client';
+"use client";
 
 import { useState } from "react";
-import ServiceDetailsModal from "../components/Services/ServiceDetailsModal";
-import ServiceSection from "../components/Services/ServiceSelection";
+import ServiceDetailsModal from "../StoryComponents/Services/ServiceDetailsModal";
+import ServiceSection from "../StoryComponents/Services/ServiceSelection";
 import Link from "next/link";
-
 
 export default function HomePage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -72,16 +71,22 @@ export default function HomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 p-8 text-white">
-      <Link href="/login" className="flex items-center justify-center h-0 text-2xl font-bold text-blue-500 hover:text-blue-700 transition-colors duration-300">
-      Click me for Login
+    <main className='min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 p-8 text-white'>
+      <Link
+        href='/login'
+        className='flex items-center justify-center h-0 text-2xl font-bold text-blue-500 hover:text-blue-700 transition-colors duration-300'
+      >
+        Click me for Login
       </Link>
-  
-      
-      <h1 className="text-3xl font-bold mb-6">Pet Services</h1>
-      <ServiceSection title="Overnight Services" services={overnightServices} columns={2} />
+
+      <h1 className='text-3xl font-bold mb-6'>Pet Services</h1>
       <ServiceSection
-        title="Grooming Services"
+        title='Overnight Services'
+        services={overnightServices}
+        columns={2}
+      />
+      <ServiceSection
+        title='Grooming Services'
         services={groomingServices.map((s) => ({
           ...s,
           onClick: () => setSelectedService(s.label),
@@ -96,7 +101,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-
-
-

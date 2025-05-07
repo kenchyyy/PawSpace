@@ -3,6 +3,8 @@
 import DashboardLayout from "@/_components/DashboardLayout";
 import SessionChecker from "@/_components/serverSide/SessionChecker";
 import { redirect } from "next/navigation";
+import "@/app/globals.css";
+
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
 
