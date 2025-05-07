@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -118,4 +119,178 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Cosmic Background */
+.fc {
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #040f44 100%);
+  color: #E9D5FF;
+  border: 1px solid #4C1D95;
+  width: 100%;
+}
+
+/* Header Styling */
+.fc-toolbar {
+  background: rgba(42, 13, 69, 0.8);
+  backdrop-filter: blur(5px);
+  border-bottom: 1px solid #9F7AEA;
+}
+
+.fc-toolbar-title {
+  color: #FBBF24;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Button Styling */
+.fc-button {
+  background: linear-gradient(145deg, #4C1D95, #2A0D45) !important;
+  border: 1px solid #9F7AEA !important;
+  color: #E9D5FF !important;
+  text-shadow: 0 0 5px rgba(159, 122, 234, 0.5);
+  transition: all 0.3s ease;
+}
+
+.fc-button:hover {
+  background: linear-gradient(145deg, #5B21B6, #3730A3) !important;
+  box-shadow: 0 0 10px #9F7AEA;
+}
+
+/* Day Cells */
+.fc-daygrid-day {
+  background: rgba(30, 27, 75, 0.5);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  width: 100%
+}
+
+.fc-day-today {
+  background: rgba(159, 122, 234, 0.2) !important;
+}
+
+/* Event Styling */
+.space-event {
+  background: linear-gradient(135deg, #4C1D95, #3730A3);
+  border: 1px solid #9F7AEA;
+  box-shadow: 0 0 8px rgba(159, 122, 234, 0.4);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Star-like dots for empty cells */
+.fc-daygrid-day-frame::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #FBBF24;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* Scrollbar (cosmic style) */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #1E1B4B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#9F7AEA, #4C1D95);
+  border-radius: 4px;
+}
+
+/* Calendar Header */
+.fc-header-toolbar {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px;
+background-color: rgba(42, 13, 69, 0.8);
+border-bottom: 1px solid #9F7AEA;
+}
+
+/* Day Grid */
+.fc-daygrid-body {
+width: 100% !important;
+}
+
+/* Event Cards */
+.fc-event{
+margin: 1px 2px;
+border: none !important;
+box-shadow: 0 0 10px rgba(99, 102, 241, 0.3) !important;
+transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.fc-event[style*="background-color"] .fc-event-main {
+  background-color: inherit !important;
+}
+
+.fc-event-main {
+  background-color: inherit !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+.fc-toolbar {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fc-toolbar-chunk {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+}
+
+/* Glass panel base style */
+.glass-panel {
+background: rgba(31, 41, 55, 0.8);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(99, 102, 241, 0.2);
+border-radius: 0.75rem;
+}
+
+/* globals.css */
+.dialog-content button[data-dismiss="dialog"] {
+  color: white; /* Example: Change text color to white */
+  background-color: #4C1D95; /* Example: Add a purple background */
+  border-radius: 50%; /* Make it round (optional) */
+  width: 24px; /* Adjust size as needed */
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+  position: absolute; /* Position it absolutely */
+  top: 8px;          /* Adjust top spacing as needed */
+  right: 8px;         /* Adjust right spacing as needed */
+  padding: 0;        /* Remove default button padding */
+  line-height: 1;    /* Adjust line height for centering */
+  font-size: 14px;   /* Adjust font size of the 'x' */
+}
+
+.dialog-content button[data-dismiss="dialog"]:hover {
+  opacity: 1;
+}
+
+.dialog-content button[data-dismiss="dialog"] svg {
+  /* If the close button uses an SVG icon */
+  width: 14px;
+  height: 14px;
+  fill: white;
+}
+
+.fc-event:hover {
+  transform: scale(1.007); /* Slightly scale up the event */
+  box-shadow: 0 2px 8px rgba(159, 122, 234, 0.6); /* Add a subtle shadow */
+  cursor: pointer; /* Indicate it's interactive */
+  z-index: 10; /* Ensure hovered event appears above others if overlapping */
+}
+
+.calendar-wrapper {
+  min-height: 100vh;
 }
