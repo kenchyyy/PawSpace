@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from "react";
-import ServiceDetailsModal from "../components/Services/ServiceDetailsModal";
-import ServiceSection from "../components/Services/ServiceSelection";
+import ServiceDetailsModal from "../StoryComponents/Services/ServiceDetailsModal";
+import ServiceSection from "../StoryComponents/Services/ServiceSelection";
 
 export default function HomePage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export default function HomePage() {
       />
 
       <ServiceSection
-        title="Grooming Services"
+        title='Grooming Services'
         services={groomingServices.map((s) => ({
           ...s,
           onClick: () => setSelectedService(s.label),
