@@ -2,9 +2,9 @@ import { DayboardingInfoProps } from "../types/accommodationTypes";
 
 const DayboardingInfo: React.FC<DayboardingInfoProps> = ({ title }) => {
     return (
-        <div className="mt-0">
+        <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
         <p className="text-sm italic text-red-500 mb-3">Hourly Rate</p>
-        <h3 className="font-semibold mb-2 text-lg text-blue-800">Dayboarding</h3>
+        <h3 className="font-semibold mb-2 text-lg text-blue-600">Dayboarding</h3>
         <div className="overflow-x-auto">
             <table className="w-full text-sm">
             <thead>

@@ -51,11 +51,9 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         title: "Dog",
         type: "overnight",
         inclusions: [
-        "Comfortable Bed",
+        "Comfortable Room",
         "24/7 Monitoring",
-        "Playtime",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
+        "Quiet Room",
         ],
         prices: [
         { size: "Small", price: 450 },
@@ -68,11 +66,9 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         title: "Cat",
         type: "overnight",
         inclusions: [
-        "Comfortable Bed",
+        "Comfortable Room",
         "24/7 Monitoring",
         "Quiet Room",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
         ],
         prices: [
         { size: "Small", price: 450 },

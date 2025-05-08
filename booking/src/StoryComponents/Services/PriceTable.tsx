@@ -3,9 +3,6 @@ import { PriceTableProps } from "./types/serviceTypes";
 const PriceTable: React.FC<PriceTableProps> = ({ prices, type }) => {
     return (
         <div className="mb-4">
-        <h3 className="font-semibold mb-2 text-lg text-blue-800">
-            {type === "grooming" ? "Service Prices" : "Overnight"}
-        </h3>
         {Array.isArray(prices) ? (
             <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -28,7 +25,7 @@ const PriceTable: React.FC<PriceTableProps> = ({ prices, type }) => {
             </table>
             </div>
         ) : (
-            <p className="text-sm font-semibold">All Sizes: ₱{prices.allSizes}</p>
+            <p className="text-sm font-sans">All Sizes: ₱{prices.allSizes}</p>
         )}
         </div>
     );
