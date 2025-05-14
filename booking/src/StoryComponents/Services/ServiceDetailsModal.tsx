@@ -70,7 +70,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
                     <DeluxeGroomingCard details={details} />
                 )}
 
-                {details.type === "grooming" && details.title === "Cats" && (
+                {details.type === "grooming" && details.title === "Cat" && (
                     <CatGroomingCard details={details} />
                 )}
 

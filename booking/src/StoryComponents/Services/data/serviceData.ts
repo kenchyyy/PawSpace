@@ -34,7 +34,7 @@ export const serviceDetailsMap: Record<string, ServiceDetails> = {
         note: "Additional charge for special cut",
     },
     Cats: {
-        title: "Cats",
+        title: "Cat",
         type: "grooming",
         inclusions: [
         "Hair Cut",
