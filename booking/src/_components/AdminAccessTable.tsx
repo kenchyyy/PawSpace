@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 type AdminAccessUser = {
     name: string;
     email: string;
-    role: string
+    role: string;
 }
 
 interface AdminAccessTableProps {

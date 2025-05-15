@@ -17,7 +17,6 @@ interface ConfirmationMessageProps {
   onConfirm: () => void;
   title: string;
   description: string;
-  
 }
 
 export default function ConfirmationMessage({ onConfirm, title, description }: ConfirmationMessageProps) {

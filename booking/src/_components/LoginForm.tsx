@@ -2,7 +2,8 @@
 
 import { Button } from '@/_components/ui/Button';
 import React from 'react';
-import { Card, CardFooter, CardHeader, CardTitle } from '@/_components/ui/card';
+import { Card, CardHeader, CardTitle, CardFooter } from '@/_components/ui/card';
+
 interface LoginFormProps {
   handleLogin: (e: React.FormEvent) => Promise<void>;
 }

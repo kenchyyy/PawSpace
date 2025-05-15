@@ -12,11 +12,14 @@ export default async function Layout({ children }: { children: React.ReactNode }
     redirect("/customer");
   }
   return (
-    <DashboardLayout colorTheme="gray"
+    <DashboardLayout colorTheme="gray"  
     buttons={[
       {icon: "FaHome", text: "Home", href: "/admin"},
       {icon: "FaList", text: "Manage Access", href: "/admin/manageAccess"},
       {icon: "FaBox", text: "Inbox", href: "/admin/inbox"},
+      {icon: "FaBook", text: "Manage Bookings", href: "/admin/manageBookings"},
+      {icon: "FaAddressCard", text: "Grooming Apointments", href: "/admin/groomingAppointments"},
+      {icon: "FaDoorOpen", text: "Rooms", href: "/admin/rooms"}
     ]}>
       {children}
     </DashboardLayout>

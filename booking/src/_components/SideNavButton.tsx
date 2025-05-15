@@ -27,7 +27,7 @@ const SideNavButton: React.FC<sideNavButtonProps> = ({ icon: Icon, text, onClick
         ${isCurrent ? colorClass[color] : ""}`}
       onClick={onClick}
     >
-        <div className="flex items-center gap-3 lg:justify-start lg:w-full">
+        <div className="flex items-center gap-3 lg:justify-start lg:w-full">  
             <Icon className={`text-lg
               ${isCurrent? (color === "purple"? "text-orange-600" : "text-white"):""}
               ${color === "gray"? "text-black":""}

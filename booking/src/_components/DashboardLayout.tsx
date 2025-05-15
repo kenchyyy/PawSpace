@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaBox, FaList, FaCalendar, FaUser} from "react-icons/fa";
+import { FaHome, FaBox, FaList, FaCalendar, FaUser, FaAddressCard, FaBook, FaDoorOpen} from "react-icons/fa";
 import SideNavButton from "@/_components/SideNavButton";
 import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
 import { usePathname } from "next/navigation";
@@ -26,6 +26,9 @@ const Icons = {
   "FaBox": FaBox,
   "FaCalendar": FaCalendar,
   "FaUser": FaUser,
+  "FaAddressCard": FaAddressCard,
+  "FaBook": FaBook,
+  "FaDoorOpen": FaDoorOpen
 }
 
 export default function DashboardLayout({ children, colorTheme , buttons}: SideNavProps) {
@@ -124,11 +127,11 @@ export default function DashboardLayout({ children, colorTheme , buttons}: SideN
       </nav>
 
       {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ease-in-out overflow-x-hidden overflow-y-auto ${expandSideNav ? 'opacity-20' : 'opacity-100'}
-        ${expandSideNav ? 'ml-20' : isLg ? 'ml-64' : 'ml-20'}
+      <main className={`flex-1 transition-all duration-300 ease-in-out overflow-x-hidden ${expandSideNav ? 'opacity-20' : 'opacity-100'}
+        ${expandSideNav ? 'ml-14' : isLg ? 'ml-64' : 'ml-14'}
       `}>
         {children}
-      </div>
+      </main>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { removeAdmin } from "@/_components/serverSide/AdminDataHandler";
 type AdminAccessUser = {
   name: string;
   email: string;
-  role: string
+  role: string;
 }
 
 export default async function AdminPage() {
