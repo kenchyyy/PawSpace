@@ -68,4 +68,6 @@ export default async function BookingHistoryPage() {
             />
         </div>
     );
-}
+};
+
+export default CustomerPage;

@@ -1,4 +1,4 @@
-import { AddBookingButton } from "../ui/button/Button";
+import { AddBookingButton } from "@/StoryComponents/ui/button/Button";
 import SpecialOffers from "./SpecialOffers";
 import DogAccommodationCard from "./accommodation/DogAccommodationCard";
 import CatAccommodationCard from "./accommodation/CatAccommodationCard";
@@ -9,7 +9,7 @@ import { Props } from "./types/serviceTypes";
 import DayboardingInfo from "./accommodation/Dayboarding";
 import { useEffect, useRef } from "react";
 
-export default function ServiceDetailsModal({ isOpen, onClose, details }: Props) {
+export default function ServiceDetailsModal({ isOpen, onClose, details, onOpenBookingForm }: Props) {
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isOpen, onClose]);
-    
+
     if (!isOpen || !details) return null;
 
     const typeColor = details.type === "grooming" ? "text-violet-600" : "text-blue-600";
@@ -70,7 +70,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
                     <DeluxeGroomingCard details={details} />
                 )}
 
-                {details.type === "grooming" && details.title === "Cats" && (
+                {details.type === "grooming" && details.title === "Cat" && (
                     <CatGroomingCard details={details} />
                 )}
 
@@ -83,7 +83,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details }: Props)
                 )}
 
                 <AddBookingButton
-                    onClick={onClose}
+                    onClick={onOpenBookingForm}
                     className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium mt-6 cursor-pointer transition duration-300 ease-in-out"
                 >
                     Book Now
