@@ -85,7 +85,6 @@ const CustomerPage = ({ children, activeTab, setActiveTab }: DashboardLayoutProp
 
             </Modal>
         </div>
-
     );
 };
 
