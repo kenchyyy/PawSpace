@@ -3,9 +3,7 @@
 import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
 import { EventInput } from "@fullcalendar/core";
 
-
 type Booking = {
-  id: string;
   booking_uuid: string;
   date_booked: string;
   service_date_start: string;
@@ -43,8 +41,8 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
   try {
     const { data, error } = await supabase
       .from("booking")
-      .select(`
-        id,
+      .select(
+        `
         booking_uuid,
         service_date_start,
         service_date_end,
@@ -53,7 +51,8 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
         pet_uuid:pet(name, pet_type, breed),
         special_requests,
         total_amount
-      `)
+      `
+      )
       .order("service_date_start", { ascending: true });
 
     if (error) {
@@ -71,21 +70,26 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
       .map((booking): BookingEvent | null => {
         try {
           // Ensure we have at least one owner and pet
-          const owner = Array.isArray(booking.owner_details) 
-            ? booking.owner_details[0] 
+          const owner = Array.isArray(booking.owner_details)
+            ? booking.owner_details[0]
             : booking.owner_details;
-          const pet = Array.isArray(booking.pet_uuid) 
-            ? booking.pet_uuid[0] 
+          const pet = Array.isArray(booking.pet_uuid)
+            ? booking.pet_uuid[0]
             : booking.pet_uuid;
 
           if (!owner || !pet) {
-            console.warn("Invalid booking data - missing owner or pet:", booking);
+            console.warn(
+              "Invalid booking data - missing owner or pet:",
+              booking
+            );
             return null;
           }
 
           // Convert dates and validate
           const startDate = new Date(booking.service_date_start);
-          const endDate = booking.service_date_end ? new Date(booking.service_date_end) : null;
+          const endDate = booking.service_date_end
+            ? new Date(booking.service_date_end)
+            : null;
 
           if (isNaN(startDate.getTime())) {
             console.warn("Invalid start date:", booking.service_date_start);
@@ -98,7 +102,7 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
           }
 
           return {
-            id: booking.id,
+            id: booking.booking_uuid,
             title: `${pet.name} (${pet.breed}) - ${owner.name}`,
             start: startDate,
             end: endDate || undefined,
@@ -111,8 +115,8 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
               contactNumber: owner.contact_number,
               status: booking.status,
               specialRequests: booking.special_requests,
-              totalAmount: booking.total_amount
-            }
+              totalAmount: booking.total_amount,
+            },
           };
         } catch (err) {
           console.error("Error processing booking:", booking, err);
@@ -120,7 +124,6 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
         }
       })
       .filter((event): event is BookingEvent => event !== null);
-
   } catch (error) {
     console.error("Error in fetchBookings:", error);
     return [];
