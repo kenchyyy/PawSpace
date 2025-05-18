@@ -16,6 +16,7 @@ export type Props = {
     isOpen: boolean;
     onClose: () => void;
     details: ServiceDetails | null;
+    onOpenBookingForm: () => void; 
 };
 
 export type GroomingServicesSectionProps = {
