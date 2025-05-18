@@ -5,11 +5,12 @@ import React from 'react';
 import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
 import { BookingRecord } from '@/_components/BookingHistory/types/bookingRecordType';
 import BookingHistoryClient from '@/_components/BookingHistory/BookingHistoryClient';
+import { redirect } from 'next/navigation'; // Import the redirect function
+import { SupabaseClient } from '@supabase/supabase-js'; // Import SupabaseClient type
 
 const ITEMS_PER_PAGE = 5; // You can adjust this number
 
-async function getBookingHistory(page: number): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
-    const supabase = await createServerSideClient();
+async function getBookingHistory(page: number, supabase: SupabaseClient): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
 
@@ -56,7 +57,6 @@ async function getBookingHistory(page: number): Promise<{ bookings: BookingRecor
                 ownerDetails: booking.owner_details,
                 totalPrice: booking.total_amount,
                 discountApplied: booking.discount_applied,
-                // approvalStatus: booking.approval_status, -- this might needed to be added and add this to the selection if needed (approval_status)
             })) as BookingRecord[];
             return { bookings: bookingRecords, error: null, totalCount: count };
         }
@@ -74,19 +74,23 @@ async function getBookingHistory(page: number): Promise<{ bookings: BookingRecor
 }
 
 export default async function BookingHistoryPage() {
-    // Initial page load, fetch the first page of data
-    const { bookings, error, totalCount } = await getBookingHistory(1);
+    const supabase = await createServerSideClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.user) {
+        redirect('/login');
+    }
+
+    const { bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, supabase);
 
     return (
         <div>
             <BookingHistoryClient
-                bookings={bookings}
-                loading={!bookings && !error}
-                error={error}
+                bookings={initialBookings}
+                loading={!initialBookings && !initialError}
+                error={initialError}
                 totalCount={totalCount}
             />
         </div>
     );
-};
-
-export default CustomerPage;
+}

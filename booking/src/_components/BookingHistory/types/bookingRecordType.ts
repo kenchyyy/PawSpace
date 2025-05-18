@@ -1,14 +1,13 @@
 export type BookingRecord = {
     bookingId: string;
-    serviceType: string; 
-    petName: string;
     checkInDate: Date | string;
     checkOutDate: Date | string;
-    status: 'pending' | 'accepted' | 'completed' | 'cancelled' | 'transferred';
+    status: 'pending' | 'accepted' | 'completed' | 'cancelled' | 'transferred' | 'pending_transfer';
     totalPrice: number | string;
     notes?: string;
     discountApplied?: boolean;
     dateBooked: Date | string;
+    approvalStatus?: 'pending' | 'approved' | 'rejected';
 
     transferDetails?: {
         newLocation?: string;
