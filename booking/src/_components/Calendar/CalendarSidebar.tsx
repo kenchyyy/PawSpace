@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { EventApi } from "@fullcalendar/core";
 import { formatDateTime } from "@/lib/utils";
 
