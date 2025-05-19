@@ -9,7 +9,7 @@ DO NOT USE THIS AS A REFERENCE FOR FUTURE CODE.
 'use client';
 import { useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
-import { Booking } from '@/_components/Booking Form/types';
+import { Booking } from '@/_components/Booking History/types';
 import BookingHistory from '@/_components/Booking History/BookingHistory';
 
 export default function CustomerHistoryPage() {
