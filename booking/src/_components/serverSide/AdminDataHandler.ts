@@ -5,7 +5,7 @@ import{ createServerSideClient } from "@/lib/supabase/CreateServerSideClient";
 export async function removeAdmin(email: string) : Promise<{ success: boolean; message: string }> {
     const supabase = await createServerSideClient();
     const { error } = await supabase
-        .from("admin_access_users")
+        .from("AdminAccessUsers")
         .delete()
         .eq("email", email);
 
@@ -20,7 +20,7 @@ export async function removeAdmin(email: string) : Promise<{ success: boolean; m
 export async function addAdmin(name: string, email: string) : Promise<{ success: boolean; message: string }> {
     const supabase = await createServerSideClient();
     const { error } = await supabase
-        .from("admin_access_users")
+        .from("AdminAccessUsers")
         .insert([
             { name: name, email: email, role: "admin" }
         ]);

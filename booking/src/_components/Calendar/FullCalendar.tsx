@@ -6,6 +6,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { EventClickArg, EventApi, EventInput } from "@fullcalendar/core";
+import "./CalendarStyles.css";
 
 type CalendarProps = {
   events: EventInput[];
@@ -25,7 +26,6 @@ const CalendarComponent = ({
   return (
     <FullCalendar
       ref={calendarRef}
-      height={"85vh"}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       headerToolbar={{
         left: "prev,next today",
