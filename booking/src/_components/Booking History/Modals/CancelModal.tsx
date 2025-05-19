@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { FiX } from 'react-icons/fi';
-import { Booking } from '../types';
-import { cancellationReasons } from '../utils';
+import { Booking, BoardingPet, GroomingPet } from '../types';
 
 interface CancelModalProps {
   isOpen: boolean;
@@ -10,17 +9,34 @@ interface CancelModalProps {
   onCancel: (reason: string) => void;
 }
 
+const cancellationReasons = [
+  'Change of plans',
+  'Found another provider',
+  'Pet is unwell',
+  'Financial reasons',
+  'Other'
+];
+
 const CancelModal: React.FC<CancelModalProps> = ({ isOpen, booking, onClose, onCancel }) => {
   const [reason, setReason] = useState('');
   const [customReason, setCustomReason] = useState('');
 
   if (!isOpen || !booking) return null;
 
+  const getServiceDate = () => {
+    if (booking.pet.service_type === 'boarding') {
+      return booking.service_date_start;
+    } else {
+      return (booking.pet as GroomingPet).service_date;
+    }
+  };
+
+  const serviceDate = getServiceDate();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const finalReason = reason === 'Other' ? customReason : reason;
     onCancel(finalReason);
-    onClose();
   };
 
   return (
@@ -34,12 +50,16 @@ const CancelModal: React.FC<CancelModalProps> = ({ isOpen, booking, onClose, onC
         </div>
         
         <div className="p-4">
-          <p className="mb-4">Are you sure you want to cancel the booking for {booking.pet.name} on {new Date(booking.serviceDate).toLocaleDateString()}?</p>
+          <p className="mb-4">
+            Are you sure you want to cancel the booking for {booking.pet.name} on {serviceDate ? new Date(serviceDate).toLocaleDateString() : 'unknown date'}?
+          </p>
           
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Reason for cancellation</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason for cancellation
+                </label>
                 <select
                   className="w-full border border-gray-300 rounded-md p-2"
                   value={reason}
@@ -55,7 +75,9 @@ const CancelModal: React.FC<CancelModalProps> = ({ isOpen, booking, onClose, onC
               
               {reason === 'Other' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Please specify</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Please specify
+                  </label>
                   <textarea
                     className="w-full border border-gray-300 rounded-md p-2"
                     rows={3}
