@@ -1,4 +1,3 @@
-// for checking user session and whitelisting in admin portal
 'use server';
 
 import { createServerSideClient } from "@/lib/supabase/CreateServerSideClient";
