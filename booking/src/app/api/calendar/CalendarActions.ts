@@ -205,7 +205,7 @@ export async function updateBookingStatus(
 
   try {
     const { error } = await supabase
-      .from("booking")
+      .from("Booking")
       .update({ status: params.status })
       .eq("id", params.bookingId);
 

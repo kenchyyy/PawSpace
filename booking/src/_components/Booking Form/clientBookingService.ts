@@ -22,7 +22,7 @@ export class ClientBookingService {
 
   async getBookings(): Promise<Booking[]> {
     const { data, error } = await this.supabase
-      .from('booking')
+      .from('Booking')
       .select(`
         booking_uuid,
         date_booked,
