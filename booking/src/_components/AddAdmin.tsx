@@ -3,7 +3,7 @@
 import { Button } from "@/_components/ui/Button";
 import { addAdmin } from "@/_components/serverSide/AdminDataHandler";
 import { useState } from "react";
-import { Card, CardContent } from "@/_components/ui/Card";
+import { Card, CardContent } from "@/_components/ui/card";
 
 interface AddAdminProps {
   onClose: (email: string) => void;
