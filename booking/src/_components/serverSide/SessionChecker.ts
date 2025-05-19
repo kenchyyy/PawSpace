@@ -7,32 +7,31 @@ interface SessionCheckerProps {
     portal: "admin" | "customer";
 }
 
-export default async function SessionChecker({portal}: SessionCheckerProps): Promise<boolean> {
+export default async function SessionChecker({portal}: SessionCheckerProps): Promise<{ isValid: boolean; email?: string }> {
     const supabase = await createServerSideClient();
-    const { data, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error) {
-        return false;
-    }
-
-    if (!data) {
-        return false;
+    if (error || !user) {
+        console.error('Session check error:', error);
+        return { isValid: false };
     }
 
     if(portal === "admin") {
-        const { data: data2, error } = await supabase
+        const { data: adminUser, error: adminError } = await supabase
             .from('admin_access_users')
             .select('email')
-            .eq('email', data.user.email)
+            .eq('email', user.email)
             .maybeSingle();
 
-        if (error) {
-            return false;
-        }
-
-        if (!data2) {
-            return false; 
+        if (adminError || !adminUser) {
+            console.error('Admin check error:', adminError);
+            return { isValid: false };
         }
     }
-    return true; 
+
+    // For both admin and customer, return the email for further use
+    return { 
+        isValid: true,
+        email: user.email 
+    }; 
 }
