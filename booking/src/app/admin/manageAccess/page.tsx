@@ -14,7 +14,7 @@ type AdminAccessUser = {
 export default async function AdminPage() {
   const supabase = await createServerSideClient();
   const { data: AdminAccessUser, error } = await supabase
-    .from("admin_access_users")
+    .from("AdminAccessUsers")
     .select("*");
   if (error) {
     return( <div> {error.message} </div>  )
