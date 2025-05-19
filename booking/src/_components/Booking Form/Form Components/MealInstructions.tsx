@@ -1,5 +1,5 @@
 import React from 'react';
-import { BoardingPet } from '../types';
+import { BoardingPet, MealType, type MealInstructions } from '../types';
 import { FiCoffee, FiSun, FiMoon } from 'react-icons/fi';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
@@ -10,8 +10,6 @@ interface MealInstructionsProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     errors?: Record<string, string>;
 }
-
-type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, errors = {} }) => {
     const getError = (fieldName: string) => errors[fieldName] ? 'border-red-500 bg-red-50' : 'border-gray-300';
@@ -56,7 +54,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
             <h3 className="font-medium text-gray-800 text-lg">Meal Instructions</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(Object.keys(pet.meal_instructions) as MealType[]).map(meal => (
+                {(Object.keys(pet.meal_instructions) as (keyof MealInstructions)[]).map(meal => (
                     <div key={meal} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <h4 className="text-sm font-medium text-gray-700 mb-3 capitalize flex items-center">
                             {getMealIcon(meal)} {meal}

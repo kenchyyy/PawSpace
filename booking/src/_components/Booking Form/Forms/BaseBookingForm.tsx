@@ -190,7 +190,20 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
       setFormErrors({ ...formErrors, pets: 'Please add at least one pet' });
       return;
     }
+    setCompletedSteps(prev => [...prev, 'pet']);
     setCurrentStep('review');
+  };
+
+  const handleStepClick = (stepId: 'customer' | 'pet' | 'review') => {
+    const stepIndex = ['customer', 'pet', 'review'].indexOf(stepId);
+    const currentStepIndex = ['customer', 'pet', 'review'].indexOf(currentStep);
+
+    if (stepIndex < currentStepIndex) {
+      // Check if the step is 'customer' or is in completedSteps
+      if (stepId === 'customer' || completedSteps.includes(stepId as 'customer' | 'pet')) {
+        setCurrentStep(stepId);
+      }
+    }
   };
 
   const handleConfirmBooking = async (): Promise<BookingResult> => {
@@ -216,23 +229,25 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         };
 
         if (isGroomingPet(pet)) {
+          const groomingPet = pet as GroomingPet;
           baseBooking.total_amount = getGroomingPrice(
-            pet.pet_type,
-            pet.service_variant,
-            pet.size as PetSize
+            groomingPet.pet_type,
+            groomingPet.service_variant,
+            groomingPet.size as PetSize
           );
-          baseBooking.service_date_start = pet.service_date;
-          baseBooking.service_date_end = pet.service_date;
+          baseBooking.service_date_start = groomingPet.service_date;
+          baseBooking.service_date_end = groomingPet.service_date;
         } else if (isBoardingPet(pet)) {
-          const checkInDate = pet.check_in_date;
-          const checkOutDate = pet.check_out_date;
+          const boardingPet = pet as BoardingPet;
+          const checkInDate = boardingPet.check_in_date;
+          const checkOutDate = boardingPet.check_out_date;
           const nights = calculateNights(checkInDate, checkOutDate);
 
           let basePrice = 0;
           let discount = 0;
-          let roomSizeKey = pet.room_size;
+          let roomSizeKey = boardingPet.room_size;
 
-          if (pet.boarding_type === 'day') {
+          if (boardingPet.boarding_type === 'day') {
             basePrice = pricing.boarding.day[roomSizeKey] || 0;
           } else {
             basePrice = (pricing.boarding.overnight[roomSizeKey] || 0) * nights;
@@ -299,6 +314,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         currentStep={currentStep}
         serviceType={serviceType}
         completedSteps={completedSteps}
+        onStepClick={handleStepClick}
       />
 
       <div className="flex-grow overflow-y-auto">
@@ -383,4 +399,3 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
 };
 
 export default BaseBookingForm;
-

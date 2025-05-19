@@ -7,9 +7,10 @@ interface StepProps {
   currentStep: 'customer' | 'pet' | 'review';
   serviceType: ServiceType;
   completedSteps: ('customer' | 'pet')[];
+  onStepClick: (stepId: 'customer' | 'pet' | 'review') => void;
 }
 
-const StepIndicator: React.FC<StepProps> = ({ currentStep, serviceType, completedSteps }) => {
+const StepIndicator: React.FC<StepProps> = ({ currentStep, serviceType, completedSteps, onStepClick }) => {
   const steps = [
     { id: 'customer', label: 'Customer', icon: <FiUser /> },
     { id: 'pet', label: serviceType === 'grooming' ? 'Pet & Service' : 'Pet & Stay', icon: <FiPieChart /> },
@@ -25,7 +26,7 @@ const StepIndicator: React.FC<StepProps> = ({ currentStep, serviceType, complete
             className="h-1 bg-purple-600 transition-all duration-300 ease-in-out"
             style={{
               width: currentStep === 'customer' ? '0%' :
-                     currentStep === 'pet' ? '50%' : '100%'
+                currentStep === 'pet' ? '50%' : '100%'
             }}
           ></div>
         </div>
@@ -35,7 +36,11 @@ const StepIndicator: React.FC<StepProps> = ({ currentStep, serviceType, complete
           const isCurrent = currentStep === step.id;
 
           return (
-            <div key={step.id} className="flex flex-col items-center">
+            <div
+              key={step.id}
+              className={`flex flex-col items-center cursor-pointer`}
+              onClick={() => isCompleted && !isCurrent ? onStepClick(step.id as 'customer' | 'pet' | 'review') : undefined}
+            >
               <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 ${
                 isCurrent
                   ? 'bg-purple-600 text-white shadow-md border-2 border-purple-600'
@@ -49,7 +54,7 @@ const StepIndicator: React.FC<StepProps> = ({ currentStep, serviceType, complete
                   React.cloneElement(step.icon, { size: 18 })
                 )}
               </div>
-              <span className={`text-xs font-medium ${
+              <span className={`text-xs font-medium text-center ${
                 isCurrent || isCompleted ? 'text-purple-600' : 'text-gray-500'
               }`}>
                 {step.label}

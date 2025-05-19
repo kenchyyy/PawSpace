@@ -90,6 +90,8 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
         })
       );
 
+      console.log(bookingResults)
+
       const allSuccessful = bookingResults.every(result => result.success);
 
       if (allSuccessful && bookingResults.length > 0) {

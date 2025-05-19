@@ -697,7 +697,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
               </>
             ) : (
               <>
-                Confirm & Pay
+                Confirm Booking
                 <FiChevronRight className="ml-2" />
               </>
             )}

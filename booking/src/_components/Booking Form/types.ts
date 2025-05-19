@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 
+// ENUMS & BASIC TYPES
 export type PetType = 'dog' | 'cat';
 export type RoomSize = 'small' | 'medium' | 'large' | 'cat_small' | 'cat_big';
 export type BoardingType = 'day' | 'overnight';
@@ -7,25 +8,53 @@ export type ServiceType = 'grooming' | 'boarding';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type PetSize = 'teacup' | 'small' | 'medium' | 'large' | 'xlarge';
 export type VaccinationStatus = 'yes' | 'no' | 'unknown';
+export type MealType = 'breakfast' | 'lunch' | 'dinner';
 
+// GROOMING VARIANTS
 export type DogGroomingVariant = 'basic' | 'deluxe';
 export type CatGroomingVariant = 'standard';
 export type GroomingVariant = DogGroomingVariant | CatGroomingVariant;
 
+// OWNER
 export interface OwnerDetails {
-  id?: string;
+  id?: string; // uuid
   name: string;
   email: string;
   address: string;
   contact_number: string;
+  auth_id?: string; // uuid, for upsert
   created_at?: string;
 }
 
-interface BasePet {
-  id?: string;
-  pet_uuid?: string;
-  boarding_id_extention?: string;
-  grooming_id?: string;
+// MEAL INSTRUCTIONS
+export type MealInstruction = {
+  time: string;   // "HH:mm" or ISO string
+  food: string;
+  notes: string;
+};
+
+export type MealInstructions = {
+  breakfast: MealInstruction;
+  lunch: MealInstruction;
+  dinner: MealInstruction;
+};
+
+// For DB row (fetching/inserting)
+export type MealInstructionsRow = {
+  id: string; // uuid
+  boarding_pet_meal_instructions: string; // uuid (FK to BoardingPet)
+  meal_type: MealType;
+  time: string;
+  food: string;
+  notes: string;
+};
+
+// BASE PET
+export interface BasePet {
+  id?: string; // DB PK (optional, for fetching)
+  pet_uuid?: string; // DB PK (uuid)
+  boarding_id_extention?: string; // uuid, FK to BoardingPet
+  grooming_id?: string; // uuid, FK to GroomingPet
   name: string;
   age: string;
   pet_type: PetType;
@@ -36,18 +65,13 @@ interface BasePet {
   allergies: string;
   special_requests: string;
   completed: boolean;
-  Owner_ID?: string;
-  booking_uuid?: string;
+  Owner_ID?: string; // uuid, FK to Owner
+  booking_uuid?: string; // uuid, FK to Booking
   created_at?: string;
   service_type: ServiceType;
 }
 
-export type MealInstruction = { 
-  time: string;
-  food: string;
-  notes: string;
-};
-
+// BOARDING PET
 export interface BoardingPet extends BasePet {
   service_type: 'boarding';
   room_size: RoomSize;
@@ -56,14 +80,11 @@ export interface BoardingPet extends BasePet {
   check_in_time: string;
   check_out_date: Date | string | null;
   check_out_time: string;
-  meal_instructions: {
-    breakfast: MealInstruction;
-    lunch: MealInstruction;
-    dinner: MealInstruction;
-  };
+  meal_instructions: MealInstructions;
   special_feeding_request: string;
 }
 
+// GROOMING PET
 export interface GroomingPet extends BasePet {
   service_type: 'grooming';
   service_variant: GroomingVariant;
@@ -71,17 +92,18 @@ export interface GroomingPet extends BasePet {
   service_time: string;
 }
 
+// PET UNION
 export type Pet = BoardingPet | GroomingPet;
 
-// Type guards
+// TYPE GUARDS
 export function isBoardingPet(pet: Pet): pet is BoardingPet {
   return pet.service_type === 'boarding';
 }
-
 export function isGroomingPet(pet: Pet): pet is GroomingPet {
   return pet.service_type === 'grooming';
 }
 
+// BOOKING
 export interface Booking {
   id?: string;
   booking_uuid: string;
@@ -99,6 +121,7 @@ export interface Booking {
   updated_at?: string;
 }
 
+// PRICING
 export interface Pricing {
   boarding: {
     day: Record<RoomSize, number>;
@@ -153,18 +176,16 @@ export const pricing: Pricing = {
   },
 };
 
+// UTILS
 export function parseDate(date: Date | string | null): Date | null {
   if (!date) return null;
   if (date instanceof Date) return date;
-  
   const parsed = new Date(date);
   if (!isNaN(parsed.getTime())) return parsed;
-  
   const parts = date.split(/[-/]/);
   if (parts.length === 3) {
     return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
   }
-  
   console.error('Invalid date format:', date);
   return null;
 }
@@ -172,9 +193,7 @@ export function parseDate(date: Date | string | null): Date | null {
 export function calculateNights(checkInDate: Date | string | null, checkOutDate: Date | string | null): number {
   const parsedCheckIn = parseDate(checkInDate);
   const parsedCheckOut = parseDate(checkOutDate);
-  
   if (!parsedCheckIn || !parsedCheckOut) return 0;
-  
   const diffTime = Math.abs(parsedCheckOut.getTime() - parsedCheckIn.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
@@ -188,12 +207,14 @@ export function isSameDay(date1: Date | string | null, date2: Date | string | nu
     d1.getDate() === d2.getDate();
 }
 
+// BOOKING RESULT
 export interface BookingResult {
   success: boolean;
   bookingId?: string;
   error?: string;
 }
 
+// SCHEDULE HANDLING
 export type ScheduleChangeType = 'checkIn' | 'checkOut' | 'service';
 export type ScheduleChangeHandler = (
   type: ScheduleChangeType,
@@ -201,6 +222,7 @@ export type ScheduleChangeHandler = (
   time: string
 ) => void;
 
+// BASE BOOKING FORM PROPS
 export interface BaseBookingFormProps {
   onConfirmBooking: (bookings: Booking[]) => Promise<BookingResult>;
   onClose: () => void;
