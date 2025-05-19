@@ -8,8 +8,7 @@ import {
   BoardingPet,
   BookingResult,
   BookingStatus,
-  MealInstructions, // Import MealInstructions type
-  MealType, // Import MealType type if used elsewhere, though keyof MealInstructions is sufficient here
+  MealInstructions, 
 } from "./types";
 
 export async function createBooking(
@@ -21,7 +20,6 @@ export async function createBooking(
   const supabase = await createServerSideClient();
 
   try {
-    // 1. Authenticate user
     const {
       data: { user },
       error: authError,
@@ -30,7 +28,7 @@ export async function createBooking(
       return { success: false, error: "User not authenticated" };
     }
 
-    console.log("user data found: ", user); // 2. Upsert Owner (table: Owner)
+    console.log("user data found: ", user); 
 
     const { data: owner, error: ownerError } = await supabase
       .from("Owner")
@@ -54,7 +52,7 @@ export async function createBooking(
       };
     }
 
-    console.log("upsert complete"); // 3. Insert Booking (table: Booking)
+    console.log("upsert complete"); 
 
     const bookingInserts = pets.map((pet, idx) => ({
       owner_details: owner.id,
@@ -78,7 +76,7 @@ export async function createBooking(
       .insert(bookingInserts)
       .select("booking_uuid");
     if (bookingError || !bookings || bookings.length === 0) {
-        console.error(bookingError)
+      console.error(bookingError);
       return {
         success: false,
         error: bookingError?.message || "Booking creation failed",
@@ -88,7 +86,7 @@ export async function createBooking(
     console.log("bookings success");
     bookings.forEach((booking) => {
       console.log(booking);
-    }); // 4. Insert Pet (table: Pet)
+    }); 
     const petInserts = pets.map((pet, idx) => ({
       Owner_ID: owner.id,
       booking_uuid: bookings[idx].booking_uuid,
@@ -106,10 +104,13 @@ export async function createBooking(
     const { data: createdPets, error: petError } = await supabase
       .from("Pet")
       .insert(petInserts)
-      .select("pet_uuid");
+      .select("pet_uuid, name");
+
+    console.log(petError);
 
     if (petError || !createdPets || createdPets.length === 0) {
-      // Attempt to clean up previously inserted booking records if pet insertion fails
+      console.log(petError);
+    
       await supabase
         .from("Booking")
         .delete()
@@ -121,7 +122,22 @@ export async function createBooking(
         success: false,
         error: petError?.message || "Pet creation failed",
       };
-    } // 5. Insert Service-Specific Records
+    } 
+    createdPets?.forEach((pet, idx) => {
+      console.log("pet number:", idx);
+      console.log(pet);
+    });
+
+
+    const { data: samplePetGetting, error: getPetError } = await supabase
+      .from("Pet")
+      .select("name, pet_uuid")
+      .eq("pet_uuid", createdPets[0].pet_uuid);
+
+    console.log("✨ Getting the new pet", samplePetGetting);
+    if (getPetError) {
+      console.log("❌ Error getting the pet", getPetError);
+    }
 
     for (let i = 0; i < pets.length; i++) {
       const pet = pets[i];
@@ -129,12 +145,11 @@ export async function createBooking(
 
       if (pet.service_type === "boarding") {
         const boardingPet = pet as BoardingPet;
-        const boardingPetId = crypto.randomUUID(); // Insert BoardingPet
 
-        const { error: boardingError } = await supabase
+        
+        const { data: newBoardingPets, error: boardingError } = await supabase
           .from("BoardingPet")
           .insert({
-            id: boardingPetId,
             service_type: "boarding",
             room_size: boardingPet.room_size,
             boarding_type: boardingPet.boarding_type,
@@ -142,11 +157,12 @@ export async function createBooking(
             check_in_time: boardingPet.check_in_time || "",
             check_out_date: boardingPet.check_out_date,
             check_out_time: boardingPet.check_out_time || "",
-            special_feeding_request: boardingPet.special_feeding_request || "", // meal_instructions is not inserted directly here, handled in MealInstructions table
-          });
+            special_feeding_request: boardingPet.special_feeding_request || "", 
+          })
+          .select("id");
 
         if (boardingError) {
-          // Attempt to clean up previous insertions
+          console.log("❌ Error: creating a new boarding pet:", boardingError);
           await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
           await supabase
             .from("Booking")
@@ -156,16 +172,19 @@ export async function createBooking(
               bookings.map((b) => b.booking_uuid)
             );
           return { success: false, error: boardingError.message };
-        } // Update Pet with boarding_id_extention (linking Pet and BoardingPet)
+        }
 
+        const newBoardingPet = newBoardingPets[0];
         const { error: updatePetError } = await supabase
           .from("Pet")
-          .update({ boarding_id_extention: boardingPetId })
+          .update({ boarding_id_extention: newBoardingPet.id })
           .eq("pet_uuid", pet_uuid);
 
         if (updatePetError) {
-          // Attempt to clean up previous insertions
-          await supabase.from("BoardingPet").delete().eq("id", boardingPetId);
+          await supabase
+            .from("BoardingPet")
+            .delete()
+            .eq("id", newBoardingPet.id);
           await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
           await supabase
             .from("Booking")
@@ -175,10 +194,9 @@ export async function createBooking(
               bookings.map((b) => b.booking_uuid)
             );
           return { success: false, error: updatePetError.message };
-        } // Insert MealInstructions if present
+        } 
 
         if (boardingPet.meal_instructions) {
-          // Corrected loop iteration type
           for (const mealType of [
             "breakfast",
             "lunch",
@@ -186,29 +204,27 @@ export async function createBooking(
           ] as (keyof MealInstructions)[]) {
             const meal = boardingPet.meal_instructions[mealType];
             if (meal && (meal.time || meal.food || meal.notes)) {
-              // Only insert if there is data
               const { error: mealError } = await supabase
                 .from("MealInstructions")
                 .insert({
-                  // id: crypto.randomUUID(), // Supabase can generate UUIDs
-                  boarding_pet_meal_instructions: boardingPetId, // Link to BoardingPet
+                  boarding_pet_meal_instructions: newBoardingPet.id, 
                   meal_type: mealType,
-                  time: meal.time || null, // Use null for empty strings if DB allows
+                  time: meal.time || null, 
                   food: meal.food || null,
                   notes: meal.notes || null,
                 })
-                .select(); // Select to get the generated ID if needed later
+                .select(); 
 
               if (mealError) {
-                // Comprehensive cleanup on error
+                console.log("❌ Error on meal Instructions: ", mealError);
                 await supabase
                   .from("MealInstructions")
                   .delete()
-                  .eq("boarding_pet_meal_instructions", boardingPetId);
+                  .eq("boarding_pet_meal_instructions", newBoardingPet.id);
                 await supabase
                   .from("BoardingPet")
                   .delete()
-                  .eq("id", boardingPetId);
+                  .eq("id", newBoardingPet.id);
                 await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
                 await supabase
                   .from("Booking")
@@ -226,7 +242,7 @@ export async function createBooking(
 
       if (pet.service_type === "grooming") {
         const groomingPet = pet as GroomingPet;
-        const groomingId = crypto.randomUUID(); // Insert GroomingPet
+        const groomingId = crypto.randomUUID(); 
 
         const { error: groomingError } = await supabase
           .from("GroomingPet")
@@ -239,7 +255,6 @@ export async function createBooking(
           });
 
         if (groomingError) {
-          // Attempt to clean up previous insertions
           await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
           await supabase
             .from("Booking")
@@ -249,7 +264,7 @@ export async function createBooking(
               bookings.map((b) => b.booking_uuid)
             );
           return { success: false, error: groomingError.message };
-        } // Update Pet with grooming_id (linking Pet and GroomingPet)
+        } 
 
         const { error: updatePetError } = await supabase
           .from("Pet")
@@ -257,7 +272,6 @@ export async function createBooking(
           .eq("pet_uuid", pet_uuid);
 
         if (updatePetError) {
-          // Attempt to clean up previous insertions
           await supabase.from("GroomingPet").delete().eq("id", groomingId);
           await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
           await supabase
