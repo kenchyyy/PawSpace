@@ -100,13 +100,11 @@ const CalendarSidebar = ({
     <div
       className='w-full lg:w-3/12 bg-gradient-to-b from-[#1E1B4B] to-[#2A0D45] shadow-lg border border-[#4C1D95] p-4 flex flex-col'
       style={{
-        maxHeight:
-          "calc(100vh - /* Adjust this value based on your header/padding */ 100px)",
         overflowY: "auto",
       }}
     >
       <div className='py-6 text-xl font-bold text-[#FBBF24] px-4 border-b border-[#9F7AEA] flex items-center gap-2'>
-        <span className='text-[#E9D5FF]'>🚀</span> Bookings
+        <span className='text-[#E9D5FF]'>📖</span> Bookings
       </div>
       <div className='flex-1 overflow-y-auto mt-4'>
         <div>
