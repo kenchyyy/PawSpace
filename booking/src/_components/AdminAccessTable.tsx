@@ -16,6 +16,7 @@ import { Button } from "@/_components/ui/Button";
 import AddAdmin from "./AddAdmin";
 import AlertMessage from "@/_components/AlertMessage";
 import { useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
 
 type AdminAccessUser = {
     name: string;
@@ -86,7 +87,9 @@ export default function AdminAccessTable({ data }: AdminAccessTableProps) {
                     <TableCell>{user.role}</TableCell>
                     {user.role !== "owner"?
                     <TableCell className="w-0">
-                        <ConfirmationMessage onConfirm={() => handleRemoveAdmin(user.email)} title="Are You sure?" description="Removing an admin is irreversersible. However, you can add the same user when you decide to add them again"></ConfirmationMessage>
+                        <ConfirmationMessage onConfirm={() => handleRemoveAdmin(user.email)} title="Are You sure?" description="Removing an admin is irreversersible. However, you can add the same user when you decide to add them again">
+                            <Button variant="outline"><Trash></Trash></Button>
+                        </ConfirmationMessage>
                     </TableCell>
                     :
                     ""}

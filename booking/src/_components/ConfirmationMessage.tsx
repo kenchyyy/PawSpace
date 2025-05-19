@@ -10,20 +10,19 @@ import { AlertDialog,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/_components/ui/alert-dialog";
-import { Trash } from "lucide-react";
-import { Button } from "@/_components/ui/Button";
 
 interface ConfirmationMessageProps {
   onConfirm: () => void;
   title: string;
   description: string;
+  children?: React.ReactNode;
 }
 
-export default function ConfirmationMessage({ onConfirm, title, description }: ConfirmationMessageProps) {
+export default function ConfirmationMessage({ onConfirm, title, description, children }: ConfirmationMessageProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline"><Trash></Trash></Button>
+        {children}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

@@ -21,7 +21,7 @@ export default async function SessionChecker({portal}: SessionCheckerProps): Pro
 
     if(portal === "admin") {
         const { data: data2, error } = await supabase
-            .from('admin_access_users')
+            .from('AdminAccessUsers')
             .select('email')
             .eq('email', data.user.email)
             .maybeSingle();

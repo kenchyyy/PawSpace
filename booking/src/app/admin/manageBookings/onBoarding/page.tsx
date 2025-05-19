@@ -5,6 +5,6 @@ import ManageBookingsPageLayout from "@/_components/admin/ManageBookingPageLayou
 
 export default function ManageBookingsPage() {
     return (
-        <ManageBookingsPageLayout bookingStatus="pending"></ManageBookingsPageLayout>
+        <ManageBookingsPageLayout bookingStatus="onGoing"></ManageBookingsPageLayout>
     )
 }

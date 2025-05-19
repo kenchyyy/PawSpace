@@ -15,15 +15,15 @@ export interface FormattedBooking {
   dateBooked: string;
   serviceDateStart: string;
   serviceDateEnd: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing' ;
   specialRequests: string;
   ownerDetails: OwnerDetails;
 }
 
-export async function fetchBookingDataByStatus(from: number, to: number, bookingStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing'): Promise<{message: string; returnData?: (Array<any> | null)}> {
+export async function fetchBookingDataByStatus(from: number, to: number, bookingStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing' ): Promise<{message: string; returnData?: (Array<any> | null)}> {
     const supabase = createClientSideClient();
     const { data, error } = await supabase
-        .from("booking")
+        .from("Booking")
         .select(`*, 
             owner_details(
             id,
@@ -34,7 +34,7 @@ export async function fetchBookingDataByStatus(from: number, to: number, booking
             `)
         .range(from, to)
         .eq("status", bookingStatus)
-        .order("service_date_start", { ascending: true   });
+        .order("service_date_start", { ascending: false   });
 
     if (error) {
         return {message: "Fetching Error", returnData: null};
@@ -47,7 +47,7 @@ export async function fetchBookingDataByStatus(from: number, to: number, booking
         status: item.status,
         specialRequests: item.special_requests,
         ownerDetails: {
-            id: item.owner_details?.id ?? null,
+            id: item.owner_details?.id ?? "",
             name: item.owner_details?.name ?? "",
             address: item.owner_details?.address ?? "",
             contactNumber: item.owner_details?.contact_number ?? "",
@@ -55,4 +55,16 @@ export async function fetchBookingDataByStatus(from: number, to: number, booking
         }
     }));
     return {message: "Booking data fetched successfully", returnData: formattedData };
+}
+
+export async function updateBookingStatus(bookingUUID: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing'): Promise<{message: string}> {
+    const supabase = createClientSideClient();
+    const { data, error } = await supabase
+        .from("Booking")
+        .update({ status })
+        .eq("booking_uuid", bookingUUID)
+    if (error) {
+        return {message: "Update Error"};
+    }
+    return {message: "Booking data updated successfully"};
 }
