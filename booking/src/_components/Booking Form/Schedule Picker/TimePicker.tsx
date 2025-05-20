@@ -87,10 +87,10 @@ const TimePicker: React.FC<TimePickerProps> = ({
 
     return (
         <div className="relative" ref={timePickerRef}>
-            {/* The visible button/input for time selection */}
+           
             <button
-                id={name} // Assign the ID for scrollToFirstError
-                name={name} // Assign the name for form submission
+                id={name} 
+                name={name} 
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm cursor-pointer text-left flex items-center space-x-2 ${

@@ -125,32 +125,23 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
             {({ pet, onChange, onScheduleChange, errors }) => {
                 if (!isBoardingPet(pet)) return null;
 
-                // This function is generally not needed if your errors object is flat per field.
-                // If you have nested errors, you might need a more sophisticated getter.
-                // For direct field errors, checking errors[fieldName] directly is sufficient.
                 const getError = (fieldName: string) => errors[fieldName] ? 'border-red-500 bg-red-50' : 'border-gray-300';
 
                 const handleDateChange = (type: 'checkIn' | 'checkOut', date: Date | null) => {
-                    // When date changes, use the existing time to update the pet object
                     const timeToPass = type === 'checkIn' ? pet.check_in_time : pet.check_out_time;
                     onScheduleChange(type, date, timeToPass);
                 };
 
                 const handleTimeChange = (type: 'checkIn' | 'checkOut', time: string) => {
-                    // When time changes, use the existing date to update the pet object
                     const dateToPass = type === 'checkIn' ? parseDate(pet.check_in_date) : parseDate(pet.check_out_date);
                     onScheduleChange(type, dateToPass, time);
                 };
 
                 const getMinDate = (): Date | undefined => {
                     if (pet.boarding_type === 'day') {
-                        // For day boarding, check-out must be the same day as check-in.
-                        // So, the minimum date for check-out should be the check-in date.
                         return parseDate(pet.check_in_date) || undefined;
                     }
                     const checkInDate = parseDate(pet.check_in_date);
-                    // For overnight, check-out must be at least the day after check-in.
-                    // If check-in date exists, set minDate to checkInDate + 1 day. Otherwise, today.
                     return checkInDate ? new Date(checkInDate.getTime() + 86400000) : new Date();
                 };
 
@@ -235,7 +226,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-In Date *</label>
                                         <DateDropdown
-                                            name="check_in_date" // Added name prop
+                                            name="check_in_date" 
                                             selectedDate={parseDate(pet.check_in_date)}
                                             onChange={(date) => handleDateChange('checkIn', date)}
                                             unavailableDates={unavailableDates}
@@ -247,7 +238,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-In Time *</label>
                                         <TimeDropdown
-                                            name="check_in_time" // Added name prop
+                                            name="check_in_time" 
                                             selectedTime={pet.check_in_time}
                                             onChange={(time) => handleTimeChange('checkIn', time)}
                                             unavailableTimes={unavailableTimes}
@@ -259,7 +250,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-Out Date *</label>
                                         <DateDropdown
-                                            name="check_out_date" // Added name prop
+                                            name="check_out_date" 
                                             selectedDate={parseDate(pet.check_out_date)}
                                             onChange={(date) => handleDateChange('checkOut', date)}
                                             unavailableDates={unavailableDates}
@@ -271,7 +262,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-Out Time *</label>
                                         <TimeDropdown
-                                            name="check_out_time" // Added name prop
+                                            name="check_out_time"
                                             selectedTime={pet.check_out_time}
                                             onChange={(time) => handleTimeChange('checkOut', time)}
                                             unavailableTimes={unavailableTimes}

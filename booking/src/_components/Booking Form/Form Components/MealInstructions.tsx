@@ -19,7 +19,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
             target: {
                 name: `meal_instructions.${meal}.time`,
                 value: time || '',
-                type: 'text' // Add type to match HTMLInputElement
+                type: 'text' 
             },
         } as unknown as React.ChangeEvent<HTMLInputElement>;
         onChange(event);
@@ -28,7 +28,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         
-        // Create a proper event object for nested structure
+       
         const event = {
             target: {
                 ...e.target,

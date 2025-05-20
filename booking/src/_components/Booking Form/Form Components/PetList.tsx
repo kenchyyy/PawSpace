@@ -27,7 +27,7 @@ const PetList: React.FC<PetListProps> = ({ pets, currentPetIndex, onEdit, onRemo
             <ul className="space-y-3">
                 {pets.map((pet, index) => (
                     <li
-                        key={pet.id} // Correctly using pet.id as key
+                        key={pet.id} 
                         className={`rounded-xl shadow-md border transition-colors duration-200 flex justify-between items-center p-4 ${
                             currentPetIndex === index
                                 ? 'border-purple-800 bg-purple-100'

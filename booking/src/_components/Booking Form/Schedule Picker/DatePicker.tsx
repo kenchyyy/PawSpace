@@ -12,8 +12,8 @@ interface DatePickerProps {
     maxDate?: Date;
     disabled?: boolean;
     placeholder?: string;
-    name: string; // Crucial for form submission and ID
-    className?: string; // For styling from parent (e.g., error classes)
+    name: string; 
+    className?: string; 
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -24,14 +24,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
     maxDate,
     disabled = false,
     placeholder = "Select a date",
-    name, // Destructure the new name prop
-    className // Destructure the new className prop
+    name, 
+    className 
 }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [isOpen, setIsOpen] = useState(false);
     const datePickerRef = useRef<HTMLDivElement>(null);
 
-    // Ensure minDate is set to the start of the day for accurate comparison
     const sanitizedMinDate = (() => {
         const d = new Date(minDate);
         d.setHours(0, 0, 0, 0);
@@ -48,7 +47,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     const isDateDisabled = (date: Date) => {
         const comparableDate = new Date(date);
-        comparableDate.setHours(0, 0, 0, 0); // Normalize to start of day
+        comparableDate.setHours(0, 0, 0, 0); 
 
         return comparableDate < sanitizedMinDate ||
                (maxDate && comparableDate > maxDate) ||
@@ -84,7 +83,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 </h2>
                 <button
                     onClick={nextMonth}
-                    // Disable next month if it would go past maxDate's month
+                   
                     disabled={maxDate && isSameMonth(currentMonth, maxDate) && currentMonth.getMonth() === maxDate.getMonth() && currentMonth.getFullYear() === maxDate.getFullYear()}
                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
                 >
@@ -95,7 +94,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     };
 
     const renderDays = () => {
-        const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; // Short day names
+        const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S']; 
         return (
             <div className="grid grid-cols-7">
                 {dayNames.map((day, index) => (
@@ -109,15 +108,15 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     const renderCells = () => {
         const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-        const firstDayOfWeek = getDay(monthStart); // 0 for Sunday, 6 for Saturday
+        const firstDayOfWeek = getDay(monthStart); 
 
         const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
 
         const cells = [];
         let day = new Date(monthStart);
-        day.setDate(day.getDate() - firstDayOfWeek); // Move 'day' back to the start of the week for the first row
+        day.setDate(day.getDate() - firstDayOfWeek); 
 
-        // Render leading empty cells for days before the 1st of the month
+   
         for (let i = 0; i < firstDayOfWeek; i++) {
             const cloneDay = new Date(day);
             const isOutOfMonth = !isSameMonth(cloneDay, currentMonth);
@@ -133,7 +132,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             day.setDate(day.getDate() + 1);
         }
 
-        // Render days of the current month
+     
         for (let i = 0; i < daysInMonth; i++) {
             const cloneDay = new Date(day);
             const isDisabled = isDateDisabled(cloneDay);
@@ -151,7 +150,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     onClick={() => {
                         if (!isDisabled) {
                             onChange(cloneDay);
-                            setIsOpen(false); // Close date picker on date selection
+                            setIsOpen(false); 
                         }
                     }}
                 >

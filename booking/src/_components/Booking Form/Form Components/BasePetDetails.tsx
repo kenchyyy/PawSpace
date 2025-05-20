@@ -27,7 +27,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
         <label htmlFor="pet_name" className="block text-sm font-medium text-gray-700">Pet Name *</label>
         <input
           type="text"
-          id="pet_name" // Added id for better accessibility
+          id="pet_name" 
           name="name"
           value={pet.name}
           onChange={onChange}
@@ -41,14 +41,14 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
       <div className="space-y-2">
         <label htmlFor="pet_type" className="block text-sm font-medium text-gray-700">Pet Type *</label>
         <select
-          id="pet_type" // Added id
+          id="pet_type"
           name="pet_type"
           value={pet.pet_type}
           onChange={onChange}
           className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('pet_type')}`}
           required
         >
-          <option value="">Select pet type</option> {/* Added a default empty option */}
+          <option value="">Select pet type</option>
           <option value="dog">Dog</option>
           <option value="cat">Cat</option>
         </select>
@@ -60,7 +60,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
         <label htmlFor="breed" className="block text-sm font-medium text-gray-700">Breed *</label>
         <input
           type="text"
-          id="breed" // Added id
+          id="breed" 
           name="breed"
           value={pet.breed}
           onChange={onChange}
@@ -96,7 +96,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
           className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('vaccinated')}`}
           required
         >
-          <option value="">Select vaccination status</option> {/* Changed to empty string for initial selection */}
+          <option value="">Select vaccination status</option> 
           <option value="yes">Yes</option>
           <option value="no">No</option>
         </select>
@@ -107,7 +107,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
       <div className="space-y-2">
         <label htmlFor="size" className="block text-sm font-medium text-gray-700">Size (kg) *</label>
         <select
-          id="size" // Added id
+          id="size" 
           name="size"
           value={pet.size}
           onChange={onChange}
@@ -128,7 +128,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="vitamins_or_medications" className="block text-sm font-medium text-gray-700">Vitamins/Medications</label>
         <textarea
-          id="vitamins_or_medications" // Added id
+          id="vitamins_or_medications" 
           name="vitamins_or_medications"
           value={pet.vitamins_or_medications || ''}
           onChange={onChange}
@@ -145,7 +145,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="allergies" className="block text-sm font-medium text-gray-700">Allergies</label>
         <textarea
-          id="allergies" // Added id
+          id="allergies" 
           name="allergies"
           value={pet.allergies || ''}
           onChange={onChange}
@@ -162,7 +162,7 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({ pet, onChange, errors, 
       <div className="space-y-2 md:col-span-2">
         <label htmlFor="special_requests" className="block text-sm font-medium text-gray-700">Special Requests</label>
         <textarea
-          id="special_requests" // Added id
+          id="special_requests" 
           name="special_requests"
           value={pet.special_requests || ''}
           onChange={onChange}
