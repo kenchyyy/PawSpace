@@ -281,12 +281,6 @@ const CalendarEventItem = ({
           <span className='text-xs text-[#FBBF24] ml-1'>({bookingType})</span>
         )}
       </div>
-
-      <div className='text-sm text-[#C4B5FD] mt-2'>
-        <span className='font-medium text-[#FBBF24]'>Pet:</span>
-        {event.extendedProps.petName} ({event.extendedProps.petType})
-      </div>
-
       <div className='text-sm text-[#C4B5FD] mt-1'>
         <span className='font-medium text-[#FBBF24]'>Owner:</span>
         {event.extendedProps.ownerName}
