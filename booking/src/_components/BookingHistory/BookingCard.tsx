@@ -9,10 +9,7 @@ interface BookingCardProps {
 }
 
 const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
-    // State to manage the expanded/collapsed state of the card
     const [isExpanded, setIsExpanded] = useState(false);
-
-    // Existing states for cancellation modal/toasts
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelMessage, setCancelMessage] = useState('');
     const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
@@ -20,7 +17,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     const [showCancelErrorToast, setShowCancelErrorToast] = useState(false);
     const [cancelErrorMessage, setCancelErrorMessage] = useState('');
 
-    // Date formatting and logic (no changes here)
     const publishDate = booking.date_booked instanceof Date ? format(booking.date_booked, 'yyyy-MM-dd') : booking.date_booked;
     const checkInDate = booking.service_date_start instanceof Date ? format(booking.service_date_start, 'yyyy-MM-dd') : booking.service_date_start;
     const checkOutDate = booking.service_date_end instanceof Date ? format(booking.service_date_end, 'yyyy-MM-dd') : booking.service_date_end;
@@ -33,7 +29,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     const isAfterStay = today > (booking.service_date_end instanceof Date ? booking.service_date_end : new Date(booking.service_date_end));
     const isPending = booking.status === 'pending';
 
-    // Tailwind CSS color classes (no changes here)
     const accent = 'text-white';
     const textPrimary = 'text-white';
     const textSecondary = 'text-gray-300';
@@ -58,17 +53,14 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
         return '';
     };
 
-    // Toggle function for card expansion
     const toggleExpansion = () => {
-        // Only toggle if the cancellation modal is NOT open
         if (!showCancelModal) {
             setIsExpanded(!isExpanded);
         }
     };
 
-    // Cancellation modal functions (no changes here)
     const openCancelModal = (event: React.MouseEvent) => {
-        event.stopPropagation(); // Prevent card from collapsing/expanding when clicking cancel button
+        event.stopPropagation();
         setShowCancelModal(true);
     };
 
@@ -128,16 +120,14 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                 ${isExpanded ? 'p-6' : 'p-4'}
                 ${interactionIndicatorClass()}
             `}
-            onClick={toggleExpansion} // Click handler for expansion/collapse
+            onClick={toggleExpansion}
         >
-            {/* Always visible: Booking ID */}
             <h3 className={`${accent} ${isExpanded ? 'text-xl' : 'text-lg'} font-semibold mb-2`}>
                 Booking ID: {booking.booking_uuid}
             </h3>
 
-            {/* Conditionally rendered content */}
             {isExpanded && (
-                <div className="space-y-2"> {/* Added a div for consistent spacing when expanded */}
+                <div className="space-y-2">
                     <p className={`${textSecondary} text-sm`}>Booked On: <span className={textPrimary}>{publishDate}</span></p>
                     <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
                     <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
@@ -158,7 +148,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                     )}
 
                     {booking.owner_details && (
-                        <div className="pt-2 border-t border-blue-800"> {/* Added padding-top and top border */}
+                        <div className="pt-2 border-t border-blue-800">
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Owner Details</h4>
                             <p className={`${textSecondary} text-sm`}>ID: <span className={textPrimary}>{booking.owner_details.id}</span></p>
                             <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{booking.owner_details.name}</span></p>
@@ -169,7 +159,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                     )}
 
                     {booking.pets && booking.pets.length > 0 && (
-                        <div className="pt-2 border-t border-blue-800"> {/* Added padding-top and top border */}
+                        <div className="pt-2 border-t border-blue-800">
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Pet Details</h4>
                             {booking.pets.map((pet) => (
                                 <div key={pet.pet_uuid} className="mb-2 p-2 rounded-md bg-blue-800 last:mb-0"> {/* last:mb-0 removes margin from last pet */}
@@ -199,7 +189,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                         </div>
                     )}
 
-                    {/* Cancellation Buttons (only show when expanded) */}
                     {(isPending || (isBeforeOrDuringStay && !isPending && canCancelBeforeThreeDays)) && (
                         <div className="mt-4 flex justify-end">
                             <button
@@ -214,7 +203,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                 </div>
             )}
 
-            {/* Modals and Toasts (these remain fixed/absolute, so they are not affected by expansion) */}
             {showCancelModal && (
                 <div className="fixed inset-0 flex justify-center items-center z-50">
                     <div className="absolute inset-0 bg-black opacity-30 backdrop-filter blur-sm"></div>

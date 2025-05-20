@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   try {
-    // Update the booking status to 'cancelled'
     const { error: updateError } = await supabase
       .from('Booking')
       .update({ status: 'cancelled' })
@@ -23,8 +22,7 @@ export async function POST(request: NextRequest) {
       console.error('Error updating booking status:', updateError);
       return NextResponse.json({ message: 'Failed to update booking status.' }, { status: 500 });
     }
-
-    // Insert the cancellation message into the CancelMessages table
+    
     const { error: insertError } = await supabase
       .from('CancelMessages')
       .insert({

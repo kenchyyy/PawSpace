@@ -308,8 +308,8 @@ export async function GET(request: NextRequest) {
         const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
         const endIndex = startIndex + ITEMS_PER_PAGE - 1;
 
-        const cookieStore = cookies(); // Get the cookie store
-        const supabase = createRouteHandlerClient({ cookies: () => cookieStore }); // Pass the cookie store
+        const cookieStore = cookies();
+        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
         const { data, error } = await supabase
             .from('Booking')

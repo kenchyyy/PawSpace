@@ -363,7 +363,6 @@ async function getBookingHistory(page: number, supabase: SupabaseClient): Promis
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
 
     try {
-        // Get the total count of bookings
         const { count, error: countError } = await supabase
             .from('Booking')
             .select('*', { count: 'exact' });
@@ -455,8 +454,6 @@ async function getBookingHistory(page: number, supabase: SupabaseClient): Promis
 
 export default async function BookingHistoryPage() {
     const supabase = await createServerSideClient();
-    // Removed session check and userId retrieval
-
     const { bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, supabase);
 
     return (

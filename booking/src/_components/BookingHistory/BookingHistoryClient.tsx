@@ -4,13 +4,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BookingCard from './BookingCard';
 import { BookingRecord } from './types/bookingRecordType';
-import { BookingHistoryClientProps } from './types/bookingRecordsInterface'; // Import the interface
+import { BookingHistoryClientProps } from './types/bookingRecordsInterface';
 
 const BookingHistoryClient: React.FC<BookingHistoryClientProps> = ({ bookings: initialBookings, loading: initialLoading, error: initialError, totalCount }) => {
   const [bookings, setBookings] = useState<BookingRecord[] | undefined | null>(initialBookings);
   const [loading, setLoading] = useState(initialLoading);
   const [error, setError] = useState(initialError);
-  const [page, setPage] = useState(2); // Start from page 2 for subsequent loads
+  const [page, setPage] = useState(2);
   const observer = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const allItemsLoaded = totalCount !== null && bookings !== undefined && bookings !== null && bookings.length >= totalCount;
