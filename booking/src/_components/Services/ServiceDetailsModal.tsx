@@ -9,7 +9,7 @@ import { Props } from "./types/serviceTypes";
 import DayboardingInfo from "./accommodation/Dayboarding";
 import { useEffect, useRef } from "react";
 
-export default function ServiceDetailsModal({ isOpen, onClose, details, onOpenBookingForm }: Props) {
+export default function ServiceDetailsModal({ isOpen, onClose, details, onClick }: Props) {
     const modalRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -37,6 +37,8 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onOpenBo
         "7 Nights: Free Food & Basic Grooming + 10% Discount",
         "15 Nights: Free Food & Basic Grooming + 20% Discount",
     ] : [];
+
+    const bookingCategory = details.type === "overnight" ? "boarding" : "grooming";
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm font-sans" onClick={onClose}>
@@ -83,7 +85,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onOpenBo
                 )}
 
                 <AddBookingButton
-                    onClick={onOpenBookingForm}
+                    onClick={() => onClick(bookingCategory)}
                     className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium mt-6 cursor-pointer transition duration-300 ease-in-out"
                 >
                     Book Now

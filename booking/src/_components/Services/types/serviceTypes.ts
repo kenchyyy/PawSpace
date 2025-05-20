@@ -16,15 +16,15 @@ export type Props = {
     isOpen: boolean;
     onClose: () => void;
     details: ServiceDetails | null;
-    onOpenBookingForm: () => void; 
+    onClick: (category: 'boarding' | 'grooming') => void;
 };
 
 export type GroomingServicesSectionProps = {
-    setSelectedService: React.Dispatch<React.SetStateAction<string | null>>;
+    setSelectedService: (serviceKey: string) => void;
 };
 
 export type OvernightServicesSectionProps = {
-    setSelectedService: React.Dispatch<React.SetStateAction<string | null>>;
+    setSelectedService: (serviceKey: string) => void;
 };
 
 export type SpecialOffersProps = {
