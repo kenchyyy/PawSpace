@@ -18,7 +18,6 @@ export default async function Layout({
 
   return (
     <DashboardLayout
-      colorTheme='gray'
       buttons={[
         { icon: "FaHome", text: "Home", href: "/admin" },
         { icon: "FaCalendar", text: "Calendar", href: "/admin/calendar" },

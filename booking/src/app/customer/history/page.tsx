@@ -1,6 +1,8 @@
 // app/customer/history/page.tsx
 'use client';
-import { Booking, BoardingPet, GroomingPet } from '@/_components/Booking History/types';
+import { useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
+import { Booking } from '@/_components/Booking History/types';
 import BookingHistory from '@/_components/Booking History/BookingHistory';
 
 export default function CustomerHistoryPage() {
