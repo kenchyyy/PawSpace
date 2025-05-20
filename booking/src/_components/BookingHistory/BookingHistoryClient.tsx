@@ -88,10 +88,12 @@ const BookingHistoryClient: React.FC<BookingHistoryClientProps> = ({ bookings: i
   }
 
   return (
-    <div className={`bg-indigo-900 flex flex-col gap-5 p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300`}>
-      <p className="text-white text-sm font-sans mb-4">
-        Past booking data is retained for 6 months after the service date ends.
-      </p>
+    <div className={`bg-indigo-900 flex flex-col font-sans gap-5 p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300`}>
+      <div className="flex justify-end">
+        <p className="text-yellow-300 text-sm font-sans mb-4">
+          Past booking data is retained for 3 months after the service date ends.
+        </p>
+      </div>
       {bookings?.map((booking) => (
         <div key={booking.booking_uuid}>
           <BookingCard booking={booking} />
