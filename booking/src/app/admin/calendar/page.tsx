@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import Calendar from "@/_components/Calendar/FullCalendar"; // Assuming your wrapper component
+import React, { useState, useRef, useEffect, Suspense } from "react";
+import Calendar from "@/_components/Calendar/FullCalendar";
 import CalendarSidebar from "@/_components/Calendar/CalendarSidebar";
 import CalendarModal from "@/_components/Calendar/CalendarModal";
 import CalendarSkeleton from "@/_components/Calendar/CalendarSkeleton";
 import { EventApi, EventClickArg, EventInput } from "@fullcalendar/core";
-import { Suspense } from "react";
 
 export default function CalendarPage() {
   const [currentEvents, setCurrentEvents] = useState<EventInput[]>([]);
@@ -15,25 +14,24 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const calendarRef = useRef<any>(null);
 
+  // Define colors for the statuses you want to display
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
-        return "#10b981";
-      case "pending":
-        return "#f59e0b";
-      case "cancelled":
-        return "#ef4444";
+        return "#10B981"; // emerald green (confirmed)
+      case "ongoing":
+        return "#F59E0B"; // amber (ongoing)
       case "completed":
-        return "#3b82f6";
+        return "#3B82F6"; // blue (completed)
       default:
-        return "#6b7280";
+        return "#6B7280"; // gray fallback
     }
   };
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch('/api/calendar'); // Fetch from your API endpoint
+        const response = await fetch("/api/calendar"); // Your API endpoint
         if (!response.ok) {
           const errorData = await response.json();
           console.error("Error fetching bookings:", errorData);
@@ -41,12 +39,28 @@ export default function CalendarPage() {
           return;
         }
         const events = await response.json();
-        console.log("Fetched events:", events);
-        const formattedEvents = events.map((event: { extendedProps: { status: string; }; }) => ({
-          ...event,
-          backgroundColor: getStatusColor(event.extendedProps.status),
-          borderColor: getStatusColor(event.extendedProps.status),
-        }));
+
+        // Filter to only show confirmed, ongoing, or completed bookings
+        const filteredEvents = events.filter(
+          (event: { extendedProps: { status: string } }) => {
+            const status = event.extendedProps.status?.toLowerCase();
+            return (
+              status === "confirmed" ||
+              status === "ongoing" ||
+              status === "completed"
+            );
+          }
+        );
+
+        // Format events with colors based on status
+        const formattedEvents = filteredEvents.map(
+          (event: { extendedProps: { status: string } }) => ({
+            ...event,
+            backgroundColor: getStatusColor(event.extendedProps.status),
+            borderColor: getStatusColor(event.extendedProps.status),
+          })
+        );
+
         setCurrentEvents(formattedEvents as EventInput[]);
         setLoading(false);
       } catch (error) {
@@ -54,6 +68,7 @@ export default function CalendarPage() {
         setLoading(false);
       }
     };
+
     loadData();
   }, []);
 
@@ -86,7 +101,7 @@ export default function CalendarPage() {
                   loading={loading}
                 />
                 <Calendar
-                  events={currentEvents} // Directly pass currentEvents
+                  events={currentEvents}
                   loading={loading}
                   onEventClick={handleEventClick}
                   calendarRef={calendarRef}
