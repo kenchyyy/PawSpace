@@ -225,7 +225,15 @@ export type ScheduleChangeHandler = (
 
 // BASE BOOKING FORM PROPS
 export interface BaseBookingFormProps {
-  onConfirmBooking: (bookings: Booking[]) => Promise<BookingResult>;
+  // CORRECTED SIGNATURE FOR onConfirmBooking
+  onConfirmBooking: (
+    ownerDetails: OwnerDetails,
+    pets: Pet[],
+    totalAmounts: number[],
+    discountsApplied?: number[] // Added as optional since your code passes it
+  ) => Promise<BookingResult>;
+  // END OF CORRECTION
+
   onClose: () => void;
   serviceType: ServiceType;
   isSubmitting?: boolean;

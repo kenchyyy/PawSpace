@@ -1,4 +1,4 @@
-// BaseBookingForm.tsx
+// booking/src/_components/Booking Form/BaseBookingForm.tsx
 'use client';
 import React, { useState, ChangeEvent, ReactNode } from 'react';
 import { FiX } from 'react-icons/fi';
@@ -7,7 +7,7 @@ import PetStep from '../Steps/PetStep';
 import ReviewStep from '../Steps/ReviewStep';
 import StepIndicator from '../Form Components/StepIndicator';
 import {
-    Booking,
+    // Removed 'Booking' from this list as we are not creating Booking objects directly here for the server action
     OwnerDetails,
     Pet,
     ServiceType,
@@ -30,7 +30,7 @@ import {
 } from '../types';
 
 const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
-    onConfirmBooking,
+    onConfirmBooking, // This is now expected to match the createBooking signature
     onClose,
     serviceType,
     isSubmitting = false,
@@ -54,13 +54,12 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setOwnerDetails(prev => ({ ...prev, [name]: value }));
-   
+
         if (formErrors[name]) {
             setFormErrors(prev => ({ ...prev, [name]: '' }));
         }
     };
 
- 
     const handlePetChange = (updatedPet: Pet) => {
         setPets(prev => {
             const newPets = prev.map((pet, index) =>
@@ -70,43 +69,39 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         });
     };
 
-
     const handleScheduleChange: ScheduleChangeHandler = (type, date, time) => {
         setPets(prev => {
-      
             const updatedPets = [...prev];
 
-           
             if (currentPetIndex < 0 || currentPetIndex >= updatedPets.length) {
                 console.warn('Invalid currentPetIndex in handleScheduleChange');
-                return prev; 
+                return prev;
             }
 
-            const currentPet = updatedPets[currentPetIndex]; 
+            const currentPet = updatedPets[currentPetIndex];
 
-            let updatedPetInstance: Pet; 
+            let updatedPetInstance: Pet;
 
             if (isBoardingPet(currentPet)) {
-                updatedPetInstance = { 
-                    ...currentPet, 
+                updatedPetInstance = {
+                    ...currentPet,
                     check_in_date: type === 'checkIn' ? date : currentPet.check_in_date,
                     check_in_time: type === 'checkIn' ? time : currentPet.check_in_time,
                     check_out_date: type === 'checkOut' ? date : currentPet.check_out_date,
                     check_out_time: type === 'checkOut' ? time : currentPet.check_out_time,
                 };
             } else if (isGroomingPet(currentPet)) {
-                updatedPetInstance = { 
-                    ...currentPet, 
+                updatedPetInstance = {
+                    ...currentPet,
                     service_date: type === 'service' ? date : currentPet.service_date,
                     service_time: type === 'service' ? time : currentPet.service_time,
                 };
             } else {
-                
                 return prev;
             }
 
             updatedPets[currentPetIndex] = updatedPetInstance;
-            return updatedPets; 
+            return updatedPets;
         });
     };
 
@@ -120,14 +115,38 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         return Object.keys(errors).length === 0;
     };
 
+    // You might want to add a validatePetForm function here
+    const validatePetForm = (pet: Pet): boolean => {
+        const errors: Record<string, string> = {};
+        let isValid = true;
+
+        if (!pet.name.trim()) { errors.name = 'Pet name is required'; isValid = false; }
+        if (!pet.age.trim()) { errors.age = 'Pet age is required'; isValid = false; }
+        // Add more validations specific to pet types if needed
+        if (isBoardingPet(pet)) {
+            if (!pet.check_in_date) { errors.check_in_date = 'Check-in date is required'; isValid = false; }
+            if (!pet.check_out_date) { errors.check_out_date = 'Check-out date is required'; isValid = false; }
+            if (pet.check_in_date && pet.check_out_date && pet.check_in_date > pet.check_out_date) {
+                errors.check_out_date = 'Check-out date must be after check-in date'; isValid = false;
+            }
+        } else if (isGroomingPet(pet)) {
+            if (!pet.service_date) { errors.service_date = 'Service date is required'; isValid = false; }
+            if (!pet.service_time) { errors.service_time = 'Service time is required'; isValid = false; }
+        }
+
+        // Set form errors for the *current* pet being edited
+        setFormErrors(prev => ({ ...prev, [`pet-${pet.id}`]: JSON.stringify(errors) })); // Store errors specific to this pet
+        return isValid;
+    };
+
     const createNewPet = (): Pet => {
         const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
         const basePet = {
-            id: uniqueId,
+            id: uniqueId, // Used as a temporary unique key for frontend state management
             name: '',
             age: '',
-            pet_type: 'dog' as const,
+            pet_type: 'dog' as const, // Default to 'dog'
             breed: '',
             vaccinated: 'unknown' as const,
             size: '',
@@ -142,8 +161,8 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             return {
                 ...basePet,
                 service_type: 'boarding',
-                room_size: 'small',
-                boarding_type: 'day',
+                room_size: 'small', // Default value
+                boarding_type: 'day', // Default value
                 check_in_date: null,
                 check_in_time: '',
                 check_out_date: null,
@@ -159,7 +178,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             return {
                 ...basePet,
                 service_type: 'grooming',
-                service_variant: 'basic',
+                service_variant: 'basic', // Default value
                 service_date: null,
                 service_time: ''
             } as GroomingPet;
@@ -174,7 +193,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             setPets([createNewPet()]);
             setCurrentPetIndex(0);
         } else {
-            setCurrentPetIndex(0);
+            setCurrentPetIndex(0); // Go to the first pet if pets already exist
         }
     };
 
@@ -183,6 +202,16 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             setFormErrors({ ...formErrors, pets: 'Please add at least one pet' });
             return;
         }
+
+        // Validate all pets before proceeding
+        const allPetsValid = pets.every(pet => validatePetForm(pet));
+        if (!allPetsValid) {
+            // If any pet is invalid, we will not proceed and display errors in PetStep
+            setFormErrors(prev => ({ ...prev, general: 'Please correct pet details before proceeding.' }));
+            return;
+        }
+
+
         setCompletedSteps(prev => [...prev, 'pet']);
         setCurrentStep('review');
     };
@@ -198,6 +227,15 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             if (currentStep === 'customer' && validateCustomerForm()) {
                 setCompletedSteps(prev => [...prev, 'customer']);
                 setCurrentStep('pet');
+            } else if (currentStep === 'pet') {
+                // If trying to jump to review from pet, validate all pets
+                const allPetsValid = pets.every(pet => validatePetForm(pet));
+                if (allPetsValid) {
+                    setCompletedSteps(prev => [...prev, 'pet']);
+                    setCurrentStep('review');
+                } else {
+                    setFormErrors(prev => ({ ...prev, general: 'Please correct pet details before proceeding.' }));
+                }
             }
         }
     };
@@ -209,30 +247,21 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         }
 
         try {
-            const bookings = pets.map(pet => {
-                const baseBooking: Booking = {
-                    id: `${Date.now()}-${pet.id}`,
-                    booking_uuid: `${Date.now()}-${pet.id}`,
-                    date_booked: new Date(),
-                    status: 'pending',
-                    owner_details: ownerDetails,
-                    pet: pet,
-                    special_requests: pet.special_requests || '',
-                    total_amount: 0,
-                    discount_applied: 0,
-                    service_date_start: null,
-                    service_date_end: null
-                };
+            const totalAmounts: number[] = [];
+            const discountsApplied: number[] = [];
+
+            // Calculate total amounts and discounts for each pet
+            pets.forEach(pet => {
+                let petTotalAmount = 0;
+                let petDiscount = 0;
 
                 if (isGroomingPet(pet)) {
                     const groomingPet = pet as GroomingPet;
-                    baseBooking.total_amount = getGroomingPrice(
+                    petTotalAmount = getGroomingPrice(
                         groomingPet.pet_type,
                         groomingPet.service_variant,
                         groomingPet.size as PetSize
                     );
-                    baseBooking.service_date_start = groomingPet.service_date;
-                    baseBooking.service_date_end = groomingPet.service_date;
                 } else if (isBoardingPet(pet)) {
                     const boardingPet = pet as BoardingPet;
                     const checkInDate = boardingPet.check_in_date;
@@ -245,22 +274,22 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
 
                     if (boardingPet.boarding_type === 'day') {
                         basePrice = pricing.boarding.day[roomSizeKey] || 0;
-                    } else {
+                    } else { // Overnight
                         basePrice = (pricing.boarding.overnight[roomSizeKey] || 0) * nights;
                         if (nights >= 15) discount = 0.2;
                         else if (nights >= 7) discount = 0.1;
                     }
-
-                    baseBooking.total_amount = basePrice * (1 - discount);
-                    baseBooking.discount_applied = discount;
-                    baseBooking.service_date_start = checkInDate;
-                    baseBooking.service_date_end = checkOutDate;
+                    petTotalAmount = basePrice * (1 - discount);
+                    petDiscount = discount;
                 }
 
-                return baseBooking;
+                totalAmounts.push(petTotalAmount);
+                discountsApplied.push(petDiscount);
             });
 
-            return await onConfirmBooking(bookings);
+            // This is the CRITICAL change: Pass ownerDetails, pets, totalAmounts, and discountsApplied
+            return await onConfirmBooking(ownerDetails, pets, totalAmounts, discountsApplied);
+
         } catch (error) {
             console.error('Booking error:', error);
             const errorMessage = error instanceof Error ? error.message : 'Booking failed';
@@ -332,22 +361,22 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                         onAddPet={() => {
                             const newPet = createNewPet();
                             setPets(prevPets => [...prevPets, newPet]);
-                            setCurrentPetIndex(pets.length);
+                            setCurrentPetIndex(pets.length); // Set index to the newly added pet
                         }}
                         onEditPet={(index: number) => setCurrentPetIndex(index)}
                         onRemovePet={(index: number) => {
                             setPets(prevPets => {
                                 const updatedPets = prevPets.filter((_, i) => i !== index);
-                                
+
                                 let newIndex = currentPetIndex;
                                 if (index === currentPetIndex) {
                                     newIndex = Math.max(0, index - 1);
-                                } else if (index < currentPetIndex) { 
+                                } else if (index < currentPetIndex) {
                                     newIndex = currentPetIndex - 1;
                                 }
-                          
+
                                 if (updatedPets.length === 0) {
-                                    newIndex = -1; 
+                                    newIndex = -1; // No pets left
                                 }
                                 setCurrentPetIndex(newIndex);
                                 return updatedPets;
@@ -356,7 +385,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                         onBack={() => setCurrentStep('customer')}
                         onNext={handleNextFromPet}
                         isSubmitting={isSubmitting}
-                        errors={formErrors}
+                        errors={formErrors} // Pass form errors to PetStep
                         onPetChange={handlePetChange}
                         onScheduleChange={handleScheduleChange}
                     >
@@ -390,8 +419,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                                         });
                                     },
                                     currentPetIndex,
-                                })
-                            )}
+                                }))}
                     </PetStep>
                 )}
 

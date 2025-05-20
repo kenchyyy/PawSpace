@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import BaseBookingForm from './BaseBookingForm';
-import { Booking, BoardingPet, parseDate, isSameDay, calculateNights, pricing, BookingResult } from '../types';
+import { Booking, BoardingPet, parseDate, isSameDay, calculateNights, pricing, BookingResult, OwnerDetails, Pet } from '../types'; // Import OwnerDetails and Pet
 import { toast } from 'sonner';
 import MealInstructions from '../Form Components/MealInstructions';
 import { FiSun, FiMoon } from 'react-icons/fi';
@@ -13,7 +13,13 @@ import { createBooking } from '../bookingService';
 import { isBoardingPet } from '../types';
 
 interface BoardingBookingFormProps {
-    onConfirmBooking?: (bookings: Booking[]) => Promise<BookingResult>;
+    // UPDATED: onConfirmBooking should match BaseBookingFormProps
+    onConfirmBooking?: (
+      ownerDetails: OwnerDetails,
+      pets: Pet[],
+      totalAmounts: number[],
+      discountsApplied?: number[]
+    ) => Promise<BookingResult>;
     onClose: () => void;
     unavailableDates?: Date[];
     unavailableTimes?: string[];
@@ -48,44 +54,53 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
         return errors;
     };
 
-    const handleConfirmBooking = async (bookings: Booking[]): Promise<BookingResult> => {
+    // UPDATED: handleConfirmBooking now matches BaseBookingForm's expected arguments
+    const handleConfirmBooking = async (
+      ownerDetails: OwnerDetails,
+      pets: Pet[],
+      totalAmounts: number[],
+      discountsApplied?: number[]
+    ): Promise<BookingResult> => {
         setIsSubmitting(true);
 
         try {
             const bookingResults = await Promise.all(
-                bookings.map(async (booking) => {
-                    if (!isBoardingPet(booking.pet)) {
+                // Iterate over pets, as each pet will correspond to a booking in this context
+                pets.map(async (pet, index) => {
+                    if (!isBoardingPet(pet)) {
+                        // This should ideally not happen if BaseBookingForm is sending correct pet types
                         throw new Error('Invalid pet type for boarding');
                     }
 
-                    const petErrors = validateBoardingData(booking.pet);
+                    const petErrors = validateBoardingData(pet);
                     if (petErrors.length > 0) throw new Error(petErrors.join(', '));
 
-                    const checkInDate = parseDate(booking.pet.check_in_date)!;
-                    const checkOutDate = parseDate(booking.pet.check_out_date)!;
+                    const checkInDate = parseDate(pet.check_in_date)!;
+                    const checkOutDate = parseDate(pet.check_out_date)!;
                     const nights = calculateNights(checkInDate, checkOutDate);
-                    const roomSizeKey = booking.pet.pet_type === 'cat'
-                        ? booking.pet.room_size === 'cat_small' ? 'cat_small' : 'cat_big'
-                        : booking.pet.room_size;
+                    const roomSizeKey = pet.pet_type === 'cat'
+                        ? pet.room_size === 'cat_small' ? 'cat_small' : 'cat_big'
+                        : pet.room_size;
 
-                    const basePrice = booking.pet.boarding_type === 'day'
+                    const basePrice = pet.boarding_type === 'day'
                         ? pricing.boarding.day[roomSizeKey] || 0
                         : (pricing.boarding.overnight[roomSizeKey] || 0) * nights;
 
                     let discount = 0;
-                    if (booking.pet.boarding_type === 'overnight') {
+                    if (pet.boarding_type === 'overnight') {
                         if (nights >= 15) discount = 0.2;
                         else if (nights >= 7) discount = 0.1;
                     }
 
-                    const totalAmount = basePrice * (1 - discount);
-                    const discountApplied = discount;
+                    const currentTotalAmount = totalAmounts[index] !== undefined ? totalAmounts[index] : (basePrice * (1 - discount));
+                    const currentDiscountApplied = discountsApplied && discountsApplied[index] !== undefined ? discountsApplied[index] : discount;
+
 
                     return await createBooking(
-                        booking.owner_details,
-                        [booking.pet],
-                        [totalAmount],
-                        [discountApplied]
+                        ownerDetails,
+                        [pet], // createBooking likely expects an array of pets for each booking
+                        [currentTotalAmount],
+                        [currentDiscountApplied]
                     );
                 })
             );
@@ -115,7 +130,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
 
     return (
         <BaseBookingForm
-            onConfirmBooking={onConfirmBooking || handleConfirmBooking}
+            onConfirmBooking={onConfirmBooking || handleConfirmBooking} // This now correctly matches the types
             onClose={onClose}
             serviceType="boarding"
             isSubmitting={isSubmitting}

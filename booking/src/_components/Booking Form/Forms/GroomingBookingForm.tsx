@@ -10,7 +10,9 @@ import {
     pricing,
     BookingResult,
     parseDate,
-    PetType
+    PetType,
+    OwnerDetails, // Import OwnerDetails
+    Pet // Import Pet
 } from '../types';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -21,7 +23,13 @@ import { createBooking } from '../bookingService';
 import { isGroomingPet } from '../types';
 
 interface GroomingBookingFormProps {
-    onConfirmBooking?: (bookings: Booking[]) => Promise<BookingResult>;
+    // UPDATED: onConfirmBooking should match BaseBookingFormProps
+    onConfirmBooking?: (
+        ownerDetails: OwnerDetails,
+        pets: Pet[],
+        totalAmounts: number[],
+        discountsApplied?: number[]
+    ) => Promise<BookingResult>;
     onClose: () => void;
     unavailableDates?: Date[];
     unavailableTimes?: string[];
@@ -36,55 +44,59 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
 
-    const handleConfirmBooking = async (bookings: Booking[]): Promise<BookingResult> => {
+    // UPDATED: handleConfirmBooking now matches BaseBookingForm's expected arguments
+    const handleConfirmBooking = async (
+        ownerDetails: OwnerDetails,
+        pets: Pet[],
+        totalAmounts: number[],
+        discountsApplied?: number[]
+    ): Promise<BookingResult> => {
         setIsSubmitting(true);
 
         try {
             const bookingResults = await Promise.all(
-                bookings.map(async (booking) => {
-                    if (!isGroomingPet(booking.pet)) {
+                pets.map(async (pet, index) => {
+                    if (!isGroomingPet(pet)) {
                         throw new Error('Invalid pet type for grooming');
                     }
 
                     // Validate required fields for grooming
-                    if (!booking.pet.service_date) {
+                    if (!pet.service_date) {
                         throw new Error('Service date is required');
                     }
-                    if (!booking.pet.service_time) {
+                    if (!pet.service_time) {
                         throw new Error('Service time is required');
                     }
-                    if (!booking.pet.service_variant) {
+                    if (!pet.service_variant) {
                         throw new Error('Service type is required');
                     }
                     // Pet size is derived from BasePetDetails, but explicitly check if it's set for dogs.
-                    if (booking.pet.pet_type === 'dog' && !booking.pet.size) {
+                    if (pet.pet_type === 'dog' && !pet.size) {
                         throw new Error('Pet size is required for dog grooming');
                     }
 
 
                     let basePrice = 0;
-                    if (booking.pet.pet_type === 'cat') {
+                    if (pet.pet_type === 'cat') {
                         basePrice = pricing.grooming.cat.cat;
                     } else {
                         // Ensure service_variant and size are valid keys before accessing pricing
-                        const variant = booking.pet.service_variant as DogGroomingVariant;
-                        const size = booking.pet.size as PetSize;
+                        const variant = pet.service_variant as DogGroomingVariant;
+                        const size = pet.size as PetSize;
                         basePrice = pricing.grooming.dog[variant]?.[size] || 0;
                     }
 
-                    // Immutable update of pet object to ensure pricing is consistent with booking
-                    // This creates a new pet object with calculated total_amount and discount_applied
-                    const petWithPricing = {
-                        ...booking.pet,
-                        total_amount: basePrice, // Assuming basePrice is the final price for grooming
-                        discount_applied: 0, // Grooming typically doesn't have discounts handled here
-                    };
+                    // For grooming, total_amount and discount_applied might be directly derived or set to basePrice and 0.
+                    // If BaseBookingForm calculates these and passes them, use them. Otherwise, use what's calculated here.
+                    const currentTotalAmount = totalAmounts[index] !== undefined ? totalAmounts[index] : basePrice;
+                    const currentDiscountApplied = discountsApplied && discountsApplied[index] !== undefined ? discountsApplied[index] : 0;
+
 
                     return await createBooking(
-                        booking.owner_details,
-                        [petWithPricing], // Pass the immutably updated pet object
-                        [basePrice], // totalAmounts array
-                        [0] // discountsApplied array
+                        ownerDetails,
+                        [pet], // createBooking likely expects an array of pets for each booking
+                        [currentTotalAmount],
+                        [currentDiscountApplied]
                     );
                 })
             );
@@ -151,7 +163,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
 
     return (
         <BaseBookingForm
-            onConfirmBooking={onConfirmBooking || handleConfirmBooking}
+            onConfirmBooking={onConfirmBooking || handleConfirmBooking} // This now correctly matches the types
             onClose={onClose}
             serviceType="grooming"
             isSubmitting={isSubmitting}
