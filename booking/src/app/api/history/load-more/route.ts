@@ -32,8 +32,7 @@ export async function GET(request: NextRequest) {
           name,
           address,
           contact_number,
-          email,
-          auth_id
+          email
         )
       `)
       .order('date_booked', { ascending: false })

@@ -24,7 +24,6 @@ export interface OwnerDetails {
   address: string;
   contact_number: string;
   email: string;
-  auth_id: string;
 }
 
 export type BookingRecord = {

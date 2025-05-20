@@ -41,8 +41,7 @@ async function getBookingHistory(page: number, supabase: SupabaseClient): Promis
           name,
           address,
           contact_number,
-          email,
-          auth_id
+          email
         )
       `)
       .order('date_booked', { ascending: false })

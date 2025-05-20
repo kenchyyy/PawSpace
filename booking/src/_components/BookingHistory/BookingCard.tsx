@@ -131,7 +131,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
           <p className={`${textSecondary} text-sm mb-1`}>Address: <span className={textPrimary}>{booking.owner_details.address}</span></p>
           <p className={`${textSecondary} text-sm mb-1`}>Contact: <span className={textPrimary}>{booking.owner_details.contact_number}</span></p>
           <p className={`${textSecondary} text-sm mb-1`}>Email: <span className={textPrimary}>{booking.owner_details.email}</span></p>
-          <p className={`${textSecondary} text-sm`}>Auth ID: <span className={textPrimary}>{booking.owner_details.auth_id}</span></p>
         </div>
       )}
 
