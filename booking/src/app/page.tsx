@@ -5,16 +5,16 @@ import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 const imageUrls = {
-  spaceBackground: '/images/7c9bebe724e704732303f857882672e3.jpg',
-  planetsLarge: '/images/ea9908482774e2b0e4f05d9d77cf3e5f.jpg',
-  spaceDogUfo: '/images/08b6d911e7d83d13d8612c613558632d.jpg',
-  spaceObjects: '/images/37de1bc3e4f7a53b7d2bc5e1cc8a067a.jpg',
-  boardingKennels: '/images/469850477_122217382610026382_826719596565059543_n.jpg',
-  groomingShihTzu: '/images/469578711_122216954750026382_6352057456154621157_n.jpg',
-  groomingMaltese: '/images/469584129_122216960126026382_6149429658583997875_n.jpg',
-  happyPuppies: '/images/470208682_122218074698026382_2282919584401485769_n.jpg',
-  kittens: '/images/469893336_122217365450026382_2282739295369555943_n.jpg',
-  petTreats: '/images/469561166_122217367790026382_2642385876666135218_n.jpg',
+  spaceBackground: '/images/background.jpg',
+  planetsLarge: '/images/background2.jpg',
+  spaceDogUfo: '/images/spaceDogUfo.ppg',
+  spaceObjects: '/images/spaceObject.ppg',
+  boardingKennels: '/images/happyPuppies.jpg',
+  groomingShihTzu: '/images/groomingShihTzu.jpg',
+  groomingMaltese: '/images/boarding.jpg',
+  happyPuppies: '/images/happyPuppies.jpg',
+  kittens: '/images/kittens.jpg',
+  petTreats: '/images/petTreats.jpg',
 };
 
 interface ParallaxLayerProps {

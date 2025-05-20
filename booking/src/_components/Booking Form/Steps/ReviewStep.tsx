@@ -72,7 +72,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     size?: string
   ): number => {
     if (petType === "cat") {
-      return pricing.grooming.cat.standard;
+      return pricing.grooming.cat.cat;
     } else if (petType === "dog" && variant === "basic" && size) {
       return pricing.grooming.dog.basic[
         size as keyof typeof pricing.grooming.dog.basic
@@ -620,7 +620,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                               })`}
                           </p>
                           <p className="font-semibold text-gray-900 mb-2">
-                            ${priceDetails.basePrice.toFixed(2)}
+                            ₱{priceDetails.basePrice.toFixed(2)}
                           </p>
                           {priceDetails.discount > 0 && (
                             <>
@@ -640,7 +640,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                             {pet.service_type === "grooming" ? "Grooming Price" : "Service Price"}
                           </p>
                           <p className="text-lg font-bold text-gray-900">
-                            ${(typeof priceDetails === "number" ? priceDetails : priceDetails.total).toFixed(2)}
+                            ₱{(typeof priceDetails === "number" ? priceDetails : priceDetails.total).toFixed(2)}
                           </p>
                         </>
                       )}

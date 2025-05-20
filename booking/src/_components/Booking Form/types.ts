@@ -12,7 +12,7 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 // GROOMING VARIANTS
 export type DogGroomingVariant = 'basic' | 'deluxe';
-export type CatGroomingVariant = 'standard';
+export type CatGroomingVariant = 'cat';
 export type GroomingVariant = DogGroomingVariant | CatGroomingVariant;
 
 // OWNER
@@ -128,7 +128,7 @@ export interface Pricing {
     overnight: Record<RoomSize, number>;
   };
   grooming: {
-    cat: { standard: number };
+    cat: { cat: number };
     dog: {
       basic: Record<PetSize, number>;
       deluxe: Record<PetSize, number>;
@@ -155,7 +155,7 @@ export const pricing: Pricing = {
   },
   grooming: {
     cat: {
-      standard: 450,
+      cat: 450,
     },
     dog: {
       basic: {
@@ -212,6 +212,7 @@ export interface BookingResult {
   success: boolean;
   bookingId?: string;
   error?: string;
+  bookingIds?: string[];
 }
 
 // SCHEDULE HANDLING
