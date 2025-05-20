@@ -16,7 +16,7 @@ const PetDetails: React.FC<PetDetailsProps> = ({ pet }) => {
         </div>
         <div>
           <p className="text-sm text-gray-500">Type</p>
-          <p className="text-gray-900">{pet.type}</p>
+          <p className="text-gray-900">{pet.pet_type}</p>
         </div>
         <div>
           <p className="text-sm text-gray-500">Breed</p>
@@ -36,7 +36,7 @@ const PetDetails: React.FC<PetDetailsProps> = ({ pet }) => {
         </div>
         <div className="md:col-span-2">
           <p className="text-sm text-gray-500">Special Requests</p>
-          <p className="text-gray-900">{pet.specialRequests || 'None'}</p>
+          <p className="text-gray-900">{pet.special_requests || 'None'}</p>
         </div>
       </div>
     </div>
