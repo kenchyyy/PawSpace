@@ -1,13 +1,16 @@
 // components/DashboardHeader.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
-import { FiPlus } from 'react-icons/fi';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+
+export type TabType = 'home' | 'history' | 'about';
 
 interface DashboardHeaderProps {
+  activeTab: TabType;
+  setActiveTab: Dispatch<SetStateAction<TabType>>;
   onOpenBookingForm: () => void;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onOpenBookingForm }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [

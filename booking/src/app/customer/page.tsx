@@ -1,33 +1,42 @@
+// app/customer/page.tsx
+
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Modal from '@/_components/Modal';
 import BoardingBookingForm from '@/_components/Booking Form/Forms/BoardingBookingForm';
 import GroomingBookingForm from '@/_components/Booking Form/Forms/GroomingBookingForm';
-import BookingHistory from '@/_components/Booking History/BookingHistory';
 import { Booking } from '@/_components/Booking Form/types';
-import { toast } from 'sonner'; // For notifications
-
+import { toast } from 'sonner';
 import CustomerDashboardHeader from "@/_components/Customer Dashoard/Header";
-import ServiceDetailsModal from "@/_components/Services/ServiceDetailsModal"; // Path adjusted for consistency
-import OvernightServicesSection from "@/_components/Services/accommodation/OvernightServiceSection"; // Path adjusted
-import GroomingServicesSection from "@/_components/Services/grooming/GroomingServiceSection"; // Path adjusted
-import { serviceDetailsMap } from "@/_components/Services/data/serviceData"; // Path adjusted
+import ServiceDetailsModal from "@/_components/Services/ServiceDetailsModal";
+import OvernightServicesSection from "@/_components/Services/accommodation/OvernightServiceSection";
+import GroomingServicesSection from "@/_components/Services/grooming/GroomingServiceSection";
+import { serviceDetailsMap } from "@/_components/Services/data/serviceData";
 
-interface CustomerPageProps {
-  children?: ReactNode;
-  initialTab?: 'home' | 'history' | 'about';
-}
+type TabType = 'home' | 'history' | 'about';
 
-export default function CustomerPage({ initialTab = 'home' }: CustomerPageProps) {
+export default function CustomerPage() {
+  const searchParams = useSearchParams(); 
+  const initialTabFromUrl = searchParams.get('tab') as TabType;
+  const validInitialTab = ['home', 'history', 'about'].includes(initialTabFromUrl)
+    ? initialTabFromUrl
+    : 'home';
 
-  const [activeTab, setActiveTab] = useState<'home' | 'history' | 'about'>(initialTab);
-  const [showBookingFormModal, setShowBookingFormModal] = useState(false); 
-  const [selectedServiceTypeForBooking, setSelectedServiceTypeForBooking] = useState<'boarding' | 'grooming' | null>(null); 
+  const [activeTab, setActiveTab] = useState<TabType>(validInitialTab);
+  const [showBookingFormModal, setShowBookingFormModal] = useState(false);
+  const [selectedServiceTypeForBooking, setSelectedServiceTypeForBooking] = useState<'boarding' | 'grooming' | null>(null);
 
-  const [selectedServiceForDetails, setSelectedServiceForDetails] = useState<string | null>(null); 
+  const [selectedServiceForDetails, setSelectedServiceForDetails] = useState<string | null>(null);
 
-  const [bookings] = useState<Booking[]>([]); 
+  useEffect(() => {
+    const newTabFromUrl = searchParams.get('tab') as TabType;
+    if (newTabFromUrl && ['home', 'history', 'about'].includes(newTabFromUrl) && newTabFromUrl !== activeTab) {
+      setActiveTab(newTabFromUrl);
+    }
+  }, [searchParams, activeTab]);
+
 
   const handleNewBooking = async (bookings: Booking[]) => {
     toast.success('Booking confirmed!');
@@ -38,7 +47,7 @@ export default function CustomerPage({ initialTab = 'home' }: CustomerPageProps)
   const openBookingFormModal = (serviceCategory: 'boarding' | 'grooming' | null = null) => {
     setSelectedServiceTypeForBooking(serviceCategory);
     setShowBookingFormModal(true);
-    setSelectedServiceForDetails(null); 
+    setSelectedServiceForDetails(null);
   };
 
   const closeBookingFormModal = () => {
@@ -71,7 +80,6 @@ export default function CustomerPage({ initialTab = 'home' }: CustomerPageProps)
 
       {activeTab === 'history' && (
         <div className="bg-white p-6 rounded-lg shadow">
-            <BookingHistory bookings={bookings} />
         </div>
       )}
 
