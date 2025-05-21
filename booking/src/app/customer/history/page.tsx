@@ -83,12 +83,12 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                     name: pet.name,
                     pet_type: pet.pet_type,
                     grooming_id: pet.grooming_id ?? null,
-                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
-                        ? { id: pet.GroomingPet[0].id, service_variant: pet.GroomingPet[0].service_variant }
+                    groom_service: pet.GroomingPet && typeof pet.GroomingPet === 'object'
+                        ? { id: pet.GroomingPet.id, service_variant: pet.GroomingPet.service_variant }
                         : null,
-                    boarding_id_extension: pet.boarding_id_extension ?? null,
-                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? { id: pet.BoardingPet[0].id, boarding_type: pet.BoardingPet[0].boarding_type }
+                    boarding_id_extension: pet.grooming_id ?? null,
+                    boarding_pet: pet.BoardingPet && typeof pet.BoardingPet === 'object'
+                        ? { id: pet.BoardingPet.id, boarding_type: pet.BoardingPet.boarding_type }
                         : null,
                 })) : [],
             })) as BookingRecord[];

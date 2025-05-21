@@ -1,20 +1,20 @@
 export interface GroomingType {
-    id: string; // PK of GroomingPet
+    id: string; 
     service_variant: string;
 }
 
 export interface BoardingType {
-    id: string; // PK of BoardingPet
-    boarding_type: string; // Changed to string
+    id: string; 
+    boarding_type: string; 
 }
 
 export interface PetDetails {
-    pet_uuid: string; // PK
+    pet_uuid: string; 
     name: string;
     pet_type: string;
-    grooming_id: string | null; // FK to GroomingPet.id, can be null
+    grooming_id: string | null; 
     groom_service?: GroomingType | null;
-    boarding_id_extension: string | null; // FK to BoardingPet.id, can be null
+    boarding_id_extension: string | null; 
     boarding_pet?: BoardingType | null;
 }
 

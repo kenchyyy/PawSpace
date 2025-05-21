@@ -16,18 +16,29 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     const [showCancelErrorToast, setShowCancelErrorToast] = useState(false);
     const [cancelErrorMessage, setCancelErrorMessage] = useState('');
 
-    const publishDate = booking.date_booked instanceof Date ? format(booking.date_booked, 'yyyy-MM-dd') : booking.date_booked;
-    const checkInDate = booking.service_date_start instanceof Date ? format(booking.service_date_start, 'yyyy-MM-dd') : booking.service_date_start;
-    const checkOutDate = booking.service_date_end instanceof Date ? format(booking.service_date_end, 'yyyy-MM-dd') : booking.service_date_end;
+    const toDate = (dateValue: Date | string | undefined | null): Date | null => {
+        if (!dateValue) return null;
+        if (dateValue instanceof Date) return dateValue;
+        const parsedDate = new Date(dateValue);
+        return isNaN(parsedDate.getTime()) ? null : parsedDate;
+    };
+
+    const rawBookedDate = toDate(booking.date_booked);
+    const rawServiceStart = toDate(booking.service_date_start);
+    const rawServiceEnd = toDate(booking.service_date_end);
+    const publishDate = rawBookedDate ? format(rawBookedDate, 'MMMM dd, yyyy') : 'N/A';
+    const checkInDate = rawServiceStart ? format(rawServiceStart, 'MMMM dd, yyyy') : 'N/A';
+    const checkOutDate = rawServiceEnd ? format(rawServiceEnd, 'MMMM dd, yyyy') : 'N/A';
+
     const today = new Date();
-    const checkIn = booking.service_date_start instanceof Date ? booking.service_date_start : new Date(booking.service_date_start);
+    const checkIn = rawServiceStart || today;
     const threeDaysBefore = new Date(checkIn);
     threeDaysBefore.setDate(checkIn.getDate() - 3);
-    const isBeforeOrDuringStay = today <= (booking.service_date_end instanceof Date ? booking.service_date_end : new Date(booking.service_date_end));
-    const canCancelBeforeThreeDays = booking.approvalStatus === 'approved' && today < threeDaysBefore;
-    const isAfterStay = today > (booking.service_date_end instanceof Date ? booking.service_date_end : new Date(booking.service_date_end));
-    const isPending = booking.status === 'pending';
 
+    const isBeforeOrDuringStay = rawServiceEnd ? today <= rawServiceEnd : false;
+    const canCancelBeforeThreeDays = booking.approvalStatus === 'approved' && today < threeDaysBefore;
+    const isAfterStay = rawServiceEnd ? today > rawServiceEnd : false;
+    const isPending = booking.status === 'pending';
     const accent = 'text-white';
     const textPrimary = 'text-white';
     const textSecondary = 'text-yellow-300';
@@ -122,13 +133,19 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
             onClick={toggleExpansion}
         >
             <h3 className={`${accent} ${isExpanded ? 'text-xl' : 'text-lg'} font-semibold mb-2`}>
-                Booking ID: {booking.booking_uuid}
+                <div>
+                    {publishDate}
+                </div>
+                <div>
+                    Pet: {booking.pets && booking.pets.length > 0 ? booking.pets[0].name : 'N/A'}
+                </div>
             </h3>
 
             {isExpanded && (
                 <div className="space-y-2">
                     <div className='pt-2 border-t border-purple-800' >
                         <div className='mb-2 p-2 rounded-md bg-purple-800 last:mb-0'>
+                            <p className={`${textSecondary} text-sm`}>Booking ID: <span className={textPrimary}>{booking.booking_uuid}</span></p>
                             <p className={`${textSecondary} text-sm`}>Booked On: <span className={textPrimary}>{publishDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
@@ -172,22 +189,15 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                             {booking.pets.map((pet) => (
                                 <div key={pet.pet_uuid} className="mb-2 p-2 rounded-md bg-purple-800 last:mb-0">
                                     <p className={`${textSecondary} text-sm`}>Pet ID: <span className={textPrimary}>{pet.pet_uuid}</span></p>
-                                    <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{pet.name}</span></p>
                                     <p className={`${textSecondary} text-sm`}>Type: <span className={textPrimary}>{pet.pet_type}</span></p>
                                     {pet.groom_service?.service_variant && (
-                                        <p className={`${textSecondary} text-sm`}>Grooming: <span className={textPrimary}>{pet.groom_service.service_variant} (ID: {pet.groom_service.id})</span></p>
+                                        <p className={`${textSecondary} text-sm`}>Grooming: <span className={textPrimary}>{pet.groom_service.service_variant}</span></p>
                                     )}
-                                    {!pet.groom_service?.service_variant && pet.grooming_id && (
-                                        <p className={`${textSecondary} text-sm`}>Grooming ID: <span className={textPrimary}>{pet.grooming_id} (Details not available)</span></p>
-                                    )}
-                                    {!pet.groom_service && !pet.grooming_id && (
+                                    {!pet.groom_service && (
                                         <p className={`${textSecondary} text-sm`}>Grooming: <span className={textPrimary}>Not applicable</span></p>
                                     )}
                                     {pet.boarding_pet?.boarding_type && (
-                                        <p className={`${textSecondary} text-sm`}>Boarding: <span className={textPrimary}>{pet.boarding_pet.boarding_type} (ID: {pet.boarding_pet.id})</span></p>
-                                    )}
-                                    {!pet.boarding_pet?.boarding_type && pet.boarding_id_extension && (
-                                        <p className={`${textSecondary} text-sm`}>Boarding ID: <span className={textPrimary}>{pet.boarding_id_extension} (Details not available)</span></p>
+                                        <p className={`${textSecondary} text-sm`}>Boarding: <span className={textPrimary}>{pet.boarding_pet.boarding_type}</span></p>
                                     )}
                                     {!pet.boarding_pet && !pet.boarding_id_extension && (
                                         <p className={`${textSecondary} text-sm`}>Boarding: <span className={textPrimary}>Not applicable</span></p>
