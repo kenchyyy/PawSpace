@@ -62,9 +62,6 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
             .order('date_booked', { ascending: false })
             .range(startIndex, endIndex);
 
-        console.log("Supabase Data (page) with Pets for User:", JSON.stringify(data, null, 2));
-        console.log("Supabase Error (page) with Pets for User:", error);
-
         if (error) {
             console.error(`Error fetching booking history with pets for user (page ${page}):`, error);
             return { bookings: null, error, totalCount: null };
