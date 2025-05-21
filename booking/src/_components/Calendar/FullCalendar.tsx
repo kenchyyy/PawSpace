@@ -1,11 +1,14 @@
-"use client";
-
 import React from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { EventClickArg, EventApi, EventInput } from "@fullcalendar/core";
+import {
+  EventClickArg,
+  EventApi,
+  EventInput,
+  EventContentArg,
+} from "@fullcalendar/core";
 import "./CalendarStyles.css";
 
 type CalendarProps = {
@@ -23,6 +26,33 @@ const CalendarComponent = ({
   onEventsSet,
   calendarRef,
 }: CalendarProps) => {
+  // Helper to get emoji by serviceType
+  const getServiceEmoji = (serviceType: string | undefined) => {
+    switch (serviceType?.toLowerCase()) {
+      case "boarding":
+        return "🏨";
+      case "grooming":
+        return "✂️";
+      default:
+        return "🐾"; // fallback emoji
+    }
+  };
+
+  // Customize event content to show emoji instead of time
+  const eventContent = (arg: EventContentArg) => {
+    const serviceType = arg.event.extendedProps.serviceType as
+      | string
+      | undefined;
+    const emoji = getServiceEmoji(serviceType);
+
+    return (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <span style={{ marginRight: 6 }}>{emoji}</span>
+        <span>{arg.event.title}</span>
+      </div>
+    );
+  };
+
   return (
     <FullCalendar
       ref={calendarRef}
@@ -42,6 +72,9 @@ const CalendarComponent = ({
       loading={() => loading}
       eventDisplay='block'
       eventClassNames='event-with-status'
+      allDayContent={false}
+      allDaySlot={false}
+      eventContent={eventContent} // <-- Add this prop
     />
   );
 };

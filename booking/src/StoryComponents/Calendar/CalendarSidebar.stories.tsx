@@ -1,4 +1,3 @@
-import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import CalendarSidebar from "@/_components/Calendar/CalendarSidebar";
 import { EventApi } from "@fullcalendar/core";
