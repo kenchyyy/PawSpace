@@ -8,7 +8,7 @@ export default function ServiceSection({
 }: ServiceSectionProps) {
     return (
         <section className="mb-10">
-        <h2 className="text-2xl mb-4 font-sans text-white">{title}</h2>
+        <h2 className="text-2xl mb-4 text-white">{title}</h2>
         <div
             className="grid gap-4 text-white"
             style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}

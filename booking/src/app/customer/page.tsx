@@ -1,162 +1,91 @@
+// app/customer/page.tsx
+
 'use client';
-import { ReactNode, useState, useEffect, useCallback } from 'react';
-import { FiPlus } from 'react-icons/fi';
-import { useRouter } from 'next/navigation';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Modal from '@/_components/Modal';
 import BoardingBookingForm from '@/_components/Booking Form/Forms/BoardingBookingForm';
 import GroomingBookingForm from '@/_components/Booking Form/Forms/GroomingBookingForm';
-import BookingHistory from '@/_components/Booking History/BookingHistory';
 import { Booking } from '@/_components/Booking Form/types';
-import { ClientBookingService } from '@/_components/Booking Form/clientBookingService';
 import { toast } from 'sonner';
-import { createBooking } from '@/_components/Booking Form/bookingService';
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import CustomerDashboardHeader from "@/_components/Customer Dashoard/Header";
+import ServiceDetailsModal from "@/_components/Services/ServiceDetailsModal";
+import OvernightServicesSection from "@/_components/Services/accommodation/OvernightServiceSection";
+import GroomingServicesSection from "@/_components/Services/grooming/GroomingServiceSection";
+import { serviceDetailsMap } from "@/_components/Services/data/serviceData";
 
-interface CustomerPageProps {
-  children?: ReactNode;
-  activeTab?: 'home' | 'history' | 'about-us';
-}
+type TabType = 'home' | 'history' | 'about';
 
-export default function CustomerPage({
-  children,
-  activeTab = 'home'
-}: CustomerPageProps) {
-  const router = useRouter();
-  const [showBookingForm, setShowBookingForm] = useState(false);
-  const [selectedService, setSelectedService] = useState<'boarding' | 'grooming' | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const supabaseClient = useSupabaseClient();
+export default function CustomerPage() {
+  const searchParams = useSearchParams(); 
+  const initialTabFromUrl = searchParams.get('tab') as TabType;
+  const validInitialTab = ['home', 'history', 'about'].includes(initialTabFromUrl)
+    ? initialTabFromUrl
+    : 'home';
 
-  const unavailableDates: Date[] = [];
-  const unavailableTimes: string[] = [];
+  const [activeTab, setActiveTab] = useState<TabType>(validInitialTab);
+  const [showBookingFormModal, setShowBookingFormModal] = useState(false);
+  const [selectedServiceTypeForBooking, setSelectedServiceTypeForBooking] = useState<'boarding' | 'grooming' | null>(null);
+
+  const [selectedServiceForDetails, setSelectedServiceForDetails] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!supabaseClient) {
-      console.warn('Supabase client not yet initialized.');
-      return;
+    const newTabFromUrl = searchParams.get('tab') as TabType;
+    if (newTabFromUrl && ['home', 'history', 'about'].includes(newTabFromUrl) && newTabFromUrl !== activeTab) {
+      setActiveTab(newTabFromUrl);
     }
+  }, [searchParams, activeTab]);
 
-    const bookingService = new ClientBookingService(supabaseClient);
 
-    const fetchBookings = async (retryCount = 0) => {
-      setLoading(true);
-      setError(null);
+  const handleNewBooking = async (bookings: Booking[]) => {
+    toast.success('Booking confirmed!');
+    closeBookingFormModal();
+    return { success: true, bookings };
+  };
 
-      try {
-        const { user, error: userError } = await bookingService.getCurrentUser();
-        if (userError || !user) {
-          throw new Error(userError || 'User not authenticated');
-        }
+  const openBookingFormModal = (serviceCategory: 'boarding' | 'grooming' | null = null) => {
+    setSelectedServiceTypeForBooking(serviceCategory);
+    setShowBookingFormModal(true);
+    setSelectedServiceForDetails(null);
+  };
 
-        const allBookings = await bookingService.getBookings();
+  const closeBookingFormModal = () => {
+    setShowBookingFormModal(false);
+    setSelectedServiceTypeForBooking(null);
+  };
 
-        const userBookings = allBookings.filter((booking: Booking) =>
-          booking.owner_details?.email === user.email
-        );
+  const handleSelectServiceForDetails = (serviceKey: string) => {
+    setSelectedServiceForDetails(serviceKey);
+  };
 
-        setBookings(userBookings || []);
-      } catch (err: any) {
-        if (retryCount < 3) {
-          setTimeout(() => fetchBookings(retryCount + 1), 1000 * (retryCount + 1));
-          return;
-        }
-        const errorMessage = err.message || 'Failed to fetch bookings';
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBookings();
-  }, [supabaseClient]);
-
-  const handleNewBooking = useCallback(async (newBookings: Booking[]): Promise<{ success: boolean; bookingId?: string }> => {
-    if (!supabaseClient) {
-      console.error('Supabase client not initialized when creating booking.');
-      toast.error('Failed to create booking: Supabase client not ready.');
-      return { success: false };
-    }
-
-    const bookingResults = await Promise.all(
-      newBookings.map(async (booking) => {
-        return await createBooking(
-          booking.owner_details,
-          [booking.pet],
-          [booking.total_amount],
-          [booking.discount_applied || 0]
-        );
-      })
-    );
-
-    const failedBooking = bookingResults.find(result => !result.success);
-    if (failedBooking) {
-      toast.error(failedBooking.error || 'One or more bookings failed');
-      return { success: false };
-    }
-
-    setBookings(prev => [...prev, ...newBookings]);
-    setShowBookingForm(false);
-    setSelectedService(null);
-    router.push('/customer/history');
-
-    return { success: true, bookingId: bookingResults[0]?.bookingId };
-  }, [supabaseClient, router]);
+  const closeServiceDetailsModal = () => {
+    setSelectedServiceForDetails(null);
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container bg-purple-900 mx-auto px-4 py-8">
+      <CustomerDashboardHeader
+        onOpenBookingForm={() => openBookingFormModal(null)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
       {activeTab === 'home' && (
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
-          <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
-          <p className="mb-6 text-gray-600">
-            Book professional grooming or overnight stay services for your pets.
-          </p>
-
-          <div className="flex flex-col md:flex-row gap-4">
-            <button
-              onClick={() => {
-                setSelectedService('boarding');
-                setShowBookingForm(true);
-              }}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center transition-colors flex-1"
-            >
-              <FiPlus className="mr-2" />
-              Book Boarding
-            </button>
-
-            <button
-              onClick={() => {
-                setSelectedService('grooming');
-                setShowBookingForm(true);
-              }}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center justify-center transition-colors flex-1"
-            >
-              <FiPlus className="mr-2" />
-              Book Grooming
-            </button>
-          </div>
-        </div>
+        <>
+          <OvernightServicesSection setSelectedService={handleSelectServiceForDetails} />
+          <GroomingServicesSection setSelectedService={handleSelectServiceForDetails} />
+        </>
       )}
 
       {activeTab === 'history' && (
         <div className="bg-white p-6 rounded-lg shadow">
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-            </div>
-          ) : error ? (
-            <p className="text-red-500">Error: {error}</p>
-          ) : (
-            <BookingHistory bookings={bookings} />
-          )}
         </div>
       )}
 
-      {activeTab === 'about-us' && (
+      {activeTab === 'about' && (
         <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4">About Pawspace</h2>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">About Pawspace</h2>
           <div className="prose max-w-none">
             <p className="text-gray-600 mb-4">
               Pawspace is your premier destination for pet care services.
@@ -171,41 +100,56 @@ export default function CustomerPage({
         </div>
       )}
 
-      <Modal
-        isOpen={showBookingForm}
-        onClose={() => {
-          setShowBookingForm(false);
-          setSelectedService(null);
+      <ServiceDetailsModal
+        isOpen={!!selectedServiceForDetails}
+        onClose={closeServiceDetailsModal}
+        details={selectedServiceForDetails ? serviceDetailsMap[selectedServiceForDetails] : null}
+        onClick={(category: 'boarding' | 'grooming') => {
+          closeServiceDetailsModal();
+          openBookingFormModal(category);
         }}
-      >
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedService === 'boarding' && (
+      />
+
+      <Modal isOpen={showBookingFormModal} onClose={closeBookingFormModal}>
+          {selectedServiceTypeForBooking === 'boarding' ? (
             <BoardingBookingForm
               onConfirmBooking={handleNewBooking}
-              onClose={() => {
-                setShowBookingForm(false);
-                setSelectedService(null);
-              }}
-              unavailableDates={unavailableDates}
-              unavailableTimes={unavailableTimes}
+              onClose={closeBookingFormModal}
             />
-          )}
-
-          {selectedService === 'grooming' && (
+          ) : selectedServiceTypeForBooking === 'grooming' ? (
             <GroomingBookingForm
               onConfirmBooking={handleNewBooking}
-              onClose={() => {
-                setShowBookingForm(false);
-                setSelectedService(null);
-              }}
-              unavailableDates={unavailableDates}
-              unavailableTimes={unavailableTimes}
+              onClose={closeBookingFormModal}
             />
+          ) : (
+            <div className="text-center py-8">
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800">Select a Service Type</h3>
+              <p className="text-gray-700 mb-4">
+                Please choose either Boarding or Grooming to proceed with your booking.
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => openBookingFormModal('boarding')}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  Book Boarding
+                </button>
+                <button
+                  onClick={() => openBookingFormModal('grooming')}
+                  className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
+                >
+                  Book Grooming
+                </button>
+              </div>
+                <button
+                  onClick={closeBookingFormModal}
+                  className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                >
+                  Close
+                </button>
+            </div>
           )}
-        </div>
       </Modal>
-
-      {children}
     </div>
   );
 }

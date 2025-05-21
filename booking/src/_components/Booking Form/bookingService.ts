@@ -6,9 +6,6 @@ import type {
   OwnerDetails,
   Pet,
   BookingResult,
-  Booking,
-  BookingStatus,
-  ServiceType,
   BoardingPet,
   GroomingPet
 } from './types'

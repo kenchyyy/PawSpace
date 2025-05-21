@@ -1,9 +1,6 @@
-import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import CalendarModal from "@/_components/Calendar/CalendarModal";
 import { EventInput } from "@fullcalendar/core";
-import { within, userEvent } from "@storybook/testing-library";
-import { expect } from "@storybook/jest";
 
 const meta: Meta<typeof CalendarModal> = {
   title: "Components/Calendar/CalendarModal",
