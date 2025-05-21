@@ -19,6 +19,13 @@ export type Props = {
     onClick: (category: 'boarding' | 'grooming') => void;
 };
 
+export type PoliciesModalProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    content: string[];
+};
+
 export type GroomingServicesSectionProps = {
     setSelectedService: (serviceKey: string) => void;
 };
