@@ -212,18 +212,34 @@ const CalendarEventItem = ({
     const todayMonth = today.getMonth();
     const todayDay = today.getDate();
 
-    const startYear = (event.start ?? new Date()).getFullYear();
-    const startMonth = (event.start ?? new Date()).getMonth();
-    const startDay = (event.start ?? new Date()).getDate();
+    const startDate =
+    typeof event.start === "string"
+    ? new Date(event.start)
+    : event.start instanceof Date
+    ? event.start
+    : new Date();
+
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth();
+    const startDay = startDate.getDate();
+
     const startsToday =
       startYear === todayYear &&
       startMonth === todayMonth &&
       startDay === todayDay;
 
-    const endsToday = event.end
-      ? event.end.getFullYear() === todayYear &&
-        event.end.getMonth() === todayMonth &&
-        event.end.getDate() === todayDay
+    const endDate = event.end
+    ? typeof event.end === "string"
+      ? new Date(event.end)
+      : event.end instanceof Date
+      ? event.end
+      : null
+    : null;
+
+    const endsToday = endDate
+      ? endDate.getFullYear() === todayYear &&
+        endDate.getMonth() === todayMonth &&
+        endDate.getDate() === todayDay
       : false;
 
     if (startsToday && endsToday) {
@@ -235,9 +251,6 @@ const CalendarEventItem = ({
     }
   } else if (isUpcoming) {
     const today = new Date();
-    const todayYear = today.getFullYear();
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
 
     const startsAfterToday = (event.start ?? new Date()) > today;
     const endsAfterToday = event.end && event.end > today;
@@ -305,7 +318,7 @@ const CalendarEventItem = ({
           border: `1px solid ${event.backgroundColor || "#9F7AEA"}`,
         }}
       >
-        {event.extendedProps.status}
+        {event.extendedProps.status.toLowerCase()}
       </div>
     </li>
   );
