@@ -1,4 +1,3 @@
-// components/BookingCard.tsx
 'use client';
 import React, { useState } from 'react';
 import { BookingRecord } from './types/bookingRecordType';
@@ -140,11 +139,14 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                     )}
                     <p className={`${textSecondary} text-sm`}>Special Requests: <span className={textPrimary}>{booking.special_requests || 'No special requests'}</span></p>
                     <p className={`${textSecondary} text-sm`}>Total Amount: <span className={`${accent} font-medium`}>{typeof booking.total_amount === 'number' ? `₱${booking.total_amount.toFixed(2)}` : booking.total_amount}</span></p>
-                    {typeof booking.discount_applied === 'number' && (
-                        <p className={`${textSecondary} text-sm`}>Discount Applied: <span className={textPrimary}>Yes</span></p>
-                    )}
-                    {booking.discount_applied === null && (
-                        <p className={`${textSecondary} text-sm`}>Discount Applied: <span className={textPrimary}>No</span></p>
+                    {typeof booking.discount_applied === 'number' && booking.discount_applied > 0 ? (
+                        <p className={`${textSecondary} text-sm`}>
+                            Discount Applied: <span className={textPrimary}>{booking.discount_applied}%</span>
+                        </p>
+                        ) : (
+                        <p className={`${textSecondary} text-sm`}>
+                            Discount Applied: <span className={textPrimary}>None</span>
+                        </p>
                     )}
 
                     {booking.owner_details && (
