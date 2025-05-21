@@ -1,0 +1,328 @@
+/* Cosmic Background */
+.fc {
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #040f44 100%);
+  color: #E9D5FF;
+  border: 1px solid #4C1D95;
+  width: 100%;
+  flex-grow: 1;
+}
+
+/* Header Styling */
+.fc-toolbar {
+  background: rgba(42, 13, 69, 0.8);
+  backdrop-filter: blur(5px);
+  border-bottom: 1px solid #9F7AEA;
+}
+
+.fc-toolbar-title {
+  color: #FBBF24;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Button Styling - Light Purple */
+.fc-button {
+  background: rgba(153, 50, 204, 0.15) !important; /* Light purple with transparency (medium orchid) */
+  border: 1px solid rgba(153, 50, 204, 0.4) !important; /* Slightly more opaque border */
+  color: #DDA0DD !important; /* Plum text */
+  text-shadow: 0 0 3px rgba(153, 50, 204, 0.6); /* Subtle text glow */
+  transition: all 0.3s ease;
+  background-image: none !important;
+}
+
+.fc-button:hover {
+  background: rgba(153, 50, 204, 0.3) !important; /* Slightly more opaque on hover */
+  border-color: rgba(153, 50, 204, 0.6) !important;
+  color: #E6E6FA !important; /* Lavender on hover */
+  box-shadow: none !important; /* No hover shine */
+}
+
+/* Day Cells */
+.fc-daygrid-day {
+  background: rgba(30, 27, 75, 0.5);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  width: 100%
+}
+
+.fc-day-today {
+  background: rgba(159, 122, 234, 0.2) !important;
+}
+
+/* Event Styling */
+.space-event {
+  background: linear-gradient(135deg, #4C1D95, #3730A3);
+  border: 1px solid #9F7AEA;
+  box-shadow: 0 0 8px rgba(159, 122, 234, 0.4);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Star-like dots for empty cells */
+.fc-daygrid-day-frame::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #FBBF24;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* Scrollbar (cosmic style) */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #1E1B4B;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#9F7AEA, #4C1D95);
+  border-radius: 4px;
+}
+
+/* Calendar Header */
+.fc-header-toolbar {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 20px;
+padding-bottom: 4px;
+border-bottom: 1px solid #4A148C;
+background-color: rgba(42, 13, 69, 0.8);
+padding-bottom: 20px;
+margin-bottom: 0 !important;
+padding-top: 20px
+
+}
+
+/* Day Grid */
+.fc-daygrid-body {
+width: 100% !important;
+}
+
+/* Event Cards */
+.fc-event{
+margin: 1px 2px;
+border: none !important;
+box-shadow: 0 0 10px rgba(99, 102, 241, 0.3) !important;
+transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.fc-event[style*="background-color"] .fc-event-main {
+  background-color: inherit !important;
+}
+
+.fc-event-main {
+  background-color: inherit !important;
+}
+
+.fc-daygrid-body .fc-day-harness {
+  border-right: 1px solid rgba(99, 102, 241, 0.2);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+.fc-toolbar {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fc-toolbar-chunk {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+}
+
+/* Glass panel base style */
+.glass-panel {
+background: rgba(31, 41, 55, 0.8);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(99, 102, 241, 0.2);
+border-radius: 0.75rem;
+}
+
+/* globals.css */
+.dialog-content button[data-dismiss="dialog"] {
+  color: white; /* Example: Change text color to white */
+  background-color: #4C1D95; /* Example: Add a purple background */
+  border-radius: 50%; /* Make it round (optional) */
+  width: 24px; /* Adjust size as needed */
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+  position: absolute; /* Position it absolutely */
+  top: 8px;          /* Adjust top spacing as needed */
+  right: 8px;         /* Adjust right spacing as needed */
+  padding: 0;        /* Remove default button padding */
+  line-height: 1;    /* Adjust line height for centering */
+  font-size: 14px;   /* Adjust font size of the 'x' */
+}
+
+.dialog-content button[data-dismiss="dialog"]:hover {
+  opacity: 1;
+}
+
+.dialog-content button[data-dismiss="dialog"] svg {
+  /* If the close button uses an SVG icon */
+  width: 14px;
+  height: 14px;
+  fill: white;
+}
+
+.fc-event:hover {
+  transform: scale(1.007); /* Slightly scale up the event */
+  box-shadow: 0 2px 8px rgba(159, 122, 234, 0.6); /* Add a subtle shadow */
+  cursor: pointer; /* Indicate it's interactive */
+  z-index: 10; /* Ensure hovered event appears above others if overlapping */
+}
+
+.calendar-wrapper {
+  min-height: 100vh;
+}
+
+/* Target the vertical lines between day cells */
+.fc-dayGridMonth-view .fc-day {
+  border-right-color: #4a148c !important; /* Dark purple, adjust */
+}
+
+/* Target the last day of the week to remove the extra right border */
+.fc-dayGridMonth-view .fc-day-sat {
+  border-right-color: transparent !important;
+}
+
+/* Target the horizontal lines between week rows */
+.fc-dayGridMonth-view .fc-row {
+  border-bottom-color: #4a148c !important; /* Dark purple, adjust */
+}
+
+/* Target the last week row to remove the extra bottom border */
+.fc-dayGridMonth-view .fc-row:last-child {
+  border-bottom-color: transparent !important;
+}
+
+/* Target the header row borders again, being specific to the month view */
+.fc-dayGridMonth-view .fc-col-header-cell {
+  border-color: #4a148c !important; /* Dark purple, adjust */
+}
+
+/* Target the overall border of the month view container */
+.fc-dayGridMonth-view.fc-view {
+  border-color: #1a237e !important; /* Darker blue, adjust */
+}
+
+.fc-dayGridMonth-view table thead tr th {
+  border-color: #4a148c !important;
+}
+
+.fc-dayGridMonth-view table tbody tr td {
+  border-color: #4a148c !important;
+}
+
+.fc-dayGridMonth-view .fc-col-header {
+  border-bottom-color: #4a148c !important;
+}
+
+.fc-dayGridMonth-view.fc-view {
+  border-color: #1a237e !important;
+}
+
+.fc-daygrid-day-frame.fc-scrollgrid-sync-inner::before {
+  content: "" !important;
+  display: none !important;
+}
+
+.fc-scrollgrid.fc-scrollgrid-liquid {
+  border: 1px solid #1a237e !important; /* Darker blue, adjust width and color */
+}
+
+/* You might also need to target the view harness for the overall border */
+.fc-view-harness {
+  border-color: #1a237e !important;
+}
+
+/* Style for the "more events" link/button */
+.fc-more {
+  background-color: #7B1FA2 !important; /* Darker purple background */
+  color: #E1BEE7 !important; /* Light purple text */
+  border: 1px solid #9C27B0 !important; /* Medium purple border */
+  padding: 2px 5px !important;
+  border-radius: 3px !important;
+  font-size: 0.8em !important;
+  cursor: pointer !important;
+  text-decoration: none !important; /* Remove underline if it's an <a> tag */
+}
+
+.fc-more:hover {
+  background-color: #9C27B0 !important; /* Slightly lighter purple on hover */
+  color: #F3E5F5 !important;
+}
+
+/* Style for the popover container */
+.fc-popover {
+  background-color: #38006B !important; /* Dark purple popover background */
+  border: 1px solid #6A1B9A !important; /* Medium purple border */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 5px !important;
+  padding: 10px !important;
+  font-size: 0.9em !important;
+  color: #E1BEE7 !important;
+}
+
+/* Style for the popover header (if it has one) */
+.fc-popover-header {
+  background-color: #4A148C !important; /* Even darker purple header */
+  color: #F3E5F5 !important;
+  padding: 8px !important;
+  border-bottom: 1px solid #6A1B9A !important;
+  border-top-left-radius: 5px !important;
+  border-top-right-radius: 5px !important;
+  margin-bottom: 5px !important;
+}
+
+.fc-popover-title {
+  font-weight: bold !important;
+}
+
+.fc-popover-close {
+  color: #F3E5F5 !important;
+  opacity: 0.7 !important;
+  cursor: pointer !important;
+}
+
+.fc-popover-close:hover {
+  opacity: 1 !important;
+}
+
+/* Style for the list of events in the popover */
+.fc-popover-body {
+  margin-top: 5px !important;
+}
+
+.fc-event-time {
+  color: #F0F4C3 !important; /* A light yellow/beige for event time */
+  font-weight: bold !important;
+  margin-right: 5px !important;
+}
+
+.fc-popover-body .fc-event {
+  background-color: #5E35B1 !important; /* Another shade of purple for events in popover */
+  color: #E1BEE7 !important;
+  border: 1px solid #7B1FA2 !important;
+  margin-bottom: 3px !important;
+  padding: 3px 5px !important;
+  border-radius: 3px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.fc-popover-body .fc-event:hover {
+  background-color: #7B1FA2 !important;
+}
