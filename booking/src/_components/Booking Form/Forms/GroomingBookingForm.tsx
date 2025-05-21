@@ -11,8 +11,8 @@ import {
     BookingResult,
     parseDate,
     PetType,
-    OwnerDetails, // Import OwnerDetails
-    Pet // Import Pet
+    OwnerDetails,
+    Pet
 } from '../types';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -23,7 +23,6 @@ import { createBooking } from '../bookingService';
 import { isGroomingPet } from '../types';
 
 interface GroomingBookingFormProps {
-    // UPDATED: onConfirmBooking should match BaseBookingFormProps
     onConfirmBooking?: (
         ownerDetails: OwnerDetails,
         pets: Pet[],
@@ -44,7 +43,6 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
 
-    // UPDATED: handleConfirmBooking now matches BaseBookingForm's expected arguments
     const handleConfirmBooking = async (
         ownerDetails: OwnerDetails,
         pets: Pet[],
@@ -60,7 +58,6 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                         throw new Error('Invalid pet type for grooming');
                     }
 
-                    // Validate required fields for grooming
                     if (!pet.service_date) {
                         throw new Error('Service date is required');
                     }
@@ -70,31 +67,25 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                     if (!pet.service_variant) {
                         throw new Error('Service type is required');
                     }
-                    // Pet size is derived from BasePetDetails, but explicitly check if it's set for dogs.
                     if (pet.pet_type === 'dog' && !pet.size) {
                         throw new Error('Pet size is required for dog grooming');
                     }
-
 
                     let basePrice = 0;
                     if (pet.pet_type === 'cat') {
                         basePrice = pricing.grooming.cat.cat;
                     } else {
-                        // Ensure service_variant and size are valid keys before accessing pricing
                         const variant = pet.service_variant as DogGroomingVariant;
                         const size = pet.size as PetSize;
                         basePrice = pricing.grooming.dog[variant]?.[size] || 0;
                     }
 
-                    // For grooming, total_amount and discount_applied might be directly derived or set to basePrice and 0.
-                    // If BaseBookingForm calculates these and passes them, use them. Otherwise, use what's calculated here.
                     const currentTotalAmount = totalAmounts[index] !== undefined ? totalAmounts[index] : basePrice;
                     const currentDiscountApplied = discountsApplied && discountsApplied[index] !== undefined ? discountsApplied[index] : 0;
 
-
                     return await createBooking(
                         ownerDetails,
-                        [pet], // createBooking likely expects an array of pets for each booking
+                        [pet],
                         [currentTotalAmount],
                         [currentDiscountApplied]
                     );
@@ -148,7 +139,6 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
         return sizeMap[size] || size;
     };
 
-    // Function to get the price dynamically for display purposes
     const getPriceDisplay = (pet: GroomingPet): string => {
         if (pet.pet_type === 'cat') {
             return `P${pricing.grooming.cat.cat}`;
@@ -163,7 +153,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
 
     return (
         <BaseBookingForm
-            onConfirmBooking={onConfirmBooking || handleConfirmBooking} // This now correctly matches the types
+            onConfirmBooking={onConfirmBooking || handleConfirmBooking}
             onClose={onClose}
             serviceType="grooming"
             isSubmitting={isSubmitting}
@@ -225,7 +215,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Appointment Date *</label>
                                         <DateDropdown
-                                            name="service_date" // Added name prop
+                                            name="service_date"
                                             selectedDate={parseDate(pet.service_date)}
                                             onChange={(date) => onScheduleChange('service', date, pet.service_time)}
                                             unavailableDates={unavailableDates}
@@ -239,7 +229,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Appointment Time *</label>
                                         <TimeDropdown
-                                            name="service_time" // Added name prop
+                                            name="service_time"
                                             selectedTime={pet.service_time}
                                             onChange={(time) => onScheduleChange('service', parseDate(pet.service_date), time)}
                                             unavailableTimes={unavailableTimes}

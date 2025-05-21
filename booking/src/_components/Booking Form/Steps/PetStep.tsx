@@ -1,34 +1,20 @@
-// PetStep.tsx
 'use client';
-import React, { useState, useEffect, useRef } from 'react'; // Import useRef
-import { Pet, ServiceType, BoardingPet, GroomingPet } from '../types';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+    Pet,
+    ServiceType,
+    BoardingPet,
+    GroomingPet,
+    PetStepProps,
+    ScheduleChangeHandler,
+    ScheduleChangeType
+} from '../types';
 import { FiPlus, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaw } from '@fortawesome/free-solid-svg-icons';
 import PetList from '../Form Components/PetList';
 import BasePetDetails from '../Form Components/BasePetDetails';
 import toast, { Toaster } from 'react-hot-toast';
-
-interface PetStepProps {
-    pets: Pet[];
-    currentPetIndex: number;
-    serviceType: ServiceType;
-    onAddPet: () => void;
-    onEditPet: (index: number) => void;
-    onRemovePet: (index: number) => void;
-    onBack: () => void;
-    onNext: () => void;
-    isSubmitting?: boolean;
-    errors?: Record<string, string>; 
-    onPetChange: (updatedPet: Pet) => void;
-    onScheduleChange: (type: 'checkIn' | 'checkOut' | 'service', date: Date | null, time: string) => void;
-    children?: (
-        pet: Pet,
-        onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void,
-        onScheduleChange: (type: 'checkIn' | 'checkOut' | 'service', date: Date | null, time: string) => void,
-        errors: Record<string, string> 
-    ) => React.ReactNode;
-}
 
 const PetStep: React.FC<PetStepProps> = ({
     pets,
@@ -40,26 +26,27 @@ const PetStep: React.FC<PetStepProps> = ({
     onBack,
     onNext,
     isSubmitting = false,
-    errors = {}, 
+    errors = {},
     onPetChange,
     onScheduleChange,
+    dateHighlight,
+    dateDefaultMessage,
     children
 }) => {
-   
+
     const [petErrors, setPetErrors] = useState<Record<string, string>>({});
-    const containerRef = useRef<HTMLDivElement>(null); 
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-       
         setPetErrors({});
     }, [currentPetIndex, pets]);
 
-   
+
     useEffect(() => {
         if (Object.keys(petErrors).length > 0) {
             scrollToFirstError(petErrors);
         }
-    }, [petErrors]); 
+    }, [petErrors]);
 
     const scrollToFirstError = (errors: Record<string, string>) => {
         const firstErrorField = Object.keys(errors)[0];
@@ -67,14 +54,14 @@ const PetStep: React.FC<PetStepProps> = ({
             const element = document.getElementById(firstErrorField);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.focus(); 
+                element.focus();
             } else {
                 console.warn(`Element with ID '${firstErrorField}' not found for scrolling.`);
             }
         }
     };
 
- 
+
     const validatePetDetails = (pet: Pet, service: ServiceType): Record<string, string> => {
         const errors: Record<string, string> = {};
 
@@ -93,11 +80,11 @@ const PetStep: React.FC<PetStepProps> = ({
             if (!boardingPet.check_in_time?.trim()) errors.check_in_time = 'Check-in time is required.';
             if (!boardingPet.check_out_date) errors.check_out_date = 'Check-out date is required.';
             if (!boardingPet.check_out_time?.trim()) errors.check_out_time = 'Check-out time is required.';
-          
+
             if (boardingPet.meal_instructions) {
                 ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
                     const meal = boardingPet.meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']];
-                    if (meal && (meal.time || meal.food || meal.notes)) { 
+                    if (meal && (meal.time || meal.food || meal.notes)) {
                         if (!meal.time?.trim()) errors[`meal_instructions.${mealType}.time`] = `${mealType} time is required.`;
                         if (!meal.food?.trim()) errors[`meal_instructions.${mealType}.food`] = `${mealType} food is required.`;
                     }
@@ -116,7 +103,7 @@ const PetStep: React.FC<PetStepProps> = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
-     
+
         if (petErrors[name]) {
             setPetErrors(prev => {
                 const newErrors = { ...prev };
@@ -124,12 +111,12 @@ const PetStep: React.FC<PetStepProps> = ({
                 return newErrors;
             });
         }
-      
+
         const currentPet = pets[currentPetIndex];
         let updatedPet: Pet;
 
         if (name.startsWith('meal_instructions.')) {
-            if (!currentPet || !('meal_instructions' in currentPet)) return; 
+            if (!currentPet || !('meal_instructions' in currentPet)) return;
 
             const [_, mealType, field] = name.split('.');
             updatedPet = {
@@ -151,13 +138,12 @@ const PetStep: React.FC<PetStepProps> = ({
         onPetChange(updatedPet);
     };
 
-
-    const handleScheduleChangeInternal = (type: 'checkIn' | 'checkOut' | 'service', date: Date | null, time: string) => {
-      
+    const handleScheduleChangeInternal: ScheduleChangeHandler = (type, date, time) => {
         const dateFieldName =
             type === 'checkIn' ? 'check_in_date' :
             type === 'checkOut' ? 'check_out_date' :
             'service_date';
+
         const timeFieldName =
             type === 'checkIn' ? 'check_in_time' :
             type === 'checkOut' ? 'check_out_time' :
@@ -165,26 +151,27 @@ const PetStep: React.FC<PetStepProps> = ({
 
         setPetErrors(prev => {
             const newErrors = { ...prev };
-            if (prev[dateFieldName] && date) delete newErrors[dateFieldName];
-            if (prev[timeFieldName] && time.trim()) delete newErrors[timeFieldName];
+            if (prev[dateFieldName] && date !== null && date !== undefined) delete newErrors[dateFieldName];
+            if (prev[timeFieldName] && time && time.trim()) delete newErrors[timeFieldName];
             return newErrors;
         });
 
         onScheduleChange(type, date, time);
     };
 
+
     const handleAddPetClick = () => {
         if (isSubmitting) return;
 
-        if (currentPetIndex >= 0 && pets[currentPetIndex]) { 
+        if (currentPetIndex >= 0 && pets[currentPetIndex]) {
             const errors = validatePetDetails(pets[currentPetIndex], serviceType);
             if (Object.keys(errors).length > 0) {
-                setPetErrors(errors); 
+                setPetErrors(errors);
                 toast.error("Please complete the current pet's details before adding a new one. Missing fields are highlighted.");
                 return;
             }
         }
-        setPetErrors({}); 
+        setPetErrors({});
         onAddPet();
     };
 
@@ -210,21 +197,21 @@ const PetStep: React.FC<PetStepProps> = ({
 
         if (firstInvalidPetIndex !== null) {
             if (currentPetIndex !== firstInvalidPetIndex) {
-            
+
                 onEditPet(firstInvalidPetIndex);
-           
+
                 setTimeout(() => {
                     setPetErrors(firstInvalidPetErrors);
                 }, 0);
             } else {
-                setPetErrors(firstInvalidPetErrors); 
+                setPetErrors(firstInvalidPetErrors);
             }
             toast.error(`Please complete all details for "${pets[firstInvalidPetIndex].name || `Pet ${firstInvalidPetIndex + 1}`}". Missing fields are highlighted.`);
             return;
         }
 
-        setPetErrors({}); 
-        onNext(); 
+        setPetErrors({});
+        onNext();
     };
 
     return (
@@ -248,14 +235,14 @@ const PetStep: React.FC<PetStepProps> = ({
                     </button>
                 </div>
 
-               
+
                 {errors.pets && (
                     <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                         {errors.pets}
                     </div>
                 )}
 
-                <div ref={containerRef} className="flex-grow overflow-y-auto"> 
+                <div ref={containerRef} className="flex-grow overflow-y-auto">
                     <PetList
                         pets={pets}
                         currentPetIndex={currentPetIndex}
@@ -263,25 +250,35 @@ const PetStep: React.FC<PetStepProps> = ({
                         onRemove={onRemovePet}
                     />
 
-                    {currentPetIndex >= 0 && pets[currentPetIndex] && ( 
-                        <div key={pets[currentPetIndex].id || currentPetIndex} className="mt-6 bg-white p-6 rounded-xl shadow-md border border-gray-100"> 
+                    {currentPetIndex >= 0 && pets[currentPetIndex] && (
+                        <div key={pets[currentPetIndex].id || currentPetIndex} className="mt-6 bg-white p-6 rounded-xl shadow-md border border-gray-100">
                             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 Pet Details
                             </h3>
                             {children ? (
                                 children(
-                                    pets[currentPetIndex],
-                                    handleChange,
-                                    handleScheduleChangeInternal,
-                                    petErrors 
+                                    {
+                                        pet: pets[currentPetIndex],
+                                        onChange: handleChange,
+                                        onScheduleChange: handleScheduleChangeInternal,
+                                        errors: petErrors,
+                                        serviceType: serviceType,
+                                        onAddPet: onAddPet,
+                                        onRemovePet: onRemovePet,
+                                        currentPetIndex: currentPetIndex,
+                                        dateHighlight: dateHighlight,
+                                        dateDefaultMessage: dateDefaultMessage
+                                    }
                                 )
                             ) : (
                                 <BasePetDetails
                                     pet={pets[currentPetIndex]}
                                     onChange={handleChange}
-                                    errors={petErrors} 
+                                    errors={petErrors}
                                     onScheduleChange={handleScheduleChangeInternal}
                                     serviceType={serviceType}
+                                    dateHighlight={dateHighlight}
+                                    dateDefaultMessage={dateDefaultMessage}
                                 />
                             )}
                         </div>
@@ -299,7 +296,7 @@ const PetStep: React.FC<PetStepProps> = ({
                 </button>
                 <button
                     onClick={handleNextClick}
-                    disabled={isSubmitting} 
+                    disabled={isSubmitting}
                     className={`px-6 py-3 rounded-xl flex items-center transition-all duration-200 ${
                         isSubmitting
                             ? 'bg-gray-200 text-gray-500 cursor-not-allowed'

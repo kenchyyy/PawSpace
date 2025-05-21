@@ -13,7 +13,6 @@ import { createBooking } from '../bookingService';
 import { isBoardingPet } from '../types';
 
 interface BoardingBookingFormProps {
-    // UPDATED: onConfirmBooking should match BaseBookingFormProps
     onConfirmBooking?: (
       ownerDetails: OwnerDetails,
       pets: Pet[],
@@ -79,7 +78,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                     const checkOutDate = parseDate(pet.check_out_date)!;
                     const nights = calculateNights(checkInDate, checkOutDate);
                     const roomSizeKey = pet.pet_type === 'cat'
-                        ? pet.room_size === 'cat_small' ? 'cat_small' : 'cat_big'
+                        ? pet.room_size === 'cat_small' ? 'cat_small' : 'cat_large'
                         : pet.room_size;
 
                     const basePrice = pet.boarding_type === 'day'

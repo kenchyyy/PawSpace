@@ -18,7 +18,7 @@ export async function createBooking(
   discountsApplied: number[] = []
 ): Promise<BookingResult> {
   const supabase = await createServerSideClient();
-  let bookingUuids: string[] = []; // Initialize to track all booking UUIDs for comprehensive rollback
+  let bookingUuids: string[] = []; 
 
   try {
     const {
@@ -33,7 +33,7 @@ export async function createBooking(
     console.log("user data found: ", user);
     console.log("Received ownerDetails:", ownerDetails);
 
-    // --- CRITICAL LOG 1: Check initial 'pets' array length ---
+    // Check initial 'pets' array length 
     console.log(`Received pets array. Number of pets: ${pets.length}`);
     pets.forEach((pet, index) => {
       console.log(`  Pet ${index + 1} details: Name - ${pet.name}, Service Type - ${pet.service_type}`);
@@ -80,12 +80,12 @@ export async function createBooking(
           ? (pet as BoardingPet).check_out_date
           : (pet as GroomingPet).service_date,
       status: "pending" as BookingStatus,
-      special_requests: pet.special_requests || null, // Changed from "" to null for consistency
+      special_requests: pet.special_requests || null, 
       total_amount: totalAmounts[idx],
       discount_applied: discountsApplied[idx] || 0,
     }));
 
-    // --- CRITICAL LOG 2: Check 'bookingInserts' array before insertion ---
+    // Check 'bookingInserts' array before insertion
     console.log(`Bookings to insert. Number of booking records: ${bookingInserts.length}`);
     bookingInserts.forEach((booking, index) => {
       console.log(`  Booking ${index + 1} for owner ${booking.owner_details}, total amount: ${booking.total_amount}`);
@@ -103,25 +103,25 @@ export async function createBooking(
         error: bookingError?.message || "Booking creation failed",
       };
     }
-    bookingUuids = bookings.map((b) => b.booking_uuid); // Store for comprehensive rollback
+    bookingUuids = bookings.map((b) => b.booking_uuid); 
     console.log("Bookings inserted successfully. UUIDs:", bookingUuids);
 
     // 3. Insert Pets (one per pet, linked to booking)
     const petInserts = pets.map((pet, idx) => ({
       Owner_ID: owner.id,
-      booking_uuid: bookingUuids[idx], // Link to the created booking UUID
+      booking_uuid: bookingUuids[idx], 
       name: pet.name,
       age: pet.age,
       pet_type: pet.pet_type,
-      breed: pet.breed || null, // Changed from "" to null for consistency
+      breed: pet.breed || null, 
       vaccinated: pet.vaccinated,
       size: pet.size,
-      vitamins_or_medications: pet.vitamins_or_medications || null, // Changed from "" to null for consistency
-      allergies: pet.allergies || null, // Changed from "" to null for consistency
+      vitamins_or_medications: pet.vitamins_or_medications || null, 
+      allergies: pet.allergies || null, 
       completed: false,
     }));
 
-    // --- CRITICAL LOG 3: Check 'petInserts' array before insertion ---
+    // Check 'petInserts' array before insertion 
     console.log(`Pets to insert. Number of pet records: ${petInserts.length}`);
     petInserts.forEach((pet, index) => {
       console.log(`  Pet ${index + 1} insert data: Name - ${pet.name}, Booking UUID - ${pet.booking_uuid}`);
@@ -134,7 +134,6 @@ export async function createBooking(
 
     if (petError || !createdPets || createdPets.length === 0) {
       console.error("Pet Insert Error:", petError?.message || "Pet creation failed", petError);
-      // Rollback: Delete all associated Booking records
       await supabase.from("Booking").delete().in("booking_uuid", bookingUuids);
       return {
         success: false,
@@ -142,18 +141,18 @@ export async function createBooking(
       };
     }
     console.log("Pets inserted successfully into 'Pet' table:", createdPets);
-    // --- CRITICAL LOG 4: Verify 'createdPets' array length after insertion ---
+    //  Verify 'createdPets' array length after insertion 
     console.log(`Successfully created ${createdPets.length} pet records.`);
 
 
     // 4. Handle Service-Specific Details (Boarding/Grooming) and link to Pet
-    // --- CRITICAL LOG 5: Starting loop for service-specific details ---
+    // Starting loop for service-specific details 
     console.log(`Starting loop to process service details for ${pets.length} pets.`);
     for (let i = 0; i < pets.length; i++) {
       const pet = pets[i];
       const pet_uuid = createdPets[i].pet_uuid;
 
-      // --- CRITICAL LOG 6: Logging each pet before service-specific processing ---
+      // Logging each pet before service-specific processing 
       console.log(`--- Processing pet ${i + 1}/${pets.length}: ${pet.name} (UUID: ${pet_uuid}) ---`);
       console.log(`  Service Type: ${pet.service_type}`);
 
@@ -170,10 +169,10 @@ export async function createBooking(
             room_size: boardingPet.room_size,
             boarding_type: boardingPet.boarding_type,
             check_in_date: boardingPet.check_in_date,
-            check_in_time: boardingPet.check_in_time || null, // Changed from "" to null
+            check_in_time: boardingPet.check_in_time || null, 
             check_out_date: boardingPet.check_out_date,
-            check_out_time: boardingPet.check_out_time || null, // Changed from "" to null
-            special_feeding_request: boardingPet.special_feeding_request || null, // Changed from "" to null
+            check_out_time: boardingPet.check_out_time || null, 
+            special_feeding_request: boardingPet.special_feeding_request || null, 
           })
           .select("id");
 
@@ -292,17 +291,13 @@ export async function createBooking(
     console.log("Booking process completed successfully for all pets.");
     return {
       success: true,
-      bookingId: bookingUuids.length > 0 ? bookingUuids[0] : undefined, // Return the first booking ID
+      bookingId: bookingUuids.length > 0 ? bookingUuids[0] : undefined, 
     };
   } catch (error) {
     console.error("Critical Booking Process Failure:", error);
     if (bookingUuids.length > 0) {
       console.warn("Attempting final rollback due to critical error. Deleting bookings:", bookingUuids);
       await supabase.from("Booking").delete().in("booking_uuid", bookingUuids);
-      // Note: A more robust rollback for pets, boarding/grooming pets, and meal instructions would
-      // be needed here if the error occurred before the specific rollbacks in the loops.
-      // However, the current code's structure with `return` on error already triggers specific rollbacks.
-      // This outer catch is for truly unexpected errors.
     }
     return {
       success: false,

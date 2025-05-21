@@ -1,60 +1,51 @@
-// TimePicker.tsx
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import { FiClock } from 'react-icons/fi';
-import { isToday, isSameDay, parseISO } from 'date-fns';
+import { isSameDay } from 'date-fns';
 
 interface TimePickerProps {
     selectedTime: string;
     onChange: (time: string) => void;
-    unavailableTimes?: string[]; // Made optional, often comes from a larger dataset
+    unavailableTimes?: string[];
     disabled?: boolean;
-    sameDayCheckInTime?: string; // For check-out time validation on the same day
-    serviceDate?: Date | null; // The specific date for which time is being picked
-    name: string; // Add name prop for form identification
-    className?: string; // Add className prop for error styling
+    sameDayCheckInTime?: string;
+    serviceDate?: Date | null;
+    name: string;
+    className?: string;
 }
 
 const TimePicker: React.FC<TimePickerProps> = ({
     selectedTime,
     onChange,
-    unavailableTimes = [], // Default to empty array if not provided
+    unavailableTimes = [],
     disabled = false,
     sameDayCheckInTime,
-    serviceDate, // This is the date the time is being picked for
-    name, // Destructure name prop
-    className // Destructure className prop
+    serviceDate,
+    name,
+    className
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const timePickerRef = useRef<HTMLDivElement>(null);
 
-    // Generate operating hours from 7:00 AM to 5:00 PM (17:00)
     const operatingHours = Array.from({ length: 11 }, (_, i) => {
-        const hour = i + 7; // Starts at 7
+        const hour = i + 7;
         return hour < 10 ? `0${hour}:00` : `${hour}:00`;
     });
 
     const isTimeDisabled = (time: string): boolean => {
-        // 1. Check if the time slot is explicitly unavailable
         if (unavailableTimes.includes(time)) return true;
 
-        // 2. If it's the same day and a check-in time is provided, ensure check-out is later
         if (sameDayCheckInTime && time <= sameDayCheckInTime) {
             return true;
         }
 
-        // 3. If the service date is today, disable past times
         if (serviceDate && isSameDay(serviceDate, new Date())) {
             const currentTime = new Date();
             const [selectedHour, selectedMinute] = time.split(':').map(Number);
-            
-            // Create a date object for comparison using today's date and the selected time
+
             const compareDateTime = new Date();
             compareDateTime.setHours(selectedHour, selectedMinute, 0, 0);
 
-            // If the selected time is in the past relative to the current time, disable it
-            // Add a small buffer (e.g., 1 hour) if you want to prevent last-minute bookings
-            // For now, simple comparison is used.
             if (compareDateTime <= currentTime) {
                 return true;
             }
@@ -77,7 +68,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
     }, []);
 
     const formatDisplayTime = (time: string): string => {
-        if (!time) return 'Select time'; // Handle empty time gracefully
+        if (!time) return 'Select time';
         const [hours, minutes] = time.split(':');
         const hourNum = parseInt(hours, 10);
         const ampm = hourNum < 12 ? 'AM' : 'PM';
@@ -87,15 +78,14 @@ const TimePicker: React.FC<TimePickerProps> = ({
 
     return (
         <div className="relative" ref={timePickerRef}>
-           
             <button
-                id={name} 
-                name={name} 
+                id={name}
+                name={name}
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm cursor-pointer text-left flex items-center space-x-2 ${
                     disabled ? 'bg-gray-100' : ''
-                } ${className || ''}`} 
+                } ${className || ''}`}
             >
                 <FiClock className="text-gray-500" />
                 <span className={selectedTime ? 'text-gray-800' : 'text-gray-500'}>
@@ -103,7 +93,6 @@ const TimePicker: React.FC<TimePickerProps> = ({
                 </span>
             </button>
 
-            {/* The dropdown list of times */}
             {isOpen && !disabled && (
                 <div className="absolute z-10 mt-1 bg-white border rounded-lg shadow-lg w-48 p-2">
                     <div className="max-h-60 overflow-y-auto">
