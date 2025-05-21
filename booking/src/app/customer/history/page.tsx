@@ -83,13 +83,17 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                     name: pet.name,
                     pet_type: pet.pet_type,
                     grooming_id: pet.grooming_id ?? null,
-                    groom_service: pet.GroomingPet && typeof pet.GroomingPet === 'object'
-                        ? { id: pet.GroomingPet.id, service_variant: pet.GroomingPet.service_variant }
-                        : null,
+                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
+                        ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
+                        : (pet.GroomingPet && !Array.isArray(pet.GroomingPet) && typeof pet.GroomingPet === 'object'
+                            ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
+                            : null),
                     boarding_id_extension: pet.grooming_id ?? null,
-                    boarding_pet: pet.BoardingPet && typeof pet.BoardingPet === 'object'
-                        ? { id: pet.BoardingPet.id, boarding_type: pet.BoardingPet.boarding_type }
-                        : null,
+                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                        ? { id: (pet.BoardingPet[0] as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet[0] as { id: string; boarding_type: string }).boarding_type }
+                        : (pet.BoardingPet && !Array.isArray(pet.BoardingPet) && typeof pet.BoardingPet === 'object'
+                            ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
+                            : null),
                 })) : [],
             })) as BookingRecord[];
             return { bookings: bookingRecords, error: null, totalCount: count };
