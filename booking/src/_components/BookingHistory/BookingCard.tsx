@@ -30,15 +30,15 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
 
     const accent = 'text-white';
     const textPrimary = 'text-white';
-    const textSecondary = 'text-gray-300';
+    const textSecondary = 'text-yellow-300';
 
     const statusColor = () => {
         switch (booking.status) {
-            case 'pending': return 'text-yellow-400';
+            case 'pending': return 'text-amber-500';
             case 'confirmed': return 'text-green-400';
             case 'completed': return 'text-blue-300';
             case 'cancelled': return 'text-red-400';
-            case 'onGoing': return 'text-orange-400';
+            case 'ongoing': return 'text-orange-300';
             default: return textSecondary;
         }
     };
@@ -114,7 +114,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     return (
         <div
             className={`
-                bg-blue-900 rounded-lg font-sans shadow-lg cursor-pointer
+                bg-purple-900 rounded-lg font-sans shadow-lg cursor-pointer
                 overflow-hidden transition-all duration-300 ease-in-out
                 ${isExpanded ? 'p-6' : 'p-4'}
                 ${interactionIndicatorClass()}
@@ -127,44 +127,50 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
 
             {isExpanded && (
                 <div className="space-y-2">
-                    <p className={`${textSecondary} text-sm`}>Booked On: <span className={textPrimary}>{publishDate}</span></p>
-                    <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
-                    <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
-                    <p className={`${textSecondary} text-sm`}>Status: <span className={`${statusColor()} font-medium`}>{booking.status}</span></p>
-                    {booking.approvalStatus && (
-                        <p className={`${textSecondary} text-sm`}>Approval Status: <span className={`${booking.approvalStatus === 'approved' ? 'text-green-400' : 'text-yellow-400'} font-medium`}>{booking.approvalStatus}</span></p>
-                    )}
-                    {booking.cancellationReason && (
-                        <p className={`${textSecondary} text-sm`}>Cancellation Reason: <span className={textPrimary}>{booking.cancellationReason}</span></p>
-                    )}
-                    <p className={`${textSecondary} text-sm`}>Special Requests: <span className={textPrimary}>{booking.special_requests || 'No special requests'}</span></p>
-                    <p className={`${textSecondary} text-sm`}>Total Amount: <span className={`${accent} font-medium`}>{typeof booking.total_amount === 'number' ? `₱${booking.total_amount.toFixed(2)}` : booking.total_amount}</span></p>
-                    {typeof booking.discount_applied === 'number' && booking.discount_applied > 0 ? (
-                        <p className={`${textSecondary} text-sm`}>
-                            Discount Applied: <span className={textPrimary}>{booking.discount_applied}%</span>
-                        </p>
-                        ) : (
-                        <p className={`${textSecondary} text-sm`}>
-                            Discount Applied: <span className={textPrimary}>None</span>
-                        </p>
-                    )}
+                    <div className='pt-2 border-t border-purple-800' >
+                        <div className='mb-2 p-2 rounded-md bg-purple-800 last:mb-0'>
+                            <p className={`${textSecondary} text-sm`}>Booked On: <span className={textPrimary}>{publishDate}</span></p>
+                            <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
+                            <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
+                            <p className={`${textSecondary} text-sm`}>Status: <span className={`${statusColor()} font-medium`}>{booking.status}</span></p>
+                            {booking.approvalStatus && (
+                                <p className={`${textSecondary} text-sm`}>Approval Status: <span className={`${booking.approvalStatus === 'approved' ? 'text-green-400' : 'text-yellow-400'} font-medium`}>{booking.approvalStatus}</span></p>
+                            )}
+                            {booking.cancellationReason && (
+                                <p className={`${textSecondary} text-sm`}>Cancellation Reason: <span className={textPrimary}>{booking.cancellationReason}</span></p>
+                            )}
+                            <p className={`${textSecondary} text-sm`}>Special Requests: <span className={textPrimary}>{booking.special_requests || 'No special requests'}</span></p>
+                            <p className={`${textSecondary} text-sm`}>Total Amount: <span className={`${accent} font-medium`}>{typeof booking.total_amount === 'number' ? `₱${booking.total_amount.toFixed(2)}` : booking.total_amount}</span></p>
+                            {typeof booking.discount_applied === 'number' && booking.discount_applied > 0 ? (
+                                <p className={`${textSecondary} text-sm`}>
+                                    Discount Applied: <span className={textPrimary}>{booking.discount_applied}%</span>
+                                </p>
+                                ) : (
+                                <p className={`${textSecondary} text-sm`}>
+                                    Discount Applied: <span className={textPrimary}>None</span>
+                                </p>
+                            )}
+                        </div>
+                    </div>
 
                     {booking.owner_details && (
-                        <div className="pt-2 border-t border-blue-800">
+                        <div className='pt-2 border-t border-purple-800' >
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Owner Details</h4>
-                            <p className={`${textSecondary} text-sm`}>ID: <span className={textPrimary}>{booking.owner_details.id}</span></p>
-                            <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{booking.owner_details.name}</span></p>
-                            <p className={`${textSecondary} text-sm`}>Address: <span className={textPrimary}>{booking.owner_details.address}</span></p>
-                            <p className={`${textSecondary} text-sm`}>Contact: <span className={textPrimary}>{booking.owner_details.contact_number}</span></p>
-                            <p className={`${textSecondary} text-sm`}>Email: <span className={textPrimary}>{booking.owner_details.email}</span></p>
+                            <div className="mb-2 p-2 rounded-md bg-purple-800 last:mb-0">
+                                <p className={`${textSecondary} text-sm`}>ID: <span className={textPrimary}>{booking.owner_details.id}</span></p>
+                                <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{booking.owner_details.name}</span></p>
+                                <p className={`${textSecondary} text-sm`}>Address: <span className={textPrimary}>{booking.owner_details.address}</span></p>
+                                <p className={`${textSecondary} text-sm`}>Contact: <span className={textPrimary}>{booking.owner_details.contact_number}</span></p>
+                                <p className={`${textSecondary} text-sm`}>Email: <span className={textPrimary}>{booking.owner_details.email}</span></p>
+                            </div>
                         </div>
                     )}
 
                     {booking.pets && booking.pets.length > 0 && (
-                        <div className="pt-2 border-t border-blue-800">
+                        <div className="pt-2 border-t border-purple-800">
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Pet Details</h4>
                             {booking.pets.map((pet) => (
-                                <div key={pet.pet_uuid} className="mb-2 p-2 rounded-md bg-blue-800 last:mb-0"> {/* last:mb-0 removes margin from last pet */}
+                                <div key={pet.pet_uuid} className="mb-2 p-2 rounded-md bg-purple-800 last:mb-0">
                                     <p className={`${textSecondary} text-sm`}>Pet ID: <span className={textPrimary}>{pet.pet_uuid}</span></p>
                                     <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{pet.name}</span></p>
                                     <p className={`${textSecondary} text-sm`}>Type: <span className={textPrimary}>{pet.pet_type}</span></p>
@@ -188,7 +194,9 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                                     )}
                                 </div>
                             ))}
+                            <div className='pt-2 border-t border-purple-800'></div>
                         </div>
+                        
                     )}
 
                     {(isPending || (isBeforeOrDuringStay && !isPending && canCancelBeforeThreeDays)) && (

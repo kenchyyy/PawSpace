@@ -31,7 +31,7 @@ export type BookingRecord = {
     date_booked: Date | string;
     service_date_start: Date | string;
     service_date_end: Date | string;
-    status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'onGoing';
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'ongoing';
     owner_details: OwnerDetails;
     special_requests: string | null;
     total_amount: number;

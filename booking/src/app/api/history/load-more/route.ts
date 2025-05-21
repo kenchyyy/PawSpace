@@ -38,8 +38,6 @@ export async function GET(request: NextRequest) {
                 special_requests,
                 total_amount,
                 discount_applied,
-                approvalStatus,
-                cancellationReason,
                 Owner (
                     id,
                     name,
@@ -82,8 +80,6 @@ export async function GET(request: NextRequest) {
                 special_requests: booking.special_requests ?? null,
                 total_amount: booking.total_amount,
                 discount_applied: booking.discount_applied ?? null,
-                approvalStatus: booking.approvalStatus ?? null,
-                cancellationReason: booking.cancellationReason ?? null,
                 owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner as OwnerDetails,
                 pets: booking.Pet ? booking.Pet.map(pet => ({
                     pet_uuid: pet.pet_uuid,
