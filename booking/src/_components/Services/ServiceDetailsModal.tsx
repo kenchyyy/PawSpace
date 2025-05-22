@@ -1,4 +1,3 @@
-// components/ServiceDetailsModal.tsx
 import { AddBookingButton } from "@/StoryComponents/ui/button/Button";
 import SpecialOffers from "./SpecialOffers";
 import DogAccommodationCard from "./accommodation/DogAccommodationCard";
@@ -49,18 +48,6 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
             setPoliciesContent({
                 title: "Boarding Terms and Conditions",
                 content: [
-                    "1. Pet Health and Behavior: I confirm that my pet is in reasonably good health and has not shown signs of illness, contagious disease, or aggressive behavior. I understand that PawSpace reserves the right to refuse service if my pet displays aggressive or unsafe behavior for staff or other animals.",
-                    "2. Injury and Risk Disclosure: I understand that while PawSpace staff take all precautions to ensure my pet's safety and comfort, grooming may involve inherent risks including, but not limited to, minor cuts, nicks, burns, skin irritation, stress, or accidental reactions. I will not hold PawSpace, its owners, employees, or affiliates liable for any injury, illness, or stress-related conditions resulting from grooming.",
-                    "3. Matted Fur or Special Conditions: I understand that heavily matted fur may need to be shaved down to prevent pain or injury. I acknowledge that de-matting can cause skin irritation or uncover pre-existing conditions. PawSpace will make reasonable efforts to inform me before proceeding.",
-                    "4. Emergency Care: In the unlikely event of an emergency, I authorize PawSpace to seek veterinary care for my pet. I understand that I am fully responsible for any and all expenses incurred.",
-                    "5. Late Pick-Up or No-Show Policy: I agree to pick up my pet promptly at the agreed time. I understand that a fee may apply for late pickups or no-shows.",
-                    "7. Photo Release (Optional): I consent to PawSpace taking photos or videos of my pet before, during, or after grooming for promotional or marketing purposes.",
-                ]
-            });
-        } else if (category === 'grooming') {
-            setPoliciesContent({
-                title: "Grooming Service Waiver & Release of Liability",
-                content: [
                     "1. HEALTH & VACCINATIONS: I confirm that my pet is in good health and up to date on core vaccinations including Rabies, Parvovirus, and Distemper. I agree to disclose any existing medical conditions, medications, allergies, or special needs. PawSpace reserves the right to refuse boarding if my pet shows signs of illness, parasites, or aggressive behavior.",
                     "2. TEMPERAMENT & BEHAVIOR: I confirm that my pet is non-aggressive and has no history of harmful or dangerous behavior. If my pet exhibits signs of distress, aggression, or destruction while at PawSpace, staff may separate them and contact me for early pick-up if necessary.",
                     "3. EMERGENCY CARE: In case of illness or emergency, I authorize PawSpace to contact my preferred veterinarian or an emergency animal clinic. I accept financial responsibility for all veterinary expenses incurred. Staff will make every reasonable effort to contact me before proceeding with treatment.",
@@ -71,13 +58,24 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
                     "8. REMINDERS TO PET OWNERS: Please bring enough food for the entire stay, especially if your pet has specific dietary needs. Don't forget any medications and written instructions. Make sure all contact and emergency details are accurate. Feel free to bring one small comfort item (e.g., a blanket or toy). PawSpace provides a loving and fun environment-but if your pet is highly anxious or has never been boarded before, consider a short trial day first."
                 ]
             });
+        } else if (category === 'grooming') {
+            setPoliciesContent({
+                title: "Grooming Service Waiver & Release of Liability",
+                content: [
+                    "1. Pet Health and Behavior: I confirm that my pet is in reasonably good health and has not shown signs of illness, contagious disease, or aggressive behavior. I understand that PawSpace reserves the right to refuse service if my pet displays aggressive or unsafe behavior for staff or other animals.",
+                    "2. Injury and Risk Disclosure: I understand that while PawSpace staff take all precautions to ensure my pet's safety and comfort, grooming may involve inherent risks including, but not limited to, minor cuts, nicks, burns, skin irritation, stress, or accidental reactions. I will not hold PawSpace, its owners, employees, or affiliates liable for any injury, illness, or stress-related conditions resulting from grooming.",
+                    "3. Matted Fur or Special Conditions: I understand that heavily matted fur may need to be shaved down to prevent pain or injury. I acknowledge that de-matting can cause skin irritation or uncover pre-existing conditions. PawSpace will make reasonable efforts to inform me before proceeding.",
+                    "4. Emergency Care: In the unlikely event of an emergency, I authorize PawSpace to seek veterinary care for my pet. I understand that I am fully responsible for any and all expenses incurred.",
+                    "5. Late Pick-Up or No-Show Policy: I agree to pick up my pet promptly at the agreed time. I understand that a fee may apply for late pickups or no-shows.",
+                    "7. Photo Release (Optional): I consent to PawSpace taking photos or videos of my pet before, during, or after grooming for promotional or marketing purposes.",
+                ]
+            });
         }
         setIsPoliciesModalOpen(true);
     };
 
     return (
         <>
-            {/* The main ServiceDetailsModal content */}
             <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm font-sans" /* No onClick here */>
                 <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in overflow-y-auto max-h-[90vh]`} onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-between mb-4">
@@ -85,7 +83,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
                             {typeEmoji} {details.title} {details.type === "grooming" ? "Grooming" : "Accommodation"}
                         </h2>
                         <button
-                            onClick={onClose} // This closes ServiceDetailsModal
+                            onClick={onClose}
                             className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer transition duration-300 ease-in-out transform hover:scale-110 rounded-full p-1"
                             aria-label="Close"
                         >
@@ -137,11 +135,10 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
                 </div>
             </div>
 
-            {/* PoliciesModal is rendered conditionally, but ServiceDetailsModal remains open underneath */}
             {isPoliciesModalOpen && policiesContent && (
                 <PoliciesModal
                     isOpen={isPoliciesModalOpen}
-                    onClose={() => setIsPoliciesModalOpen(false)} // This only closes PoliciesModal
+                    onClose={() => setIsPoliciesModalOpen(false)}
                     title={policiesContent.title}
                     content={policiesContent.content}
                 />

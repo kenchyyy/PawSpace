@@ -19,11 +19,13 @@ const GroomingServicesSection: React.FC<GroomingServicesSectionProps> = ({ setSe
         }));
 
     return (
-        <ServiceSection
-        title='Grooming Services'
-        services={groomingServicesData}
-        columns={3}
-        />
+        <div className="mx-4">
+            <ServiceSection
+            title='Grooming Services'
+            services={groomingServicesData}
+            columns={3}
+            />
+        </div>
     );
 };
 
