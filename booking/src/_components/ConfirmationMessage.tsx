@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertDialog,
+import {
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -16,24 +17,34 @@ interface ConfirmationMessageProps {
   title: string;
   description: string;
   children?: React.ReactNode;
+  disabled?: boolean; // Add this
 }
 
-export default function ConfirmationMessage({ onConfirm, title, description, children }: ConfirmationMessageProps) {
+export default function ConfirmationMessage({ onConfirm, title, description, children, disabled }: ConfirmationMessageProps) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger asChild disabled={disabled}>
         {children}
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-purple-800 border-2 border-purple-600 text-white">
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-orange-400 text-xl font-semibold">
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-purple-200 mt-2">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>Continue</AlertDialogAction>
+          <AlertDialogCancel className="bg-gray-200 text-black hover:bg-gray-300">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={onConfirm}
+            className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white"
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
@@ -9,14 +9,14 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/_components/ui/Button";
 
 interface ButtonData {
-    icon: keyof typeof Icons;
-    text: string;
-    href: string;
-  }
-  
+  icon: keyof typeof Icons;
+  text: string;
+  href: string;
+}
+
 interface SideNavProps {
   children: React.ReactNode;
-  colorTheme: "purple" | "gray";  
+  colorTheme: "purple" | "gray";
   buttons: ButtonData[];
 }
 
@@ -31,7 +31,11 @@ const Icons = {
   "FaDoorOpen": FaDoorOpen
 }
 
-export default function DashboardLayout({ children, colorTheme , buttons}: SideNavProps) {
+export default function DashboardLayout({
+  children,
+  colorTheme,
+  buttons,
+}: SideNavProps) {
   const [expandSideNav, toggleSideNav] = useState(false);
   const [isLg, setIsLg] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -80,14 +84,16 @@ export default function DashboardLayout({ children, colorTheme , buttons}: SideN
   }, [expandSideNav]);
 
   return (
-    <div className={`h-screen w-screen flex
-      ${colorTheme === "purple" ? 
-        "bg-[linear-gradient(to_top_right,#1a011f,#2b0231,#220127,#240132,#2e0249,#5b0d6d,#921f38,#7a1d31)]" : 
-        "bg-slate-300"}`
-      }
+    <div
+      className={`h-screen w-screen flex
+      ${
+        colorTheme === "purple"
+          ? "bg-[linear-gradient(to_top_right,#1a011f,#2b0231,#220127,#240132,#2e0249,#5b0d6d,#921f38,#7a1d31)]"
+          : "bg-slate-300"
+      }`}
     >
       {/* Sidebar */}
-      <nav 
+      <nav
         ref={navRef}
         className={`h-full text-white space-y-4 shadow-lg cursor-pointer fixed
         ${expandSideNav ? `w-40 shadow-2xl p-4 ${colorTheme === "purple" ? ` bg-violet-950` : `bg-gray-400` }` : isLg ? 'p-4 w-64 shadow-2xl' : 'w-14 shadow-lg pt-4 p-1'}
@@ -100,29 +106,30 @@ export default function DashboardLayout({ children, colorTheme , buttons}: SideN
           </div>
         </h2>
 
-        <SideNavButton 
-          icon={FiMenu} 
-          text="" 
+        <SideNavButton
+          icon={FiMenu}
+          text=''
           onClick={() => toggleSideNav(!expandSideNav)}
-          color="purple"
-          className={`lg:hidden ${expandSideNav ? 'hidden' : ''}`}
+          color='purple'
+          className={`lg:hidden ${expandSideNav ? "hidden" : ""}`}
           isCurrent={false}
         />
 
-        <ul className="space-y-4">
-            {buttons.map((button, index) => (
-                <SideNavButton
-                    key={index}
-                    icon={Icons[button.icon as keyof typeof Icons]}
-                    text={button.text}
-                    isCurrent={pathname === button.href}
-                    showText={expandSideNav}
-                    href={button.href}
-                    color={colorTheme}
-                    onClick={() => { 
-                        toggleSideNav(false); 
-                      }}
-                />))}
+        <ul className='space-y-4'>
+          {buttons.map((button, index) => (
+            <SideNavButton
+              key={index}
+              icon={Icons[button.icon as keyof typeof Icons]}
+              text={button.text}
+              isCurrent={pathname === button.href}
+              showText={expandSideNav}
+              href={button.href}
+              color={colorTheme}
+              onClick={() => {
+                toggleSideNav(false);
+              }}
+            />
+          ))}
         </ul>
       </nav>
 
@@ -135,4 +142,3 @@ export default function DashboardLayout({ children, colorTheme , buttons}: SideN
     </div>
   );
 }
-

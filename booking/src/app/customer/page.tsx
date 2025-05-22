@@ -1,196 +1,211 @@
-//Customer Dashboard Page
-
 'use client';
-import { ReactNode } from 'react';
-import { FiPlus} from 'react-icons/fi';
-import CustomerDashboardHeader from '@/_components/Customer Dashoard/Header';
-import { useState } from 'react';
-import { Booking } from '@/_components/Booking Form/types';
+import { ReactNode, useState, useEffect, useCallback } from 'react';
+import { FiPlus } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 import Modal from '@/_components/Modal';
-import BookingForm from '@/_components/Booking Form/BookingForm';
-import ServiceDetailsModal from "@/components/Services/ServiceDetailsModal";
-import ServiceSection from "@/components/Services/ServiceSelection";
+import BoardingBookingForm from '@/_components/Booking Form/Forms/BoardingBookingForm';
+import GroomingBookingForm from '@/_components/Booking Form/Forms/GroomingBookingForm';
+import BookingHistory from '@/_components/Booking History/BookingHistory';
+import { Booking } from '@/_components/Booking Form/types';
+import { ClientBookingService } from '@/_components/Booking Form/clientBookingService';
+import { toast } from 'sonner';
+import { createBooking } from '@/_components/Booking Form/bookingService';
+import { createClientSideClient } from '@/lib/supabase/CreateClientSideClient';
 
-interface DashboardLayoutProps {
-  children: ReactNode;
-  activeTab: string;
-  setActiveTab: (tab: 'home' | 'history' | 'about') => void;
+interface CustomerPageProps {
+  children?: ReactNode;
+  activeTab?: 'home' | 'history' | 'about-us';
 }
 
-const CustomerPage = ({ children, activeTab, setActiveTab }: DashboardLayoutProps) => {
+export default function CustomerPage({
+  children,
+  activeTab = 'home'
+}: CustomerPageProps) {
   const router = useRouter();
-
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [selectedService, setSelectedService] = useState<'boarding' | 'grooming' | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const supabaseClient = createClientSideClient();
 
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const unavailableDates: Date[] = [];
+  const unavailableTimes: string[] = [];
 
-  type ServiceDetails = {
-    title: string;
-    type: "grooming" | "overnight";
-    inclusions: string[];
-    prices: { size?: string; price: number; weightRange?: string }[] | { allSizes: number };
-    note?: string;
-  };
+  useEffect(() => {
+    if (!supabaseClient) {
+      console.warn('Supabase client not yet initialized.');
+      return;
+    }
 
-  const serviceDetailsMap: Record<string, ServiceDetails> = {
-    Basic: {
-      title: "Basic",
-      type: "grooming",
-      inclusions: ["Bath & Blow Dry", "Ear Cleaning", "Nail Trim", "Cologne"],
-      prices: [
-        { size: "Teacup", price: 250, weightRange: "1-3kg" },
-        { size: "Small", price: 300, weightRange: "3.1-7kg" },
-        { size: "Medium", price: 400, weightRange: "7.1-13kg" },
-        { size: "Large", price: 500, weightRange: "13.1-19kg" },
-        { size: "X-Large", price: 600, weightRange: "19kg & up" },
-      ],
-    },
-    Deluxe: {
-      title: "Deluxe",
-      type: "grooming",
-      inclusions: [
-        "Hair Cut (additional charge for special cut)",
-        "Bath & Blow Dry",
-        "Ear Cleaning",
-        "Nail Trim",
-        "Teeth Brushing",
-        "Cologne",
-      ],
-      prices: [
-        { size: "Teacup", price: 350, weightRange: "1-3kg" },
-        { size: "Small", price: 400, weightRange: "3.1-7kg" },
-        { size: "Medium", price: 500, weightRange: "7.1-13kg" },
-        { size: "Large", price: 600, weightRange: "13.1-19kg" },
-        { size: "X-Large", price: 750, weightRange: "19kg & up" },
-      ],
-      note: "Additional charge for special cut",
-    },
-    Cats: {
-      title: "Cats",
-      type: "grooming",
-      inclusions: [
-        "Hair Cut (additional charge for special cut)",
-        "Bath & Blow Dry",
-        "Ear Cleaning",
-        "Nail Trim",
-        "Teeth Brushing",
-        "Cologne",
-      ],
-      prices: { allSizes: 450 },
-      note: "Additional charge for special cut",
-    },
-    DogsOvernight: {
-      title: "Dogs Overnight",
-      type: "overnight",
-      inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
-        "Playtime",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
-      ],
-      prices: [
-        { size: "Small", price: 450 },
-        { size: "Medium", price: 600 },
-        { size: "Large", price: 800 },
-      ],
-    },
-    CatsOvernight: {
-      title: "Cats Overnight",
-      type: "overnight",
-      inclusions: [
-        "Comfortable Bed", 
-        "24/7 Monitoring", 
-        "Quiet Room",
-        "Free Food",
-        "Free Basic Grooming (Bath & Brush)"
-      ],
-      prices: { allSizes: 450 },
-    },
-  };
+    const bookingService = new ClientBookingService(supabaseClient);
 
-  const overnightServices = [
-    { label: "DogsOvernight", icon: "🐶", bgColor: "bg-orange-500" },
-    { label: "CatsOvernight", icon: "🐱", bgColor: "bg-pink-500" },
-  ];
+    const fetchBookings = async (retryCount = 0) => {
+      setLoading(true);
+      setError(null);
 
-  const groomingServices = [
-    { label: "Basic", icon: "🐶", bgColor: "bg-orange-500" },
-    { label: "Deluxe", icon: "🐶", bgColor: "bg-lime-500", glow: true },
-    { label: "Cats", icon: "🐱", bgColor: "bg-pink-500" },
-  ];
+      try {
+        const { user, error: userError } = await bookingService.getCurrentUser();
+        if (userError || !user) {
+          throw new Error(userError || 'User not authenticated');
+        }
 
+        const allBookings = await bookingService.getBookings();
 
-  function handleNewBooking(newBookings: Booking[]) {
-    setBookings([...bookings, ...newBookings]);
+        const userBookings = allBookings.filter((booking: Booking) =>
+          booking.owner_details?.email === user.email
+        );
+
+        setBookings(userBookings || []);
+      } catch (err: any) {
+        if (retryCount < 3) {
+          setTimeout(() => fetchBookings(retryCount + 1), 1000 * (retryCount + 1));
+          return;
+        }
+        const errorMessage = err.message || 'Failed to fetch bookings';
+        setError(errorMessage);
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [supabaseClient]);
+
+  const handleNewBooking = useCallback(async (newBookings: Booking[]): Promise<{ success: boolean; bookingId?: string }> => {
+    if (!supabaseClient) {
+      console.error('Supabase client not initialized when creating booking.');
+      toast.error('Failed to create booking: Supabase client not ready.');
+      return { success: false };
+    }
+
+    const bookingResults = await Promise.all(
+      newBookings.map(async (booking) => {
+        return await createBooking(
+          booking.owner_details,
+          [booking.pet],
+          [booking.total_amount],
+          [booking.discount_applied || 0]
+        );
+      })
+    );
+
+    const failedBooking = bookingResults.find(result => !result.success);
+    if (failedBooking) {
+      toast.error(failedBooking.error || 'One or more bookings failed');
+      return { success: false };
+    }
+
+    setBookings(prev => [...prev, ...newBookings]);
     setShowBookingForm(false);
+    setSelectedService(null);
+    router.push('/customer/history');
 
-    const encoded = encodeURIComponent(JSON.stringify(newBookings));
-    router.push(`/customer/history?bookings=${encoded}`);
-  }
+    return { success: true, bookingId: bookingResults[0]?.bookingId };
+  }, [supabaseClient, router]);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <CustomerDashboardHeader onOpenBookingForm={() => setShowBookingForm(true)} />
-      {/* <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
-        <p className="mb-6 text-gray-600">
-          Book professional grooming or overnight stay services for your pets.
-        </p>
-        <button
-          onClick={() => setShowBookingForm(true)}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center transition-colors"
-        >
-          <FiPlus className="mr-2" />
-          Create New Booking
-        </button>
-      </div> */}
-      <div className='text-white'>
+      {activeTab === 'home' && (
+        <div className="bg-white p-6 rounded-lg shadow mb-6">
+          <h2 className="text-2xl font-bold mb-4">Welcome to Pawspace</h2>
+          <p className="mb-6 text-gray-600">
+            Book professional grooming or overnight stay services for your pets.
+          </p>
 
-        <h1 className="text-3xl font-bold mb-6">Pet Services</h1>
+          <div className="flex flex-col md:flex-row gap-4">
+            <button
+              onClick={() => {
+                setSelectedService('boarding');
+                setShowBookingForm(true);
+              }}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center transition-colors flex-1"
+            >
+              <FiPlus className="mr-2" />
+              Book Boarding
+            </button>
 
-        <ServiceSection
-          title="Overnight Services"
-          services={overnightServices.map((s) => ({
-            ...s,
-            onClick: () => setSelectedService(s.label),
-          }))}
-          columns={2}
-        />
-
-        <ServiceSection
-          title="Grooming Services"
-          services={groomingServices.map((s) => ({
-            ...s,
-            onClick: () => setSelectedService(s.label),
-          }))}
-          columns={3}
-        />
-
-        <ServiceDetailsModal
-          isOpen={!!selectedService}
-          onClose={() => setSelectedService(null)}
-          details={selectedService ? serviceDetailsMap[selectedService] : null}
-        />
-
-      </div>
-      
-      <Modal 
-          isOpen={showBookingForm} 
-          onClose={() => setShowBookingForm(false)}
-        >
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl">
-            <BookingForm 
-              onConfirmBooking={handleNewBooking}
-              onClose={() => setShowBookingForm(false)}
-            />
+            <button
+              onClick={() => {
+                setSelectedService('grooming');
+                setShowBookingForm(true);
+              }}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center justify-center transition-colors flex-1"
+            >
+              <FiPlus className="mr-2" />
+              Book Grooming
+            </button>
           </div>
-        </Modal>
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+        <div className="bg-white p-6 rounded-lg shadow">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+          ) : error ? (
+            <p className="text-red-500">Error: {error}</p>
+          ) : (
+            <BookingHistory bookings={bookings} />
+          )}
+        </div>
+      )}
+
+      {activeTab === 'about-us' && (
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-2xl font-bold mb-4">About Pawspace</h2>
+          <div className="prose max-w-none">
+            <p className="text-gray-600 mb-4">
+              Pawspace is your premier destination for pet care services.
+            </p>
+            <ul className="list-disc pl-5 mb-4 text-gray-600">
+              <li>Professional grooming services for dogs and cats</li>
+              <li>Comfortable boarding facilities for your pets</li>
+              <li>Experienced and caring staff</li>
+              <li>Customized care for each pet's needs</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      <Modal
+        isOpen={showBookingForm}
+        onClose={() => {
+          setShowBookingForm(false);
+          setSelectedService(null);
+        }}
+      >
+        <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          {selectedService === 'boarding' && (
+            <BoardingBookingForm
+              onConfirmBooking={handleNewBooking}
+              onClose={() => {
+                setShowBookingForm(false);
+                setSelectedService(null);
+              }}
+              unavailableDates={unavailableDates}
+              unavailableTimes={unavailableTimes}
+            />
+          )}
+
+          {selectedService === 'grooming' && (
+            <GroomingBookingForm
+              onConfirmBooking={handleNewBooking}
+              onClose={() => {
+                setShowBookingForm(false);
+                setSelectedService(null);
+              }}
+              unavailableDates={unavailableDates}
+              unavailableTimes={unavailableTimes}
+            />
+          )}
+        </div>
+      </Modal>
+
+      {children}
     </div>
-
   );
-};
-
-export default CustomerPage;
+}

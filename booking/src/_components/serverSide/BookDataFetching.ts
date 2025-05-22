@@ -15,16 +15,16 @@ export interface FormattedBooking {
   dateBooked: string;
   serviceDateStart: string;
   serviceDateEnd: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing' ;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing' ;
   specialRequests: string;
   ownerDetails: OwnerDetails;
 }
 
-export async function fetchBookingDataByStatus(from: number, to: number, bookingStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing' ): Promise<{message: string; returnData?: (Array<any> | null)}> {
+export async function GetBookingDataByStatus(from: number, to: number, bookingStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing' ): Promise<{message: string; returnData?: (Array<any> | null)}> {
     const supabase = createClientSideClient();
     const { data, error } = await supabase
         .from("Booking")
-        .select(`*, 
+        .select(`*,
             owner_details(
             id,
             name,
@@ -34,7 +34,8 @@ export async function fetchBookingDataByStatus(from: number, to: number, booking
             `)
         .range(from, to)
         .eq("status", bookingStatus)
-        .order("service_date_start", { ascending: false   });
+        .order("service_date_start", { ascending: false}
+        );
 
     if (error) {
         return {message: "Fetching Error", returnData: null};
@@ -57,7 +58,8 @@ export async function fetchBookingDataByStatus(from: number, to: number, booking
     return {message: "Booking data fetched successfully", returnData: formattedData };
 }
 
-export async function updateBookingStatus(bookingUUID: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'onGoing'): Promise<{message: string}> {
+
+export async function updateBookingStatus(bookingUUID: string, status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing'): Promise<{message: string}> {
     const supabase = createClientSideClient();
     const { data, error } = await supabase
         .from("Booking")

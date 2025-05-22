@@ -1,3 +1,4 @@
+// components/BookingHistory/OwnerInfo.tsx
 import React from 'react';
 import { OwnerDetails } from '../../Booking Form/types';
 
@@ -16,7 +17,7 @@ const OwnerInfo: React.FC<OwnerInfoProps> = ({ ownerDetails }) => {
         </div>
         <div>
           <p className="text-sm text-gray-500">Contact</p>
-          <p className="text-gray-900">{ownerDetails.contactNumber}</p>
+          <p className="text-gray-900">{ownerDetails.contact_number}</p>
         </div>
         <div className="md:col-span-2">
           <p className="text-sm text-gray-500">Address</p>
