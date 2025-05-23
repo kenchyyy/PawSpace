@@ -1,5 +1,6 @@
+// PetStep.tsx
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
     Pet,
     ServiceType,
@@ -7,13 +8,15 @@ import {
     GroomingPet,
     PetStepProps,
     ScheduleChangeHandler,
-    ScheduleChangeType
-} from '../types';
+    ScheduleChangeType,
+    isBoardingPet,
+    isGroomingPet,
+} from '../types'; 
 import { FiPlus, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaw } from '@fortawesome/free-solid-svg-icons';
 import PetList from '../Form Components/PetList';
-import BasePetDetails from '../Form Components/BasePetDetails';
+import BasePetDetails from '../Form Components/BasePetDetails'; 
 import toast, { Toaster } from 'react-hot-toast';
 
 const PetStep: React.FC<PetStepProps> = ({
@@ -29,27 +32,43 @@ const PetStep: React.FC<PetStepProps> = ({
     errors = {},
     onPetChange,
     onScheduleChange,
+    unavailableDates, 
+    unavailableTimes, 
     dateHighlight,
     dateDefaultMessage,
     children
 }) => {
 
-    const [petErrors, setPetErrors] = useState<Record<string, string>>({});
+    const [localPetErrors, setLocalPetErrors] = useState<Record<string, string>>({});
     const containerRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        setPetErrors({});
-    }, [currentPetIndex, pets]);
+    const currentPet = useMemo(() => {
+        return currentPetIndex >= 0 ? pets[currentPetIndex] : undefined;
+    }, [pets, currentPetIndex]);
 
-
     useEffect(() => {
-        if (Object.keys(petErrors).length > 0) {
-            scrollToFirstError(petErrors);
+        if (currentPet) {
+            try {
+                const specificPetErrors = errors[`pet-${currentPet.id}`];
+                setLocalPetErrors(specificPetErrors ? JSON.parse(specificPetErrors) : {});
+            } catch (e) {
+                console.error("Failed to parse pet errors from props:", e);
+                setLocalPetErrors({});
+            }
+        } else {
+            setLocalPetErrors({});
         }
-    }, [petErrors]);
+    }, [currentPet, errors]);
 
-    const scrollToFirstError = (errors: Record<string, string>) => {
-        const firstErrorField = Object.keys(errors)[0];
+
+    useEffect(() => {
+        if (Object.keys(localPetErrors).length > 0) {
+            scrollToFirstError(localPetErrors);
+        }
+    }, [localPetErrors]);
+
+    const scrollToFirstError = (errorsToScroll: Record<string, string>) => {
+        const firstErrorField = Object.keys(errorsToScroll)[0];
         if (firstErrorField) {
             const element = document.getElementById(firstErrorField);
             if (element) {
@@ -63,68 +82,91 @@ const PetStep: React.FC<PetStepProps> = ({
 
 
     const validatePetDetails = (pet: Pet, service: ServiceType): Record<string, string> => {
-        const errors: Record<string, string> = {};
+        const currentPetErrors: Record<string, string> = {};
 
-        if (!pet.name?.trim()) errors.name = 'Pet name is required.';
-        if (!pet.pet_type) errors.pet_type = 'Pet type is required.';
-        if (!pet.breed?.trim()) errors.breed = 'Breed is required.';
-        if (!pet.age?.trim()) errors.age = 'Age is required.';
-        if (pet.vaccinated === undefined || pet.vaccinated === 'unknown') errors.vaccinated = 'Vaccination status is required.';
-        if (!pet.size?.trim()) errors.size = 'Size is required.';
+        if (!pet.name?.trim()) currentPetErrors.name = 'Pet name is required.';
+        if (!pet.pet_type) currentPetErrors.pet_type = 'Pet type is required.';
+        if (!pet.breed?.trim()) currentPetErrors.breed = 'Breed is required.';
+        if (!pet.age?.trim()) currentPetErrors.age = 'Age is required.';
 
-        if (service === 'boarding') {
-            const boardingPet = pet as BoardingPet;
-            if (!boardingPet.room_size) errors.room_size = 'Room size is required.';
-            if (!boardingPet.boarding_type) errors.boarding_type = 'Boarding type is required.';
-            if (!boardingPet.check_in_date) errors.check_in_date = 'Check-in date is required.';
-            if (!boardingPet.check_in_time?.trim()) errors.check_in_time = 'Check-in time is required.';
-            if (!boardingPet.check_out_date) errors.check_out_date = 'Check-out date is required.';
-            if (!boardingPet.check_out_time?.trim()) errors.check_out_time = 'Check-out time is required.';
+        if (pet.vaccinated === 'unknown' || pet.vaccinated === '') {
+            currentPetErrors.vaccinated = 'Vaccination status is required.';
+        }
+        if (!pet.size?.trim()) currentPetErrors.size = 'Size is required.';
+
+
+        if (isBoardingPet(pet)) {
+            const boardingPet = pet;
+            if (!boardingPet.room_size) currentPetErrors.room_size = 'Room size is required.';
+            if (!boardingPet.boarding_type) currentPetErrors.boarding_type = 'Boarding type is required.';
+            if (!boardingPet.check_in_date) currentPetErrors.check_in_date = 'Check-in date is required.';
+            if (!boardingPet.check_in_time?.trim()) currentPetErrors.check_in_time = 'Check-in time is required.';
+            if (!boardingPet.check_out_date) currentPetErrors.check_out_date = 'Check-out date is required.';
+            if (!boardingPet.check_out_time?.trim()) currentPetErrors.check_out_time = 'Check-out time is required.';
+
+            if (boardingPet.check_in_date && boardingPet.check_out_date) {
+                if (boardingPet.boarding_type === 'day') {
+                    if (boardingPet.check_in_date.getTime() !== boardingPet.check_out_date.getTime()) {
+                        currentPetErrors.check_out_date = 'For Day Boarding, check-out date must be the same as check-in date.';
+                    }
+                } else if (boardingPet.boarding_type === 'overnight') {
+                    if (boardingPet.check_in_date.getTime() >= boardingPet.check_out_date.getTime()) {
+                        currentPetErrors.check_out_date = 'For Overnight Boarding, check-out date must be after check-in date.';
+                    }
+                }
+            }
+
 
             if (boardingPet.meal_instructions) {
                 ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
                     const meal = boardingPet.meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']];
-                    if (meal && (meal.time || meal.food || meal.notes)) {
-                        if (!meal.time?.trim()) errors[`meal_instructions.${mealType}.time`] = `${mealType} time is required.`;
-                        if (!meal.food?.trim()) errors[`meal_instructions.${mealType}.food`] = `${mealType} food is required.`;
+                    if (meal && (meal.time?.trim() || meal.food?.trim() || meal.notes?.trim())) {
+                        if (!meal.time?.trim()) currentPetErrors[`meal_instructions.${mealType}.time`] = `${mealType} time is required.`;
+                        if (!meal.food?.trim()) currentPetErrors[`meal_instructions.${mealType}.food`] = `${mealType} food is required.`;
                     }
                 });
             }
-        } else if (service === 'grooming') {
-            const groomingPet = pet as GroomingPet;
-            if (!groomingPet.service_variant) errors.service_variant = 'Service variant is required.';
-            if (!groomingPet.service_date) errors.service_date = 'Service date is required.';
-            if (!groomingPet.service_time?.trim()) errors.service_time = 'Service time is required.';
+        } else if (isGroomingPet(pet)) {
+            const groomingPet = pet;
+            if (!groomingPet.service_variant) currentPetErrors.service_variant = 'Service variant is required.';
+            if (!groomingPet.service_date) currentPetErrors.service_date = 'Service date is required.';
+            if (!groomingPet.service_time?.trim()) currentPetErrors.service_time = 'Service time is required.';
         }
 
-        return errors;
+        return currentPetErrors;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
+        if (!currentPet) return;
 
-        if (petErrors[name]) {
-            setPetErrors(prev => {
-                const newErrors = { ...prev };
+        setLocalPetErrors(prev => {
+            const newErrors = { ...prev };
+            if (newErrors[name]) {
                 delete newErrors[name];
-                return newErrors;
-            });
-        }
+            }
+            if (name.startsWith('meal_instructions.')) {
+                const [_, mealType, field] = name.split('.');
+                if (newErrors[`meal_instructions.${mealType}.${field}`]) {
+                    delete newErrors[`meal_instructions.${mealType}.${field}`];
+                }
+            }
+            return newErrors;
+        });
 
-        const currentPet = pets[currentPetIndex];
         let updatedPet: Pet;
 
         if (name.startsWith('meal_instructions.')) {
-            if (!currentPet || !('meal_instructions' in currentPet)) return;
+            if (!isBoardingPet(currentPet)) return;
 
             const [_, mealType, field] = name.split('.');
             updatedPet = {
                 ...currentPet,
                 meal_instructions: {
-                    ...(currentPet as BoardingPet).meal_instructions,
+                    ...currentPet.meal_instructions,
                     [mealType]: {
-                        ...((currentPet as BoardingPet).meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']] || { time: '', food: '', notes: '' }),
+                        ...(currentPet.meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']] || { time: '', food: '', notes: '' }),
                         [field]: value
                     }
                 }
@@ -145,14 +187,18 @@ const PetStep: React.FC<PetStepProps> = ({
             'service_date';
 
         const timeFieldName =
-            type === 'checkIn' ? 'check_in_time' :
-            type === 'checkOut' ? 'check_out_time' :
+            type === 'checkInTime' ? 'check_in_time' :
+            type === 'checkOutTime' ? 'check_out_time' :
             'service_time';
 
-        setPetErrors(prev => {
+        setLocalPetErrors(prev => {
             const newErrors = { ...prev };
-            if (prev[dateFieldName] && date !== null && date !== undefined) delete newErrors[dateFieldName];
-            if (prev[timeFieldName] && time && time.trim()) delete newErrors[timeFieldName];
+            if ((type === 'checkIn' || type === 'checkOut' || type === 'service') && date !== null && date !== undefined) {
+                delete newErrors[dateFieldName];
+            }
+            if ((type === 'checkInTime' || type === 'checkOutTime' || type === 'serviceTime') && time && time.trim()) {
+                delete newErrors[timeFieldName];
+            }
             return newErrors;
         });
 
@@ -163,15 +209,15 @@ const PetStep: React.FC<PetStepProps> = ({
     const handleAddPetClick = () => {
         if (isSubmitting) return;
 
-        if (currentPetIndex >= 0 && pets[currentPetIndex]) {
-            const errors = validatePetDetails(pets[currentPetIndex], serviceType);
+        if (currentPet) {
+            const errors = validatePetDetails(currentPet, serviceType);
             if (Object.keys(errors).length > 0) {
-                setPetErrors(errors);
-                toast.error("Please complete the current pet's details before adding a new one. Missing fields are highlighted.");
+                setLocalPetErrors(errors);
+                toast.error(`Please complete the current pet's details (${currentPet.name || 'Unnamed Pet'}) before adding a new one. Missing fields are highlighted.`);
                 return;
             }
         }
-        setPetErrors({});
+        setLocalPetErrors({});
         onAddPet();
     };
 
@@ -197,20 +243,18 @@ const PetStep: React.FC<PetStepProps> = ({
 
         if (firstInvalidPetIndex !== null) {
             if (currentPetIndex !== firstInvalidPetIndex) {
-
                 onEditPet(firstInvalidPetIndex);
-
                 setTimeout(() => {
-                    setPetErrors(firstInvalidPetErrors);
+                    setLocalPetErrors(firstInvalidPetErrors);
                 }, 0);
             } else {
-                setPetErrors(firstInvalidPetErrors);
+                setLocalPetErrors(firstInvalidPetErrors);
             }
             toast.error(`Please complete all details for "${pets[firstInvalidPetIndex].name || `Pet ${firstInvalidPetIndex + 1}`}". Missing fields are highlighted.`);
             return;
         }
 
-        setPetErrors({});
+        setLocalPetErrors({});
         onNext();
     };
 
@@ -250,36 +294,58 @@ const PetStep: React.FC<PetStepProps> = ({
                         onRemove={onRemovePet}
                     />
 
-                    {currentPetIndex >= 0 && pets[currentPetIndex] && (
-                        <div key={pets[currentPetIndex].id || currentPetIndex} className="mt-6 bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    {currentPet && (
+                        <div key={currentPet.id || currentPetIndex} className="mt-6 bg-white p-6 rounded-xl shadow-md border border-gray-100">
                             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                 Pet Details
                             </h3>
                             {children ? (
                                 children(
                                     {
-                                        pet: pets[currentPetIndex],
+                                        pet: currentPet,
                                         onChange: handleChange,
                                         onScheduleChange: handleScheduleChangeInternal,
-                                        errors: petErrors,
+                                        errors: localPetErrors,
                                         serviceType: serviceType,
                                         onAddPet: onAddPet,
                                         onRemovePet: onRemovePet,
                                         currentPetIndex: currentPetIndex,
+                                        unavailableDates: unavailableDates, 
+                                        unavailableTimes: unavailableTimes, 
                                         dateHighlight: dateHighlight,
                                         dateDefaultMessage: dateDefaultMessage
                                     }
                                 )
                             ) : (
                                 <BasePetDetails
-                                    pet={pets[currentPetIndex]}
+                                    pet={currentPet}
                                     onChange={handleChange}
-                                    errors={petErrors}
+                                    errors={localPetErrors}
                                     onScheduleChange={handleScheduleChangeInternal}
                                     serviceType={serviceType}
+                                    unavailableDates={unavailableDates} 
+                                    unavailableTimes={unavailableTimes} 
                                     dateHighlight={dateHighlight}
                                     dateDefaultMessage={dateDefaultMessage}
                                 />
+                            )}
+
+                            {isBoardingPet(currentPet) && (
+                                <>
+                                    {errors[`pet-${currentPet.id}`] && (() => {
+                                        try {
+                                            const parsedErrors = JSON.parse(errors[`pet-${currentPet.id}`]);
+                                            return parsedErrors.check_out_date && (
+                                                <div className="error" style={{ color: 'red', marginBottom: 8, marginTop: 8 }}>
+                                                    {parsedErrors.check_out_date}
+                                                </div>
+                                            );
+                                        } catch (e) {
+                                            console.error("Error parsing pet errors for check-out date display:", e);
+                                            return null;
+                                        }
+                                    })()}
+                                </>
                             )}
                         </div>
                     )}

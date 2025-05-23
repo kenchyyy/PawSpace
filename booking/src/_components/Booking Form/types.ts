@@ -2,17 +2,18 @@
 import { ReactNode } from 'react';
 
 export type PetType = 'dog' | 'cat';
-export type RoomSize = 'small' | 'medium' | 'large' | 'cat_small' | 'cat_large';
+export type RoomSize = 'small' | 'medium' | 'large' | 'cat_small' | 'cat_large' | '';
 export type BoardingType = 'day' | 'overnight';
 export type ServiceType = 'grooming' | 'boarding';
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type PetSize = 'teacup' | 'small' | 'medium' | 'large' | 'xlarge';
-export type VaccinationStatus = 'yes' | 'no' | 'unknown';
+export type VaccinationStatus = 'yes' | 'no' | 'unknown' | '';
 export type MealType = 'breakfast' | 'lunch' | 'dinner';
 
 export type DogGroomingVariant = 'basic' | 'deluxe';
 export type CatGroomingVariant = 'cat';
 export type GroomingVariant = DogGroomingVariant | CatGroomingVariant;
+
 
 export interface OwnerDetails {
     id?: string;
@@ -81,6 +82,7 @@ export type Pet = BoardingPet | GroomingPet;
 export function isBoardingPet(pet: Pet): pet is BoardingPet {
     return pet.service_type === 'boarding';
 }
+
 export function isGroomingPet(pet: Pet): pet is GroomingPet {
     return pet.service_type === 'grooming';
 }
@@ -93,7 +95,7 @@ export interface Booking {
     service_date_end: Date | string | null;
     status: BookingStatus;
     owner_details: OwnerDetails;
-    pet: Pet[];
+    pet: Pet;
     special_requests: string;
     total_amount: number;
     discount_applied?: number;
@@ -119,6 +121,7 @@ export interface Pricing {
 export const pricing: Pricing = {
     boarding: {
         day: {
+            '': 0,
             small: 65,
             medium: 75,
             large: 110,
@@ -126,6 +129,7 @@ export const pricing: Pricing = {
             cat_large: 65,
         },
         overnight: {
+            '': 0,
             small: 450,
             medium: 600,
             large: 800,
@@ -200,11 +204,19 @@ export interface BookingResult {
     bookingIds?: string[];
 }
 
-export type ScheduleChangeType = 'checkIn' | 'checkOut' | 'service';
+export type ScheduleChangeType = 'checkIn' | 'checkOut' | 'service' | 'boardingType';
+
 export type ScheduleChangeHandler = (
-    type: ScheduleChangeType,
-    date: Date | null,
-    time: string
+    type:
+        | 'boardingType'
+        | 'checkIn'
+        | 'checkOut'
+        | 'checkInTime'
+        | 'checkOutTime' 
+        | 'service' 
+        | 'serviceTime', 
+    value: Date | string | null,
+    time?: string 
 ) => void;
 
 export interface BaseBookingFormProps {
@@ -217,6 +229,10 @@ export interface BaseBookingFormProps {
     onClose: () => void;
     serviceType: ServiceType;
     isSubmitting?: boolean;
+    unavailableDates: Date[]; 
+    unavailableTimes: string[]; 
+    dateHighlight?: (date: Date) => boolean;
+    dateDefaultMessage?: string;
     children?: (props: {
         pet: Pet;
         onChange: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
@@ -228,9 +244,10 @@ export interface BaseBookingFormProps {
         currentPetIndex: number;
         dateHighlight?: (date: Date) => boolean;
         dateDefaultMessage?: string;
+        unavailableDates: Date[]; 
+        unavailableTimes: string[]; 
     }) => ReactNode;
-    unavailableDates: Date[]; 
-    unavailableTimes: string[]; 
+
 }
 
 export interface PetStepProps {
@@ -261,6 +278,8 @@ export interface PetStepProps {
         currentPetIndex: number;
         dateHighlight?: (date: Date) => boolean;
         dateDefaultMessage?: string;
+        unavailableDates: Date[];
+        unavailableTimes: string[];
     }) => ReactNode;
 }
 
@@ -272,6 +291,7 @@ export interface BasePetDetailsProps {
     serviceType: ServiceType;
     dateHighlight?: (date: Date) => boolean;
     dateDefaultMessage?: string;
-    unavailableDates: Date[];
-    unavailableTimes: string[];
+    unavailableDates: Date[]; 
+    unavailableTimes: string[]; 
 }
+

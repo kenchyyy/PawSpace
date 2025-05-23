@@ -1,14 +1,5 @@
 import React from 'react';
-import { Pet, ServiceType, ScheduleChangeHandler } from '../types'; 
-interface BasePetDetailsProps {
-    pet: Pet;
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-    errors: Record<string, string>;
-    onScheduleChange: ScheduleChangeHandler; 
-    serviceType: ServiceType;
-    dateHighlight?: (date: Date) => boolean; 
-    dateDefaultMessage?: string; 
-}
+import { Pet, ServiceType, ScheduleChangeHandler, BasePetDetailsProps } from '../types'; 
 
 const BasePetDetails: React.FC<BasePetDetailsProps> = ({
     pet,
@@ -17,7 +8,10 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
     onScheduleChange, 
     serviceType, 
     dateHighlight, 
-    dateDefaultMessage 
+    dateDefaultMessage,
+    unavailableDates, 
+    unavailableTimes, 
+    
 }) => {
     const getError = (fieldName: string) => errors[fieldName] ? 'border-red-500 bg-red-50' : 'border-gray-300';
 

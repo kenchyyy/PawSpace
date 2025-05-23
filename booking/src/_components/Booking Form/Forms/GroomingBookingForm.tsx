@@ -12,7 +12,9 @@ import {
     parseDate,
     PetType,
     OwnerDetails,
-    Pet
+    Pet,
+    // Ensure all necessary types are imported from '../types'
+    BasePetDetailsProps // We will pass these props down to BasePetDetails
 } from '../types';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -30,6 +32,9 @@ interface GroomingBookingFormProps {
         discountsApplied?: number[]
     ) => Promise<BookingResult>;
     onClose: () => void;
+    // These props are defined as optional in GroomingBookingFormProps
+    // but BaseBookingForm (and BasePetDetails) might expect them
+    // so they are passed down with defaults if not provided.
     unavailableDates?: Date[];
     unavailableTimes?: string[];
 }
@@ -37,8 +42,8 @@ interface GroomingBookingFormProps {
 const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
     onConfirmBooking,
     onClose,
-    unavailableDates = [],
-    unavailableTimes = [],
+    unavailableDates = [], // Default to empty array if not provided
+    unavailableTimes = [], // Default to empty array if not provided
 }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
@@ -72,9 +77,10 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                     }
 
                     let basePrice = 0;
-                    if (pet.pet_type === 'cat') {
+                    // Correct type inference for cat grooming variant
+                    if (pet.pet_type === 'cat' && pet.service_variant === 'cat') {
                         basePrice = pricing.grooming.cat.cat;
-                    } else {
+                    } else if (pet.pet_type === 'dog' && pet.service_variant) {
                         const variant = pet.service_variant as DogGroomingVariant;
                         const size = pet.size as PetSize;
                         basePrice = pricing.grooming.dog[variant]?.[size] || 0;
@@ -111,14 +117,15 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
             return { success: false, error: errorMsg };
         } finally {
             setIsSubmitting(false);
-            onClose();
+            onClose(); // Consider whether onClose should always be called on failure
         }
     };
 
     const getServiceVariantOptions = (petType: PetType) => {
         if (petType === 'cat') {
+            // Ensure the value 'cat' matches CatGroomingVariant
             return [
-                { value: 'standard', label: 'Standard Grooming (P800)' }
+                { value: 'cat', label: 'Standard Grooming (P450)' } // Corrected price from your pricing object
             ];
         }
         return [
@@ -140,7 +147,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
     };
 
     const getPriceDisplay = (pet: GroomingPet): string => {
-        if (pet.pet_type === 'cat') {
+        if (pet.pet_type === 'cat' && pet.service_variant === 'cat') {
             return `P${pricing.grooming.cat.cat}`;
         } else if (pet.pet_type === 'dog' && pet.service_variant && pet.size) {
             const variant = pet.service_variant as DogGroomingVariant;
@@ -160,7 +167,9 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
             unavailableDates={unavailableDates}
             unavailableTimes={unavailableTimes}
         >
-            {({ pet, onChange, onScheduleChange, errors }) => {
+            {/* Destructure unavailableDates and unavailableTimes from the props object
+                provided by BaseBookingForm's children render prop */}
+            {({ pet, onChange, onScheduleChange, errors, unavailableDates: childUnavailableDates, unavailableTimes: childUnavailableTimes }) => {
                 if (!isGroomingPet(pet)) return null;
 
                 const getErrorClass = (fieldName: string) =>
@@ -174,6 +183,9 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                             errors={errors}
                             onScheduleChange={onScheduleChange}
                             serviceType="grooming"
+                            // Pass the unavailable dates and times received from BaseBookingForm
+                            unavailableDates={childUnavailableDates}
+                            unavailableTimes={childUnavailableTimes}
                         />
 
                         <div className="grid grid-cols-1 gap-6">
@@ -218,7 +230,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                             name="service_date"
                                             selectedDate={parseDate(pet.service_date)}
                                             onChange={(date) => onScheduleChange('service', date, pet.service_time)}
-                                            unavailableDates={unavailableDates}
+                                            unavailableDates={childUnavailableDates} // Use the destructured prop
                                             minDate={new Date()}
                                         />
                                         {errors.service_date && (
@@ -232,7 +244,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                             name="service_time"
                                             selectedTime={pet.service_time}
                                             onChange={(time) => onScheduleChange('service', parseDate(pet.service_date), time)}
-                                            unavailableTimes={unavailableTimes}
+                                            unavailableTimes={childUnavailableTimes} // Use the destructured prop
                                             disabled={!pet.service_date}
                                         />
                                         {errors.service_time && (

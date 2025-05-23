@@ -16,6 +16,7 @@ import {
   pricing,
 } from "../types";
 import { FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
+import PoliciesModal from '@/_components/Services/PoliciesModal';
 
 interface ReviewStepProps {
   ownerDetails: OwnerDetails;
@@ -56,6 +57,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [isPoliciesModalOpen, setIsPoliciesModalOpen] = useState(false);
 
   // Clear timeout on unmount
   useEffect(() => {
@@ -225,6 +227,19 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     } finally {
       clearTimeout(id);
     }
+  };
+
+  const boardingTermsAndConditionsContent = [
+      "hi"
+  ];
+
+  const handleOpenPoliciesModal = (e: React.MouseEvent) => {
+      e.preventDefault(); 
+      setIsPoliciesModalOpen(true);
+  };
+
+  const handleClosePoliciesModal = () => {
+      setIsPoliciesModalOpen(false);
   };
 
   const formatDate = (date: Date | string | null): string => {
@@ -652,23 +667,37 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
           </div>
         </div>
 
-        <div>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={confirmedInfo}
-              onChange={(e) => onConfirmChange(e.target.checked)}
-              className="mr-2 h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+        <div className="ml-8 mb-8">
+            <label className="flex items-start mb-2"> 
+                <input
+                    type="checkbox"
+                    checked={confirmedInfo}
+                    onChange={(e) => onConfirmChange(e.target.checked)}
+                    className="mr-2 h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 flex-shrink-0 mt-1" 
+                />
+                <span className="text-sm text-gray-700">
+                    I confirm that all information provided is accurate. I have read and agree to the Pawspace's{" "}
+                    <button
+                        type="button" 
+                        onClick={handleOpenPoliciesModal}
+                        className="text-blue-600 hover:text-blue-800 underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                        Boarding Terms and Conditions.
+                    </button>.
+                </span>
+            </label>
+            {errors?.confirmation && !confirmedInfo && ( 
+                <p className="text-red-500 text-sm mt-1">
+                    {errors.confirmation}
+                </p>
+            )}
+
+            <PoliciesModal
+                isOpen={isPoliciesModalOpen}
+                onClose={handleClosePoliciesModal}
+                title="Pawspace Boarding Terms and Conditions"
+                content={boardingTermsAndConditionsContent}
             />
-            <span className="text-sm text-gray-700">
-              I confirm that the information above is correct.
-            </span>
-          </label>
-          {!confirmedInfo && (
-            <p className="text-red-500 text-sm mt-1">
-              Please confirm the information to proceed.
-            </p>
-          )}
         </div>
 
         <div className="flex justify-between">

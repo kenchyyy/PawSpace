@@ -1,6 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import React from 'react'; 
 import { OwnerDetails } from '../types';
 import { FaUserCircle, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 
@@ -19,30 +18,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
   onNext,
   isSubmitting,
 }) => {
-  const supabase = createClientComponentClient();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        onChange({
-          target: {
-            name: 'name',
-            value: user.user_metadata?.full_name || user.email?.split('@')[0] || ''
-          }
-        } as React.ChangeEvent<HTMLInputElement>);
-        
-        onChange({
-          target: {
-            name: 'email',
-            value: user.email || ''
-          }
-        } as React.ChangeEvent<HTMLInputElement>);
-      }
-    };
-
-    fetchUser();
-  }, [onChange, supabase]);
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-gray-200">
@@ -85,7 +61,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
                 type="email"
                 name="email"
                 id="email"
-                value={ownerDetails.email}
+                value={ownerDetails.email} 
                 onChange={onChange}
                 className={`shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border rounded-md py-2.5 pl-10 pr-3 ${
                   errors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
@@ -99,6 +75,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
             </div>
             {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
           </div>
+
           <div>
             <label htmlFor="contact_number" className="block text-sm font-medium text-gray-700">
               Contact Number <span className="text-red-500">*</span>

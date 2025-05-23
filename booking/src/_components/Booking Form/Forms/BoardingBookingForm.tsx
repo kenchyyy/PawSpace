@@ -1,7 +1,8 @@
+// BoardingBookingForm.tsx
 'use client';
 import React, { useState } from 'react';
 import BaseBookingForm from './BaseBookingForm';
-import { Booking, BoardingPet, parseDate, isSameDay, calculateNights, pricing, BookingResult, OwnerDetails, Pet } from '../types'; // Import OwnerDetails and Pet
+import { Booking, BoardingPet, parseDate, isSameDay, calculateNights, pricing, BookingResult, OwnerDetails, Pet } from '../types';
 import { toast } from 'sonner';
 import MealInstructions from '../Form Components/MealInstructions';
 import { FiSun, FiMoon } from 'react-icons/fi';
@@ -11,6 +12,7 @@ import BasePetDetails from '../Form Components/BasePetDetails';
 import { useRouter } from 'next/navigation';
 import { createBooking } from '../bookingService';
 import { isBoardingPet } from '../types';
+import RoomAvailabilityDisplay from '../Form Components/RoomAvailabilityDisplay';
 
 interface BoardingBookingFormProps {
     onConfirmBooking?: (
@@ -32,6 +34,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
 }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
+    const [showAvailability, setShowAvailability] = useState(false);
 
     const validateBoardingData = (pet: BoardingPet): string[] => {
         const errors: string[] = [];
@@ -53,7 +56,6 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
         return errors;
     };
 
-    // UPDATED: handleConfirmBooking now matches BaseBookingForm's expected arguments
     const handleConfirmBooking = async (
       ownerDetails: OwnerDetails,
       pets: Pet[],
@@ -64,10 +66,8 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
 
         try {
             const bookingResults = await Promise.all(
-                // Iterate over pets, as each pet will correspond to a booking in this context
                 pets.map(async (pet, index) => {
                     if (!isBoardingPet(pet)) {
-                        // This should ideally not happen if BaseBookingForm is sending correct pet types
                         throw new Error('Invalid pet type for boarding');
                     }
 
@@ -94,17 +94,14 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                     const currentTotalAmount = totalAmounts[index] !== undefined ? totalAmounts[index] : (basePrice * (1 - discount));
                     const currentDiscountApplied = discountsApplied && discountsApplied[index] !== undefined ? discountsApplied[index] : discount;
 
-
                     return await createBooking(
                         ownerDetails,
-                        [pet], // createBooking likely expects an array of pets for each booking
+                        [pet],
                         [currentTotalAmount],
                         [currentDiscountApplied]
                     );
                 })
             );
-
-            console.log(bookingResults)
 
             const allSuccessful = bookingResults.every(result => result.success);
 
@@ -129,7 +126,7 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
 
     return (
         <BaseBookingForm
-            onConfirmBooking={onConfirmBooking || handleConfirmBooking} // This now correctly matches the types
+            onConfirmBooking={onConfirmBooking || handleConfirmBooking}
             onClose={onClose}
             serviceType="boarding"
             isSubmitting={isSubmitting}
@@ -167,6 +164,8 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                             errors={errors}
                             onScheduleChange={onScheduleChange}
                             serviceType="boarding"
+                            unavailableDates={unavailableDates}
+                            unavailableTimes={unavailableTimes}
                         />
 
                         <div className="grid grid-cols-1 gap-6">
@@ -182,7 +181,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                                 name="boarding_type"
                                                 value="day"
                                                 checked={pet.boarding_type === 'day'}
-                                                onChange={onChange}
+                                                onChange={(e) => {
+                                                    onChange(e);
+                                                    setShowAvailability(false);
+                                                }}
                                                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                                                 required
                                             />
@@ -197,7 +199,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                                 name="boarding_type"
                                                 value="overnight"
                                                 checked={pet.boarding_type === 'overnight'}
-                                                onChange={onChange}
+                                                onChange={(e) => {
+                                                    onChange(e);
+                                                    setShowAvailability(false);
+                                                }}
                                                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
                                                 required
                                             />
@@ -214,7 +219,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <select
                                         name="room_size"
                                         value={pet.room_size}
-                                        onChange={onChange}
+                                        onChange={(e) => {
+                                            onChange(e);
+                                            setShowAvailability(true);
+                                        }}
                                         className={`block w-full px-3 py-2 border ${errors.room_size ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm`}
                                         required
                                     >
@@ -236,13 +244,18 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     {errors.room_size && <p className="mt-1 text-sm text-red-600">{errors.room_size}</p>}
                                 </div>
 
+                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-In Date *</label>
                                         <DateDropdown
                                             name="check_in_date" 
                                             selectedDate={parseDate(pet.check_in_date)}
-                                            onChange={(date) => handleDateChange('checkIn', date)}
+                                            onChange={(date) => {
+                                                handleDateChange('checkIn', date);
+                                                setShowAvailability(true);
+                                            }}
                                             unavailableDates={unavailableDates}
                                             minDate={new Date()}
                                         />
@@ -254,7 +267,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                         <TimeDropdown
                                             name="check_in_time" 
                                             selectedTime={pet.check_in_time}
-                                            onChange={(time) => handleTimeChange('checkIn', time)}
+                                            onChange={(time) => {
+                                                handleTimeChange('checkIn', time);
+                                                setShowAvailability(true);
+                                            }}
                                             unavailableTimes={unavailableTimes}
                                             disabled={!pet.check_in_date}
                                         />
@@ -266,7 +282,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                         <DateDropdown
                                             name="check_out_date" 
                                             selectedDate={parseDate(pet.check_out_date)}
-                                            onChange={(date) => handleDateChange('checkOut', date)}
+                                            onChange={(date) => {
+                                                handleDateChange('checkOut', date);
+                                                setShowAvailability(true);
+                                            }}
                                             unavailableDates={unavailableDates}
                                             minDate={getMinDate()}
                                         />
@@ -278,14 +297,27 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                         <TimeDropdown
                                             name="check_out_time"
                                             selectedTime={pet.check_out_time}
-                                            onChange={(time) => handleTimeChange('checkOut', time)}
+                                            onChange={(time) => {
+                                                handleTimeChange('checkOut', time);
+                                                setShowAvailability(true);
+                                            }}
                                             unavailableTimes={unavailableTimes}
                                             disabled={!pet.check_out_date}
                                             sameDayCheckInTime={pet.boarding_type === 'day' && pet.check_in_date && isSameDay(parseDate(pet.check_in_date), parseDate(pet.check_out_date)) ? pet.check_in_time : undefined}
                                         />
                                         {errors.check_out_time && <p className="mt-1 text-sm text-red-600">{errors.check_out_time}</p>}
-                                    </div>
+                                    </div>     
                                 </div>
+                                {/* Room Availability Display */}
+                                {showAvailability && pet.room_size && (
+                                    <RoomAvailabilityDisplay
+                                        roomSize={pet.room_size}
+                                        checkIn={parseDate(pet.check_in_date)}
+                                        checkOut={parseDate(pet.check_out_date)}
+                                        checkInTime={pet.check_in_time || ''}
+                                        checkOutTime={pet.check_out_time || ''}
+                                    />
+                                )}
                             </div>
 
                             <div className="md:col-span-2">
