@@ -1,28 +1,31 @@
-'use server';
-
-import React from 'react';
-import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
+import { NextResponse, NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { BookingRecord, OwnerDetails } from '@/_components/BookingHistory/types/bookingRecordType';
-import BookingHistoryClient from '@/_components/BookingHistory/BookingHistoryClient';
-import { redirect } from 'next/navigation';
-import { SupabaseClient } from '@supabase/supabase-js';
 
 const ITEMS_PER_PAGE = 5;
 
-async function getBookingHistory(page: number, userId: string, supabase: SupabaseClient): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE - 1;
-
+export async function GET(request: NextRequest) {
     try {
-        const { count, error: countError } = await supabase
-            .from('Booking')
-            .select('*', { count: 'exact' })
-            .eq('owner_details', userId);
+        const searchParams = request.nextUrl.searchParams;
+        const page = searchParams.get('page');
+        const pageNumber = page ? parseInt(page, 10) : 1;
+        const startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE - 1;
 
-        if (countError) {
-            console.error('Error fetching total booking count for user:', countError);
-            return { bookings: null, error: countError, totalCount: null };
+        const cookieStore = cookies();
+        const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
+        const {
+            data: { session },
+            error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError || !session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const userId = session.user.id;
 
         const { data, error } = await supabase
             .from('Booking')
@@ -63,12 +66,12 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
             .range(startIndex, endIndex);
 
         if (error) {
-            console.error(`Error fetching booking history with pets for user (page ${page}):`, error);
-            return { bookings: null, error, totalCount: null };
+            console.error(`Error fetching more bookings with pets for user (page ${pageNumber}):`, error);
+            return NextResponse.json({ error: 'Failed to fetch more bookings with pet details' }, { status: 500 });
         }
 
-        if (data) {
-            const bookingRecords = data.map(booking => ({
+        return NextResponse.json({
+            bookings: data.map(booking => ({
                 booking_uuid: booking.booking_uuid,
                 date_booked: booking.date_booked,
                 service_date_start: booking.service_date_start,
@@ -85,50 +88,20 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                     grooming_id: pet.grooming_id ?? null,
                     groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
                         ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
-                        : (pet.GroomingPet && !Array.isArray(pet.GroomingPet) && typeof pet.GroomingPet === 'object'
+                        : (pet.GroomingPet && typeof pet.GroomingPet === 'object' && !Array.isArray(pet.GroomingPet)
                             ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
                             : null),
                     boarding_id_extension: pet.grooming_id ?? null,
                     boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? { id: (pet.BoardingPet[0] as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet[0] as { id: string; boarding_type: string }).boarding_type }
-                        : (pet.BoardingPet && !Array.isArray(pet.BoardingPet) && typeof pet.BoardingPet === 'object'
+                        ? { id: pet.BoardingPet[0].id, boarding_type: pet.BoardingPet[0].boarding_type }
+                        : (pet.BoardingPet && typeof pet.BoardingPet === 'object' && !Array.isArray(pet.BoardingPet)
                             ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
                             : null),
                 })) : [],
-            })) as BookingRecord[];
-            return { bookings: bookingRecords, error: null, totalCount: count };
-        }
-
-        return { bookings: null, error: null, totalCount: count };
+            })) as BookingRecord[]
+        }, { status: 200 });
     } catch (error: unknown) {
         console.error('An unexpected error occurred:', error);
-        return { bookings: null, error: new Error('Failed to fetch booking history with pets'), totalCount: null };
+        return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
     }
-}
-
-export default async function BookingHistoryPage() {
-    const supabase = await createServerSideClient();
-
-    const {
-        data: { session },
-        error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session?.user) {
-        redirect('/login');
-    }
-
-    const userId = session.user.id;
-    const { bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, userId, supabase);
-
-    return (
-        <div>
-            <BookingHistoryClient
-                bookings={initialBookings}
-                loading={!initialBookings && !initialError}
-                error={initialError}
-                totalCount={totalCount}
-            />
-        </div>
-    );
 }

@@ -17,6 +17,7 @@ import {
 } from "../types";
 import { FiChevronLeft, FiChevronRight, FiCheckCircle } from "react-icons/fi";
 import PoliciesModal from '@/_components/Services/PoliciesModal';
+import { policyContent } from "@/_components/Services/data/policyData" 
 
 interface ReviewStepProps {
   ownerDetails: OwnerDetails;
@@ -229,9 +230,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
     }
   };
 
-  const boardingTermsAndConditionsContent = [
-      "hi"
-  ];
+  const boardingTermsAndConditionsContent = policyContent.boarding.content;
 
   const handleOpenPoliciesModal = (e: React.MouseEvent) => {
       e.preventDefault(); 
@@ -646,7 +645,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                             </>
                           )}
                           <p className="text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
-                            Total: ${priceDetails.total.toFixed(2)}
+                            Total: ₱{priceDetails.total.toFixed(2)}
                           </p>
                         </>
                       ) : (
@@ -696,7 +695,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 isOpen={isPoliciesModalOpen}
                 onClose={handleClosePoliciesModal}
                 title="Pawspace Boarding Terms and Conditions"
-                content={boardingTermsAndConditionsContent}
+                content={boardingTermsAndConditionsContent} // This will now pass the actual content
             />
         </div>
 

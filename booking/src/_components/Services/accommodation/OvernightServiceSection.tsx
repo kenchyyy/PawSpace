@@ -13,11 +13,13 @@ const OvernightServicesSection: React.FC<OvernightServicesSectionProps> = ({ set
         }));
 
     return (
-        <ServiceSection
-        title="Overnight Services"
-        services={overnightServicesData}
-        columns={2}
+        <div className="mx-4">
+            <ServiceSection
+            title="Boarding Services"
+            services={overnightServicesData}
+            columns={2}
         />
+        </div>
     );
 };
 
