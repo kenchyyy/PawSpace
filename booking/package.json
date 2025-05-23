@@ -98,7 +98,10 @@
     ]
   },
   "optionalDependencies": {
-    "@tailwindcss/oxide-darwin-arm64": "^4.0.14",
-    "lightningcss-darwin-arm64": "^1.29"
+    "@tailwindcss/oxide-darwin-arm64": "^4.1.7",
+    "lightningcss-darwin-arm64": "^1.30.1",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.7",
+    "lightningcss-linux-x64-gnu": "^1.30.1"
   }
 }
+           
