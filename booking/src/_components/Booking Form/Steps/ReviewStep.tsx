@@ -695,7 +695,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
                 isOpen={isPoliciesModalOpen}
                 onClose={handleClosePoliciesModal}
                 title="Pawspace Boarding Terms and Conditions"
-                content={boardingTermsAndConditionsContent} // This will now pass the actual content
+                content={boardingTermsAndConditionsContent} 
             />
         </div>
 
@@ -708,27 +708,27 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
             Back
           </button>
           <button
-            onClick={handleConfirm}
-            disabled={!confirmedInfo || isSubmitting}
-            className={`
-              ${
-                isSubmitting
-                  ? "bg-blue-300 text-white cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }
-              font-semibold py-2.5 px-6 rounded-lg transition-colors duration-200 flex items-center
-            `}
+              onClick={handleConfirm}
+              disabled={!confirmedInfo || isSubmitting}
+              className={`
+                  font-semibold py-2.5 px-6 rounded-lg transition-colors duration-200 flex items-center
+                  ${
+                      !confirmedInfo || isSubmitting 
+                          ? "bg-blue-300 text-white cursor-not-allowed" 
+                          : "bg-blue-600 hover:bg-blue-700 text-white" 
+                  }
+              `}
           >
-            {isSubmitting ? (
-              <>
-                <span>Loading...</span>
-              </>
-            ) : (
-              <>
-                Confirm Booking
-                <FiChevronRight className="ml-2" />
-              </>
-            )}
+              {isSubmitting ? (
+                  <>
+                      <span>Loading...</span>
+                  </>
+              ) : (
+                  <>
+                      Confirm Booking
+                      <FiChevronRight className="ml-2" />
+                  </>
+              )}
           </button>
         </div>
       </div>
