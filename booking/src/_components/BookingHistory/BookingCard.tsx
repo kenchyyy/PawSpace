@@ -30,15 +30,23 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
     const checkInDate = rawServiceStart ? format(rawServiceStart, 'MMMM dd, yyyy') : 'N/A';
     const checkOutDate = rawServiceEnd ? format(rawServiceEnd, 'MMMM dd, yyyy') : 'N/A';
 
-    const today = new Date();
-    const checkIn = rawServiceStart || today;
-    const threeDaysBefore = new Date(checkIn);
-    threeDaysBefore.setDate(checkIn.getDate() - 3);
+    const now = new Date();
 
-    const isBeforeOrDuringStay = rawServiceEnd ? today <= rawServiceEnd : false;
-    const canCancelBeforeThreeDays = booking.approvalStatus === 'approved' && today < threeDaysBefore;
-    const isAfterStay = rawServiceEnd ? today > rawServiceEnd : false;
+    // Helper to get days between two dates (ignore time)
+    const daysBetween = (d1: Date, d2: Date) => {
+        const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+        const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+        return (utc1 - utc2) / (1000 * 60 * 60 * 24);
+    };
+
+    // Cancellation button disable logic
     const isPending = booking.status === 'pending';
+    const isPastBooking = rawServiceStart ? daysBetween(rawServiceStart, now) < 0 : false;
+    const isCheckInLessThan3Days = rawServiceStart ? daysBetween(rawServiceStart, now) < 3 : false;
+    const disableCancel = isPending && (isPastBooking || isCheckInLessThan3Days);
+
+    const isBeforeOrDuringStay = rawServiceEnd ? now <= rawServiceEnd : false;
+    const isAfterStay = rawServiceEnd ? now > rawServiceEnd : false;
     const accent = 'text-white';
     const textPrimary = 'text-white';
     const textSecondary = 'text-yellow-300';
@@ -140,7 +148,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                     Pet: {booking.pets && booking.pets.length > 0 ? booking.pets[0].name : 'N/A'}
                 </div>
             </h3>
-
             {isExpanded && (
                 <div className="space-y-2">
                     <div className='pt-2 border-t border-purple-800' >
@@ -150,9 +157,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                             <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Status: <span className={`${statusColor()} font-medium`}>{booking.status}</span></p>
-                            {booking.approvalStatus && (
-                                <p className={`${textSecondary} text-sm`}>Approval Status: <span className={`${booking.approvalStatus === 'approved' ? 'text-green-400' : 'text-yellow-400'} font-medium`}>{booking.approvalStatus}</span></p>
-                            )}
                             {booking.cancellationReason && (
                                 <p className={`${textSecondary} text-sm`}>Cancellation Reason: <span className={textPrimary}>{booking.cancellationReason}</span></p>
                             )}
@@ -206,18 +210,27 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                             ))}
                             <div className='pt-2 border-t border-purple-800'></div>
                         </div>
-                        
                     )}
 
-                    {(isPending || (isBeforeOrDuringStay && !isPending && canCancelBeforeThreeDays)) && (
-                        <div className="mt-4 flex justify-end">
+                    {/* Cancel Button for Pending Bookings */}
+                    {isPending && (
+                        <div className="mt-4 flex flex-col items-end space-y-1">
                             <button
                                 onClick={openCancelModal}
-                                disabled={isSubmittingCancel}
-                                className={`bg-yellow-500 hover:bg-yellow-600 cursor-pointer text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isSubmittingCancel ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={isSubmittingCancel || disableCancel}
+                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline
+                                    ${isSubmittingCancel || disableCancel ? 'opacity-50 cursor-not-allowed' : ''}
+                                `}
                             >
                                 {isSubmittingCancel ? 'Cancelling...' : 'Cancel Booking'}
                             </button>
+                            {disableCancel && (
+                                <p className="text-red-400 text-sm italic mt-1">
+                                    {isPastBooking
+                                        ? 'This booking is already past.'
+                                        : 'Cannot cancel booking when it is less than 3 days before the booking starts.'}
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>
