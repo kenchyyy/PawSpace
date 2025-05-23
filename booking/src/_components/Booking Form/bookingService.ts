@@ -33,7 +33,7 @@ export async function createBooking(
     let ownerId: number;
     try {
       const { data: existingOwner, error: ownerQueryError } = await supabase
-        .from('owner')
+        .from('Owner')
         .select('id')
         .eq('auth_id', user.id)
         .single();
@@ -46,7 +46,7 @@ export async function createBooking(
         ownerId = existingOwner.id;
       } else {
         const { data: newOwner, error: ownerInsertError } = await supabase
-          .from('owner')
+          .from('Owner')
           .insert({
             auth_id: user.id,
             name: ownerDetails.name,
@@ -70,7 +70,7 @@ export async function createBooking(
 
 
     const { data: bookingData, error: bookingInsertError } = await supabase
-      .from('booking')
+      .from('Booking')
       .insert({
         owner_id: ownerId,
         date_booked: new Date(),
@@ -104,7 +104,7 @@ export async function createBooking(
       const discountApplied = discountsApplied[i] || 0;
 
       const { data: petData, error: petInsertError } = await supabase
-        .from('pet')
+        .from('Pet')
         .insert({
           owner_id: ownerId,
           name: pet.name,
@@ -131,7 +131,7 @@ export async function createBooking(
       if (pet.service_type === 'boarding') {
         const boardingPet = pet as BoardingPet;
         const { error: boardingInsertError } = await supabase
-          .from('boarding')
+          .from('BoardingPet')
           .insert({
             booking_id: bookingId,
             pet_id: petId,
@@ -152,7 +152,7 @@ export async function createBooking(
         if (boardingPet.meal_instructions && Array.isArray(boardingPet.meal_instructions)) {
           for (const meal of boardingPet.meal_instructions) {
             const { error: mealInsertError } = await supabase
-              .from('meal_instructions')
+              .from('MealInstructions')
               .insert({
                 booking_id: bookingId,
                 meal_type: meal.meal_type,
@@ -170,7 +170,7 @@ export async function createBooking(
       } else if (pet.service_type === 'grooming') {
         const groomingPet = pet as GroomingPet;
         const { error: groomingInsertError } = await supabase
-          .from('grooming')
+          .from('GroomingPet')
           .insert({
             booking_id: bookingId,
             pet_id: petId,
@@ -209,7 +209,7 @@ export async function getBookings(authId: string) {
 
   try {
     const { data: bookings, error } = await supabase
-      .from('booking')
+      .from('Booking')
       .select(`
         booking_uuid,
         date_booked,
