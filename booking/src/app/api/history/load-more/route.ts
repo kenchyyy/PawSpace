@@ -1,7 +1,8 @@
+// app/api/history/load-more/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { BookingRecord, OwnerDetails, BoardingType, GroomingType } from '@/_components/BookingHistory/types/bookingRecordType';
+import { BookingRecord, OwnerDetails, BoardingPet, GroomService, MealInstructionType } from '@/_components/BookingHistory/types/bookingRecordType';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -16,18 +17,22 @@ export async function GET(request: NextRequest) {
         const cookieStore = cookies();
         const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
+        let userId: string | null = null;
+        let requiresAuth: boolean = false;
+
         const {
             data: { session },
             error: sessionError,
         } = await supabase.auth.getSession();
 
-        if (sessionError || !session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        if (sessionError) {
+            console.error("Supabase session error:", sessionError);
+        } else if (session?.user) {
+            userId = session.user.id;
+            requiresAuth = true;
         }
 
-        const userId = session.user.id;
-
-        const { data, error } = await supabase
+        let query = supabase
             .from('Booking')
             .select(`
                 booking_uuid,
@@ -48,38 +53,65 @@ export async function GET(request: NextRequest) {
                 Pet (
                     pet_uuid,
                     name,
-                    age,              
+                    age,
                     pet_type,
-                    breed,            
-                    size,             
-                    vaccinated,      
-                    vitamins_or_medications, 
+                    breed,
+                    size,
+                    vaccinated,
+                    vitamins_or_medications,
                     allergies,
                     grooming_id,
                     boarding_id_extension,
                     GroomingPet (
                         id,
-                        service_variant
+                        service_variant,
+                        service_time
                     ),
                     BoardingPet (
                         id,
+                        check_in_time,
+                        check_out_time,
+                        check_in_date,
                         boarding_type,
-                        room_size,          
-                        special_feeding_request
+                        room_size,
+                        special_feeding_request,
+                        MealInstructions (
+                            id,
+                            meal_type,
+                            time,
+                            food,
+                            notes
+                        )
                     )
                 )
-            `)
-            .eq('owner_details', userId)
+            `);
+
+        if (userId) {
+            query = query.eq('owner_details', userId);
+        }
+
+        const { data, error } = await query
             .order('date_booked', { ascending: false })
             .range(startIndex, endIndex);
 
         if (error) {
-            console.error(`Error fetching more bookings with pets for user (page ${pageNumber}):`, error);
-            return NextResponse.json({ error: 'Failed to fetch more bookings with pet details' }, { status: 500 });
+            console.error(`Error fetching bookings (page ${pageNumber}):`, error);
+            return NextResponse.json({ error: 'Failed to fetch booking details' }, { status: 500 });
         }
 
-        return NextResponse.json({
-            bookings: data.map(booking => ({
+        if (requiresAuth && !userId) {
+             return NextResponse.json({ error: 'Unauthorized. Please log in to view your bookings.' }, { status: 401 });
+        }
+
+
+        const formattedBookings: BookingRecord[] = data.map(booking => {
+            const ownerDetails: OwnerDetails | null = Array.isArray(booking.Owner) && booking.Owner.length > 0
+                ? (booking.Owner[0] as OwnerDetails)
+                : (booking.Owner && typeof booking.Owner === 'object' && !Array.isArray(booking.Owner)
+                    ? (booking.Owner as OwnerDetails)
+                    : null);
+
+            return {
                 booking_uuid: booking.booking_uuid,
                 date_booked: booking.date_booked,
                 service_date_start: booking.service_date_start,
@@ -88,38 +120,54 @@ export async function GET(request: NextRequest) {
                 special_requests: booking.special_requests ?? null,
                 total_amount: booking.total_amount,
                 discount_applied: booking.discount_applied ?? null,
-                owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner[0] as OwnerDetails,
+                owner_details: ownerDetails as OwnerDetails,
                 pets: booking.Pet ? booking.Pet.map(pet => {
                     const groomService = Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
-                        ? pet.GroomingPet[0] as GroomingType
+                        ? pet.GroomingPet[0] as GroomService
                         : (pet.GroomingPet && typeof pet.GroomingPet === 'object' && !Array.isArray(pet.GroomingPet)
-                            ? pet.GroomingPet as GroomingType
+                            ? pet.GroomingPet as GroomService
                             : null);
 
-                    const boardingPet = Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? pet.BoardingPet[0] as BoardingType
+                    const boardingPetRaw = Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                        ? pet.BoardingPet[0]
                         : (pet.BoardingPet && typeof pet.BoardingPet === 'object' && !Array.isArray(pet.BoardingPet)
-                            ? pet.BoardingPet as BoardingType
+                            ? pet.BoardingPet
                             : null);
+
+                    const boardingPet: BoardingPet | undefined = boardingPetRaw ? {
+                        id: boardingPetRaw.id,
+                        boarding_type: boardingPetRaw.boarding_type,
+                        room_size: boardingPetRaw.room_size,
+                        special_feeding_request: boardingPetRaw.special_feeding_request,
+                        check_in_time: boardingPetRaw.check_in_time,
+                        check_out_time: boardingPetRaw.check_out_time,
+                        check_in_date: boardingPetRaw.check_in_date,
+                        meal_instructions: Array.isArray(boardingPetRaw.MealInstructions) ? boardingPetRaw.MealInstructions as MealInstructionType[] : [],
+                    } as BoardingPet : undefined;
 
                     return {
                         pet_uuid: pet.pet_uuid,
                         name: pet.name,
                         age: pet.age,
                         pet_type: pet.pet_type,
-                        breed: pet.breed, 
-                        size: pet.size, 
+                        breed: pet.breed,
+                        size: pet.size,
                         vaccinated: pet.vaccinated,
                         vitamins_or_medications: pet.vitamins_or_medications ?? null,
-                        allergies: pet.allergies ?? null, 
+                        allergies: pet.allergies ?? null,
                         grooming_id: pet.grooming_id ?? null,
-                        groom_service: groomService,
-                        boarding_id_extension: pet.boarding_id_extension ?? null, 
+                        groom_service: groomService ?? undefined,
+                        boarding_id_extension: pet.boarding_id_extension ?? null,
                         boarding_pet: boardingPet,
                     };
                 }) : [],
-            })) as BookingRecord[]
+            };
+        });
+
+        return NextResponse.json({
+            bookings: formattedBookings
         }, { status: 200 });
+
     } catch (error: unknown) {
         console.error('An unexpected error occurred:', error);
         return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
