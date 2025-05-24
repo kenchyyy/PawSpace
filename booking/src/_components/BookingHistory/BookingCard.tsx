@@ -32,14 +32,12 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
 
     const now = new Date();
 
-    // Helper to get days between two dates (ignore time)
     const daysBetween = (d1: Date, d2: Date) => {
         const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
         const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
-        return (utc1 - utc2) / (1000 * 60 * 60 * 24);
+        return Math.floor((utc1 - utc2) / (1000 * 60 * 60 * 24));
     };
 
-    // Cancellation button disable logic
     const isPending = booking.status === 'pending';
     const isPastBooking = rawServiceStart ? daysBetween(rawServiceStart, now) < 0 : false;
     const isCheckInLessThan3Days = rawServiceStart ? daysBetween(rawServiceStart, now) < 3 : false;
@@ -152,7 +150,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                 <div className="space-y-2">
                     <div className='pt-2 border-t border-purple-800' >
                         <div className='mb-2 p-2 rounded-md bg-purple-800 last:mb-0'>
-                            <p className={`${textSecondary} text-sm`}>Booking ID: <span className={textPrimary}>{booking.booking_uuid}</span></p>
                             <p className={`${textSecondary} text-sm`}>Booked On: <span className={textPrimary}>{publishDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Check-in: <span className={textPrimary}>{checkInDate}</span></p>
                             <p className={`${textSecondary} text-sm`}>Check-out: <span className={textPrimary}>{checkOutDate}</span></p>
@@ -178,7 +175,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                         <div className='pt-2 border-t border-purple-800' >
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Owner Details</h4>
                             <div className="mb-2 p-2 rounded-md bg-purple-800 last:mb-0">
-                                <p className={`${textSecondary} text-sm`}>ID: <span className={textPrimary}>{booking.owner_details.id}</span></p>
                                 <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{booking.owner_details.name}</span></p>
                                 <p className={`${textSecondary} text-sm`}>Address: <span className={textPrimary}>{booking.owner_details.address}</span></p>
                                 <p className={`${textSecondary} text-sm`}>Contact: <span className={textPrimary}>{booking.owner_details.contact_number}</span></p>
@@ -192,18 +188,30 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                             <h4 className={`${accent} text-lg font-semibold mb-1`}>Pet Details</h4>
                             {booking.pets.map((pet) => (
                                 <div key={pet.pet_uuid} className="mb-2 p-2 rounded-md bg-purple-800 last:mb-0">
-                                    <p className={`${textSecondary} text-sm`}>Pet ID: <span className={textPrimary}>{pet.pet_uuid}</span></p>
+                                    <p className={`${textSecondary} text-sm`}>Name: <span className={textPrimary}>{pet.name}</span></p> 
                                     <p className={`${textSecondary} text-sm`}>Type: <span className={textPrimary}>{pet.pet_type}</span></p>
+                                    <p className={`${textSecondary} text-sm`}>Age: <span className={textPrimary}>{pet.age}</span></p> 
+                                    <p className={`${textSecondary} text-sm`}>Breed: <span className={textPrimary}>{pet.breed}</span></p> 
+                                    <p className={`${textSecondary} text-sm`}>Size: <span className={textPrimary}>{pet.size}</span></p> 
+                                    <p className={`${textSecondary} text-sm`}>Vaccinated: <span className={textPrimary}>{pet.vaccinated ? 'Yes' : 'No'}</span></p> 
+                                    <p className={`${textSecondary} text-sm`}>Vitamins/Medications: <span className={textPrimary}>{pet.vitamins_or_medications || 'None'}</span></p> 
+                                    <p className={`${textSecondary} text-sm`}>Allergies: <span className={textPrimary}>{pet.allergies || 'None'}</span></p> 
+
                                     {pet.groom_service?.service_variant && (
                                         <p className={`${textSecondary} text-sm`}>Grooming: <span className={textPrimary}>{pet.groom_service.service_variant}</span></p>
                                     )}
                                     {!pet.groom_service && (
                                         <p className={`${textSecondary} text-sm`}>Grooming: <span className={textPrimary}>Not applicable</span></p>
                                     )}
-                                    {pet.boarding_pet?.boarding_type && (
-                                        <p className={`${textSecondary} text-sm`}>Boarding: <span className={textPrimary}>{pet.boarding_pet.boarding_type}</span></p>
+
+                                    {pet.boarding_pet && (
+                                        <>
+                                            <p className={`${textSecondary} text-sm`}>Boarding Type: <span className={textPrimary}>{pet.boarding_pet.boarding_type}</span></p>
+                                            <p className={`${textSecondary} text-sm`}>Room Size: <span className={textPrimary}>{pet.boarding_pet.room_size}</span></p> 
+                                            <p className={`${textSecondary} text-sm`}>Special Feeding Request: <span className={textPrimary}>{pet.boarding_pet.special_feeding_request || 'None'}</span></p>
+                                        </>
                                     )}
-                                    {!pet.boarding_pet && !pet.boarding_id_extension && (
+                                    {!pet.boarding_pet && (
                                         <p className={`${textSecondary} text-sm`}>Boarding: <span className={textPrimary}>Not applicable</span></p>
                                     )}
                                 </div>
@@ -212,7 +220,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking }) => {
                         </div>
                     )}
 
-                    {/* Cancel Button for Pending Bookings */}
                     {isPending && (
                         <div className="mt-4 flex flex-col items-end space-y-1">
                             <button

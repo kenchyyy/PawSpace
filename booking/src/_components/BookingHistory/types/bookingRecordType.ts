@@ -6,12 +6,20 @@ export interface GroomingType {
 export interface BoardingType {
     id: string; 
     boarding_type: string; 
+    room_size: string;
+    special_feeding_request: string;
 }
 
 export interface PetDetails {
     pet_uuid: string; 
     name: string;
+    age: string;
     pet_type: string;
+    breed: string;
+    size: string;
+    vaccinated: boolean;
+    vitamins_or_medications: string;
+    allergies: string;
     grooming_id: string | null; 
     groom_service?: GroomingType | null;
     boarding_id_extension: string | null; 
@@ -36,7 +44,6 @@ export type BookingRecord = {
     special_requests: string | null;
     total_amount: number;
     discount_applied: number | null;
-    approvalStatus?: 'pending' | 'approved' | 'cancelled' | null;
     cancellationReason: string | null;
     pets?: PetDetails[];
 };

@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { BookingRecord, OwnerDetails } from '@/_components/BookingHistory/types/bookingRecordType';
+import { BookingRecord, OwnerDetails, BoardingType, GroomingType } from '@/_components/BookingHistory/types/bookingRecordType';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -48,7 +48,13 @@ export async function GET(request: NextRequest) {
                 Pet (
                     pet_uuid,
                     name,
+                    age,              
                     pet_type,
+                    breed,            
+                    size,             
+                    vaccinated,      
+                    vitamins_or_medications, 
+                    allergies,
                     grooming_id,
                     boarding_id_extension,
                     GroomingPet (
@@ -57,7 +63,9 @@ export async function GET(request: NextRequest) {
                     ),
                     BoardingPet (
                         id,
-                        boarding_type
+                        boarding_type,
+                        room_size,          
+                        special_feeding_request
                     )
                 )
             `)
@@ -80,24 +88,36 @@ export async function GET(request: NextRequest) {
                 special_requests: booking.special_requests ?? null,
                 total_amount: booking.total_amount,
                 discount_applied: booking.discount_applied ?? null,
-                owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner as OwnerDetails,
-                pets: booking.Pet ? booking.Pet.map(pet => ({
-                    pet_uuid: pet.pet_uuid,
-                    name: pet.name,
-                    pet_type: pet.pet_type,
-                    grooming_id: pet.grooming_id ?? null,
-                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
-                        ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
+                owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner[0] as OwnerDetails,
+                pets: booking.Pet ? booking.Pet.map(pet => {
+                    const groomService = Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
+                        ? pet.GroomingPet[0] as GroomingType
                         : (pet.GroomingPet && typeof pet.GroomingPet === 'object' && !Array.isArray(pet.GroomingPet)
-                            ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
-                            : null),
-                    boarding_id_extension: pet.grooming_id ?? null,
-                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? { id: pet.BoardingPet[0].id, boarding_type: pet.BoardingPet[0].boarding_type }
+                            ? pet.GroomingPet as GroomingType
+                            : null);
+
+                    const boardingPet = Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                        ? pet.BoardingPet[0] as BoardingType
                         : (pet.BoardingPet && typeof pet.BoardingPet === 'object' && !Array.isArray(pet.BoardingPet)
-                            ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
-                            : null),
-                })) : [],
+                            ? pet.BoardingPet as BoardingType
+                            : null);
+
+                    return {
+                        pet_uuid: pet.pet_uuid,
+                        name: pet.name,
+                        age: pet.age,
+                        pet_type: pet.pet_type,
+                        breed: pet.breed, 
+                        size: pet.size, 
+                        vaccinated: pet.vaccinated,
+                        vitamins_or_medications: pet.vitamins_or_medications ?? null,
+                        allergies: pet.allergies ?? null, 
+                        grooming_id: pet.grooming_id ?? null,
+                        groom_service: groomService,
+                        boarding_id_extension: pet.boarding_id_extension ?? null, 
+                        boarding_pet: boardingPet,
+                    };
+                }) : [],
             })) as BookingRecord[]
         }, { status: 200 });
     } catch (error: unknown) {

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
-import { BookingRecord, OwnerDetails } from '@/_components/BookingHistory/types/bookingRecordType';
+import { BookingRecord, OwnerDetails, GroomingType, BoardingType } from '@/_components/BookingHistory/types/bookingRecordType';
 import BookingHistoryClient from '@/_components/BookingHistory/BookingHistoryClient';
 import { redirect } from 'next/navigation';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -45,7 +45,13 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                 Pet (
                     pet_uuid,
                     name,
+                    age,             
                     pet_type,
+                    breed,            
+                    size,             
+                    vaccinated,       
+                    vitamins_or_medications, 
+                    allergies,
                     grooming_id,
                     boarding_id_extension,
                     GroomingPet (
@@ -53,8 +59,10 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                         service_variant
                     ),
                     BoardingPet (
-                        id,
-                        boarding_type
+                        id,   
+                        boarding_type,
+                        room_size,          
+                        special_feeding_request 
                     )
                 )
             `)
@@ -78,23 +86,35 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                 total_amount: booking.total_amount,
                 discount_applied: booking.discount_applied ?? null,
                 owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner as OwnerDetails,
-                pets: booking.Pet ? booking.Pet.map(pet => ({
-                    pet_uuid: pet.pet_uuid,
-                    name: pet.name,
-                    pet_type: pet.pet_type,
-                    grooming_id: pet.grooming_id ?? null,
-                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
-                        ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
-                        : (pet.GroomingPet && !Array.isArray(pet.GroomingPet) && typeof pet.GroomingPet === 'object'
-                            ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
-                            : null),
-                    boarding_id_extension: pet.grooming_id ?? null,
-                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? { id: (pet.BoardingPet[0] as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet[0] as { id: string; boarding_type: string }).boarding_type }
-                        : (pet.BoardingPet && !Array.isArray(pet.BoardingPet) && typeof pet.BoardingPet === 'object'
-                            ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
-                            : null),
-                })) : [],
+                pets: booking.Pet ? booking.Pet.map(pet => {
+                    const groomService = Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
+                        ? pet.GroomingPet[0] as GroomingType
+                        : (pet.GroomingPet && typeof pet.GroomingPet === 'object' && !Array.isArray(pet.GroomingPet)
+                            ? pet.GroomingPet as GroomingType
+                            : null);
+
+                    const boardingPet = Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                        ? pet.BoardingPet[0] as BoardingType
+                        : (pet.BoardingPet && typeof pet.BoardingPet === 'object' && !Array.isArray(pet.BoardingPet)
+                            ? pet.BoardingPet as BoardingType
+                            : null);
+
+                    return {
+                        pet_uuid: pet.pet_uuid,
+                        name: pet.name,
+                        age: pet.age, 
+                        pet_type: pet.pet_type,
+                        breed: pet.breed,
+                        size: pet.size, 
+                        vaccinated: pet.vaccinated, 
+                        vitamins_or_medications: pet.vitamins_or_medications ?? null, 
+                        allergies: pet.allergies ?? null, 
+                        grooming_id: pet.grooming_id ?? null,
+                        groom_service: groomService,
+                        boarding_id_extension: pet.boarding_id_extension ?? null,
+                        boarding_pet: boardingPet,
+                    };
+                }) : [],
             })) as BookingRecord[];
             return { bookings: bookingRecords, error: null, totalCount: count };
         }
