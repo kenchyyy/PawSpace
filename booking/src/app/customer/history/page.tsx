@@ -1,30 +1,38 @@
+// src/app/history/page.tsx
 'use server';
 
 import React from 'react';
 import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
-import { BookingRecord, OwnerDetails } from '@/_components/BookingHistory/types/bookingRecordType';
+import { BookingRecord, OwnerDetails, GroomService, BoardingPet, MealInstructionType } from '@/_components/BookingHistory/types/bookingRecordType';
 import BookingHistoryClient from '@/_components/BookingHistory/BookingHistoryClient';
 import { redirect } from 'next/navigation';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5; 
 
-async function getBookingHistory(page: number, userId: string, supabase: SupabaseClient): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
+async function getBookingHistory(
+    page: number,
+    supabase: SupabaseClient,
+    userId: string | null = null // userId is optional; if null, fetches all
+): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE - 1;
 
     try {
-        const { count, error: countError } = await supabase
-            .from('Booking')
-            .select('*', { count: 'exact' })
-            .eq('owner_details', userId);
+        // Query for total count (conditionally filtered by userId)
+        let countQuery = supabase.from('Booking').select('*', { count: 'exact' });
+        if (userId) {
+            countQuery = countQuery.eq('owner_details', userId);
+        }
+        const { count, error: countError } = await countQuery;
 
         if (countError) {
-            console.error('Error fetching total booking count for user:', countError);
+            console.error('Error fetching total booking count:', countError);
             return { bookings: null, error: countError, totalCount: null };
         }
 
-        const { data, error } = await supabase
+        // Query for booking data (conditionally filtered by userId)
+        let dataQuery = supabase
             .from('Booking')
             .select(`
                 booking_uuid,
@@ -45,57 +53,113 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
                 Pet (
                     pet_uuid,
                     name,
+                    age,
                     pet_type,
+                    breed,
+                    size,
+                    vaccinated,
+                    vitamins_or_medications,
+                    allergies,
                     grooming_id,
                     boarding_id_extension,
                     GroomingPet (
                         id,
-                        service_variant
+                        service_variant,
+                        service_time
                     ),
                     BoardingPet (
                         id,
-                        boarding_type
+                        check_in_time,
+                        check_out_time,
+                        check_in_date,
+                        boarding_type,
+                        room_size,
+                        special_feeding_request,
+                        MealInstructions (
+                            id,
+                            meal_type,
+                            time,
+                            food,
+                            notes
+                        )
                     )
                 )
-            `)
-            .eq('owner_details', userId)
+            `);
+
+        if (userId) {
+            dataQuery = dataQuery.eq('owner_details', userId);
+        }
+
+        const { data, error } = await dataQuery
             .order('date_booked', { ascending: false })
             .range(startIndex, endIndex);
 
         if (error) {
-            console.error(`Error fetching booking history with pets for user (page ${page}):`, error);
+            console.error(`Error fetching booking history with pets (page ${page}):`, error);
             return { bookings: null, error, totalCount: null };
         }
 
         if (data) {
-            const bookingRecords = data.map(booking => ({
-                booking_uuid: booking.booking_uuid,
-                date_booked: booking.date_booked,
-                service_date_start: booking.service_date_start,
-                service_date_end: booking.service_date_end,
-                status: booking.status,
-                special_requests: booking.special_requests ?? null,
-                total_amount: booking.total_amount,
-                discount_applied: booking.discount_applied ?? null,
-                owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner as OwnerDetails,
-                pets: booking.Pet ? booking.Pet.map(pet => ({
-                    pet_uuid: pet.pet_uuid,
-                    name: pet.name,
-                    pet_type: pet.pet_type,
-                    grooming_id: pet.grooming_id ?? null,
-                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
-                        ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
-                        : (pet.GroomingPet && !Array.isArray(pet.GroomingPet) && typeof pet.GroomingPet === 'object'
-                            ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
-                            : null),
-                    boarding_id_extension: pet.grooming_id ?? null,
-                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
-                        ? { id: (pet.BoardingPet[0] as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet[0] as { id: string; boarding_type: string }).boarding_type }
-                        : (pet.BoardingPet && !Array.isArray(pet.BoardingPet) && typeof pet.BoardingPet === 'object'
-                            ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
-                            : null),
-                })) : [],
-            })) as BookingRecord[];
+            const bookingRecords = data.map(booking => {
+                const ownerDetails: OwnerDetails | null = Array.isArray(booking.Owner) && booking.Owner.length > 0
+                    ? (booking.Owner[0] as OwnerDetails)
+                    : (booking.Owner && typeof booking.Owner === 'object' && !Array.isArray(booking.Owner)
+                        ? (booking.Owner as OwnerDetails)
+                        : null);
+
+                return {
+                    booking_uuid: booking.booking_uuid,
+                    date_booked: booking.date_booked,
+                    service_date_start: booking.service_date_start,
+                    service_date_end: booking.service_date_end,
+                    status: booking.status,
+                    special_requests: booking.special_requests ?? null,
+                    total_amount: booking.total_amount,
+                    discount_applied: booking.discount_applied ?? null,
+                    owner_details: ownerDetails as OwnerDetails, 
+                    pets: booking.Pet ? booking.Pet.map(pet => {
+                        const groomService = Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
+                            ? pet.GroomingPet[0] as GroomService
+                            : (pet.GroomingPet && typeof pet.GroomingPet === 'object' && !Array.isArray(pet.GroomingPet)
+                                ? pet.GroomingPet as GroomService
+                                : null);
+
+                        const boardingPetRaw = Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                            ? pet.BoardingPet[0]
+                            : (pet.BoardingPet && typeof pet.BoardingPet === 'object' && !Array.isArray(pet.BoardingPet)
+                                ? pet.BoardingPet
+                                : null);
+
+                        const boardingPet: BoardingPet | null = boardingPetRaw ? {
+                            id: boardingPetRaw.id,
+                            boarding_type: boardingPetRaw.boarding_type,
+                            room_size: boardingPetRaw.room_size,
+                            special_feeding_request: boardingPetRaw.special_feeding_request,
+                            check_in_time: boardingPetRaw.check_in_time,
+                            check_out_time: boardingPetRaw.check_out_time,
+                            check_in_date: boardingPetRaw.check_in_date,
+                            meal_instructions: Array.isArray(boardingPetRaw.MealInstructions) ? boardingPetRaw.MealInstructions as MealInstructionType[] : [],
+                        } as BoardingPet : null;
+
+                        return {
+                            pet_uuid: pet.pet_uuid,
+                            name: pet.name,
+                            age: pet.age,
+                            pet_type: pet.pet_type,
+                            breed: pet.breed,
+                            size: pet.size,
+                            vaccinated: pet.vaccinated,
+                            vitamins_or_medications: pet.vitamins_or_medications ?? null,
+                            allergies: pet.allergies ?? null,
+                            grooming_id: pet.grooming_id ?? null,
+                            groom_service: groomService,
+                            boarding_id_extension: pet.boarding_id_extension ?? null,
+                            boarding_pet: boardingPet,
+                        };
+                    }) : [],
+                };
+            }) as BookingRecord[];
+
             return { bookings: bookingRecords, error: null, totalCount: count };
         }
 
@@ -109,17 +173,28 @@ async function getBookingHistory(page: number, userId: string, supabase: Supabas
 export default async function BookingHistoryPage() {
     const supabase = await createServerSideClient();
 
+    let userId: string | null = null;
+    let initialError: Error | null = null;
+    let totalCount: number | null = null;
+    let initialBookings: BookingRecord[] | null = null;
+
+    // Attempt to get the user session
     const {
         data: { session },
         error: sessionError,
     } = await supabase.auth.getSession();
 
-    if (sessionError || !session?.user) {
+    if (sessionError) {
+        console.error("Supabase session error in BookingHistoryPage:", sessionError);
+        // If there's a session error, `userId` will remain null, and `getBookingHistory` will fetch all.
+        // Just uncomment the redirect below if you want to strictly enforce login for this page.
         redirect('/login');
+    } else if (session?.user) {
+        userId = session.user.id;
     }
 
-    const userId = session.user.id;
-    const { bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, userId, supabase);
+    // Call getBookingHistory with or without userId based on session
+    ({ bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, supabase, userId));
 
     return (
         <div>
