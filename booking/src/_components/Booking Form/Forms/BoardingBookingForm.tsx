@@ -1,4 +1,3 @@
-// BoardingBookingForm.tsx
 'use client';
 import React, { useState } from 'react';
 import BaseBookingForm from './BaseBookingForm';
@@ -141,11 +140,13 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                 const handleDateChange = (type: 'checkIn' | 'checkOut', date: Date | null) => {
                     const timeToPass = type === 'checkIn' ? pet.check_in_time : pet.check_out_time;
                     onScheduleChange(type, date, timeToPass);
+                    setShowAvailability(true); 
                 };
 
                 const handleTimeChange = (type: 'checkIn' | 'checkOut', time: string) => {
                     const dateToPass = type === 'checkIn' ? parseDate(pet.check_in_date) : parseDate(pet.check_out_date);
                     onScheduleChange(type, dateToPass, time);
+                    setShowAvailability(true); 
                 };
 
                 const getMinDate = (): Date | undefined => {
@@ -214,47 +215,17 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     {errors.boarding_type && <p className="mt-1 text-sm text-red-600">{errors.boarding_type}</p>}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-medium text-gray-700">Room Size *</label>
-                                    <select
-                                        name="room_size"
-                                        value={pet.room_size}
-                                        onChange={(e) => {
-                                            onChange(e);
-                                            setShowAvailability(true);
-                                        }}
-                                        className={`block w-full px-3 py-2 border ${errors.room_size ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm`}
-                                        required
-                                    >
-                                        <option value="">Select room size</option>
-                                        {pet.pet_type === 'dog' && (
-                                            <>
-                                                <option value="small">Small (P65/hr or P450/night)</option>
-                                                <option value="medium">Medium (P75/hr or P600/night)</option>
-                                                <option value="large">Large (P110/hr or P800/night)</option>
-                                            </>
-                                        )}
-                                        {pet.pet_type === 'cat' && (
-                                            <>
-                                                <option value="cat_small">Cat - Small (P65/hr or P450/night)</option>
-                                                <option value="cat_big">Cat - Big (P65/hr or P600/night)</option>
-                                            </>
-                                        )}
-                                    </select>
-                                    {errors.room_size && <p className="mt-1 text-sm text-red-600">{errors.room_size}</p>}
-                                </div>
-
-                                
-
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Please note: A ₱200 surcharge applies for check-ins/check-outs before and after our standard service hours, 9AM-7PM.
+                                </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-In Date *</label>
                                         <DateDropdown
-                                            name="check_in_date" 
+                                            name="check_in_date"
                                             selectedDate={parseDate(pet.check_in_date)}
                                             onChange={(date) => {
                                                 handleDateChange('checkIn', date);
-                                                setShowAvailability(true);
                                             }}
                                             unavailableDates={unavailableDates}
                                             minDate={new Date()}
@@ -265,14 +236,14 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-In Time *</label>
                                         <TimeDropdown
-                                            name="check_in_time" 
+                                            name="check_in_time"
                                             selectedTime={pet.check_in_time}
                                             onChange={(time) => {
                                                 handleTimeChange('checkIn', time);
-                                                setShowAvailability(true);
                                             }}
                                             unavailableTimes={unavailableTimes}
                                             disabled={!pet.check_in_date}
+                                            serviceDate={pet.check_in_date}
                                         />
                                         {errors.check_in_time && <p className="mt-1 text-sm text-red-600">{errors.check_in_time}</p>}
                                     </div>
@@ -280,11 +251,10 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Check-Out Date *</label>
                                         <DateDropdown
-                                            name="check_out_date" 
+                                            name="check_out_date"
                                             selectedDate={parseDate(pet.check_out_date)}
                                             onChange={(date) => {
                                                 handleDateChange('checkOut', date);
-                                                setShowAvailability(true);
                                             }}
                                             unavailableDates={unavailableDates}
                                             minDate={getMinDate()}
@@ -299,15 +269,59 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                             selectedTime={pet.check_out_time}
                                             onChange={(time) => {
                                                 handleTimeChange('checkOut', time);
-                                                setShowAvailability(true);
                                             }}
                                             unavailableTimes={unavailableTimes}
-                                            disabled={!pet.check_out_date}
-                                            sameDayCheckInTime={pet.boarding_type === 'day' && pet.check_in_date && isSameDay(parseDate(pet.check_in_date), parseDate(pet.check_out_date)) ? pet.check_in_time : undefined}
+                                            disabled={!pet.check_out_date} 
+                                            serviceDate={pet.check_out_date}
+                                            sameDayCheckInTime={
+                                                pet.boarding_type === 'day' && 
+                                                pet.check_in_date &&
+                                                pet.check_out_date && 
+                                                isSameDay(parseDate(pet.check_in_date), parseDate(pet.check_out_date))
+                                                    ? pet.check_in_time 
+                                                    : undefined 
+                                            }
                                         />
                                         {errors.check_out_time && <p className="mt-1 text-sm text-red-600">{errors.check_out_time}</p>}
-                                    </div>     
+                                    </div>
                                 </div>
+
+                                                                <div className="space-y-2">
+                                    <label className="block text-sm font-medium text-gray-700">Room Size *</label>
+                                    <select
+                                        name="room_size"
+                                        value={pet.room_size}
+                                        onChange={(e) => {
+                                            onChange(e);
+                                            setShowAvailability(true);
+                                        }}
+                                        className={`block w-full px-3 py-2 border ${errors.room_size ? 'border-red-300 bg-red-50' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm`}
+                                        required
+                                        disabled={!pet.pet_type} 
+                                    >
+                                        <option value="">
+                                            {pet.pet_type ? 'Select room size' : 'Select pet type to select room size'}
+                                        </option>
+                                        {pet.pet_type === 'dog' && (
+                                            <>
+                                                <option value="small">Small (P65/hr or P450/night)</option>
+                                                <option value="medium">Medium (P75/hr or P600/night)</option>
+                                                <option value="large">Large (P110/hr or P800/night)</option>
+                                            </>
+                                        )}
+                                        {pet.pet_type === 'cat' && (
+                                            <>
+                                                <option value="cat_small">Cat - Small (P65/hr or P450/night)</option>
+                                                <option value="cat_large">Cat - Large (P65/hr or P600/night)</option>
+                                            </>
+                                        )}
+                                    </select>
+                                    {errors.room_size && <p className="mt-1 text-sm text-red-600">{errors.room_size}</p>}
+                                    {!pet.pet_type && (
+                                        <p className="mt-1 text-sm text-blue-600">Please select a Pet Type to view room size options.</p>
+                                    )}
+                                </div>
+
                                 {/* Room Availability Display */}
                                 {showAvailability && pet.room_size && (
                                     <RoomAvailabilityDisplay
@@ -326,19 +340,19 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
                                     onChange={onChange}
                                     errors={errors}
                                 />
-                                <div className="space-y-2 md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Special Requests</label>
-                                    <textarea
-                                        name="special_requests"
-                                        value={pet.special_requests}
-                                        onChange={onChange}
-                                        className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('special_requests')}`}
-                                        rows={3}
-                                    />
-                                    {errors.special_requests && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.special_requests}</p>
-                                    )}
-                                </div>
+                            </div>
+                            <div className="space-y-2 md:col-span-2 mt-8">
+                                <label className="block text-sm font-medium text-gray-700">Special Requests</label>
+                                <textarea
+                                    name="special_requests"
+                                    value={pet.special_requests}
+                                    onChange={onChange}
+                                    className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('special_requests')}`}
+                                    rows={3}
+                                />
+                                {errors.special_requests && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.special_requests}</p>
+                                )}
                             </div>
                         </div>
                     </div>

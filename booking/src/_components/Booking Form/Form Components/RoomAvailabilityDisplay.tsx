@@ -1,4 +1,3 @@
-// src/_components/Booking Form/RoomAvailabilityDisplay.tsx
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';

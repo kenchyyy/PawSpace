@@ -40,7 +40,7 @@ export type SpecialOffersProps = {
 
 type Service = {
     label: string;
-    icon: string;
+    icon: React.ReactNode;
     bgColor: string;
     glow?: boolean;
     onClick?: () => void;
@@ -54,7 +54,7 @@ export type ServiceSectionProps = {
 
 export type ServiceCardProps = {
     label: string;
-    icon: string;
+    icon: React.ReactNode;
     bgColor: string;
     onClick?: () => void;
 };

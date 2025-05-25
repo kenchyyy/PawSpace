@@ -1,30 +1,59 @@
 import React from 'react';
-import { Pet, ServiceType, ScheduleChangeHandler, BasePetDetailsProps } from '../types'; 
+import { Pet, ServiceType, ScheduleChangeHandler, BasePetDetailsProps } from '../types';
 
 const BasePetDetails: React.FC<BasePetDetailsProps> = ({
     pet,
     onChange,
     errors,
-    onScheduleChange, 
-    serviceType, 
-    dateHighlight, 
+    onScheduleChange,
+    serviceType,
+    dateHighlight,
     dateDefaultMessage,
-    unavailableDates, 
-    unavailableTimes, 
-    
+    unavailableDates,
+    unavailableTimes,
 }) => {
     const getError = (fieldName: string) => errors[fieldName] ? 'border-red-500 bg-red-50' : 'border-gray-300';
 
-    const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        // Allows only numbers
-        const numericValue = value.replace(/[^0-9]/g, '');
-        onChange({ target: { name, value: numericValue } } as React.ChangeEvent<HTMLInputElement>);
+    const parseAge = (ageString: string) => {
+        const match = ageString.match(/^(\d{1,2})\s*(month|months|year|years)$/i);
+        if (match) {
+            return {
+                number: match[1],
+                unit: match[2].toLowerCase().startsWith('month') ? 'months' : 'years'
+            };
+        }
+        return { number: '', unit: '' };
     };
+
+    const { number: initialAgeNumber, unit: initialAgeUnit } = parseAge(pet.age);
+    const [ageNumber, setAgeNumber] = React.useState<string>(initialAgeNumber);
+    const [ageUnit, setAgeUnit] = React.useState<'months' | 'years' | ''>(initialAgeUnit as 'months' | 'years' | '');
+
+    React.useEffect(() => {
+        const { number, unit } = parseAge(pet.age);
+        setAgeNumber(number);
+        setAgeUnit(unit as 'months' | 'years' | '');
+    }, [pet.age]);
+
+
+    const handleAgeNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const filteredValue = value.replace(/[^0-9]/g, '').slice(0, 2);
+        setAgeNumber(filteredValue);
+        const newAge = filteredValue && ageUnit ? `${filteredValue} ${ageUnit}` : '';
+        onChange({ target: { name: 'age', value: newAge } } as React.ChangeEvent<HTMLInputElement>);
+    };
+
+    const handleAgeUnitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value as 'months' | 'years' | '';
+        setAgeUnit(value);
+        const newAge = ageNumber && value ? `${ageNumber} ${value}` : '';
+        onChange({ target: { name: 'age', value: newAge } } as React.ChangeEvent<HTMLInputElement>);
+    };
+
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pet Name */}
             <div className="space-y-2 md:col-span-2">
                 <label htmlFor="pet_name" className="block text-sm font-medium text-gray-700">Pet Name *</label>
                 <input
@@ -39,7 +68,6 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Pet Type */}
             <div className="space-y-2">
                 <label htmlFor="pet_type" className="block text-sm font-medium text-gray-700">Pet Type *</label>
                 <select
@@ -57,7 +85,6 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 {errors.pet_type && <p className="text-red-500 text-xs mt-1">{errors.pet_type}</p>}
             </div>
 
-            {/* Breed */}
             <div className="space-y-2">
                 <label htmlFor="breed" className="block text-sm font-medium text-gray-700">Breed *</label>
                 <input
@@ -72,22 +99,36 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 {errors.breed && <p className="text-red-500 text-xs mt-1">{errors.breed}</p>}
             </div>
 
-            {/* Age */}
-            <div className="space-y-2">
-                <label htmlFor="age" className="block text-sm font-medium text-gray-700">Age *</label>
-                <input
-                    type="text" // Keep as text to allow onChange to handle numeric conversion
-                    id="age"
-                    name="age"
-                    value={pet.age}
-                    onChange={handleNumberInputChange}
-                    className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('age')}`}
-                    required
-                />
+            <div className="space-y-2 md:col-span-2">
+                <label htmlFor="age_number" className="block text-sm font-medium text-gray-700">Age *</label>
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        id="age_number"
+                        name="ageNumber"
+                        value={ageNumber}
+                        onChange={handleAgeNumberChange}
+                        className={`w-1/3 p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('age')}`}
+                        placeholder="e.g., 6, 2"
+                        maxLength={2}
+                        required
+                    />
+                    <select
+                        id="age_unit"
+                        name="ageUnit"
+                        value={ageUnit}
+                        onChange={handleAgeUnitChange}
+                        className={`w-2/3 p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm ${getError('age')}`}
+                        required
+                    >
+                        <option value="">Select Unit</option>
+                        <option value="months">month(s)</option>
+                        <option value="years">year(s)</option>
+                    </select>
+                </div>
                 {errors.age && <p className="text-red-500 text-xs mt-1">{errors.age}</p>}
             </div>
 
-            {/* Vaccination Status */}
             <div className="space-y-2">
                 <label htmlFor="vaccinated" className="block text-sm font-medium text-gray-700">Vaccinated *</label>
                 <select
@@ -105,9 +146,8 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 {errors.vaccinated && <p className="text-red-500 text-xs mt-1">{errors.vaccinated}</p>}
             </div>
 
-            {/* Size */}
             <div className="space-y-2">
-                <label htmlFor="size" className="block text-sm font-medium text-gray-700">Size (kg) *</label>
+                <label htmlFor="size" className="block text-sm font-medium text-gray-700">Size *</label>
                 <select
                     id="size"
                     name="size"
@@ -126,7 +166,6 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 {errors.size && <p className="text-red-500 text-xs mt-1">{errors.size}</p>}
             </div>
 
-            {/* Vitamins/Medications */}
             <div className="space-y-2 md:col-span-2">
                 <label htmlFor="vitamins_or_medications" className="block text-sm font-medium text-gray-700">Vitamins/Medications</label>
                 <textarea
@@ -143,7 +182,6 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                 )}
             </div>
 
-            {/* Allergies */}
             <div className="space-y-2 md:col-span-2">
                 <label htmlFor="allergies" className="block text-sm font-medium text-gray-700">Allergies</label>
                 <textarea
@@ -159,7 +197,6 @@ const BasePetDetails: React.FC<BasePetDetailsProps> = ({
                     <p className="text-red-500 text-xs mt-1">{errors.allergies}</p>
                 )}
             </div>
-
         </div>
     );
 };

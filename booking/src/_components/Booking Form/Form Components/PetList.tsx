@@ -1,4 +1,3 @@
-// PetList.tsx (No changes needed)
 import React from 'react';
 import { Pet } from '../types';
 import { FiEdit2, FiTrash2, FiCheck } from 'react-icons/fi';
@@ -27,27 +26,31 @@ const PetList: React.FC<PetListProps> = ({ pets, currentPetIndex, onEdit, onRemo
             <ul className="space-y-3">
                 {pets.map((pet, index) => (
                     <li
-                        key={pet.id} 
-                        className={`rounded-xl shadow-md border transition-colors duration-200 flex justify-between items-center p-4 ${
+                        key={pet.id}
+                        className={`rounded-xl shadow-md border transition-colors duration-200 flex items-center p-4 ${
                             currentPetIndex === index
                                 ? 'border-purple-800 bg-purple-100'
-                                : 'bg-white border-gray-100 '
+                                : 'bg-white border-gray-100'
                         }`}
                     >
-                        <div className="flex items-center">
+                        <div className="flex-grow flex items-center min-w-0">
                             {pet.completed && (
-                                <span className="text-purple-500 mr-3">
+                                <span className="text-purple-500 mr-3 flex-shrink-0">
                                     <FiCheck size={18} />
                                 </span>
                             )}
-                            <span className="font-semibold text-gray-900">
-                                {pet.name || `Pet ${index + 1}`}
-                            </span>
-                            {pet.pet_type && (
-                                <span className="text-gray-600 ml-2 text-sm">({pet.pet_type})</span>
-                            )}
+                            <div className="flex flex-col sm:flex-row sm:items-baseline min-w-0">
+                                <span className="font-semibold text-gray-900 truncate">
+                                    {pet.name || `Pet ${index + 1}`}
+                                </span>
+                                {pet.pet_type && (
+                                    <span className="text-gray-600 sm:ml-2 text-sm truncate">
+                                        ({pet.pet_type})
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex space-x-3">
+                        <div className="flex space-x-3 flex-shrink-0 ml-4">
                             <button
                                 onClick={() => onEdit(index)}
                                 className="text-gray-700 hover:bg-gray-100 rounded-full p-2 transition-colors duration-200"
