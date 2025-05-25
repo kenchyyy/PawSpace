@@ -1,78 +1,16 @@
 'use client';
 import React, { useState, ChangeEvent, ReactNode, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { isSameDay, addDays } from 'date-fns';
 import { FiX } from 'react-icons/fi';
 import CustomerStep from '../Steps/CustomerStep';
 import PetStep from '../Steps/PetStep';
 import ReviewStep from '../Steps/ReviewStep';
 import StepIndicator from '../Form Components/StepIndicator';
 import {
-    OwnerDetails,
-    Pet,
-    ServiceType,
-    BoardingPet,
-    GroomingPet,
-    pricing,
-    calculateNights,
-    isBoardingPet,
-    isGroomingPet,
-    BookingResult,
-    ScheduleChangeHandler,
-    BaseBookingFormProps,
-    PetType,
-    GroomingVariant,
-    PetSize,
-    DogGroomingVariant,
-    RoomSize,
-    BoardingType,
-    MealInstruction,
-    BasePetDetailsProps,
+    OwnerDetails, Pet, ServiceType, BoardingPet, GroomingPet, pricing, calculateNights, isBoardingPet, isGroomingPet, BookingResult, ScheduleChangeHandler, BaseBookingFormProps, PetType, GroomingVariant, PetSize, DogGroomingVariant, RoomSize, BoardingType, MealInstruction,
+    BasePetDetailsProps, parseDate
 } from '../types';
-
-function parseDate(dateStr: string | Date | null): Date | null {
-    if (!dateStr) return null;
-
-    if (dateStr instanceof Date) {
-        const d = new Date(dateStr.getFullYear(), dateStr.getMonth(), dateStr.getDate());
-        d.setHours(0, 0, 0, 0);
-        return d;
-    }
-
-    const parts = dateStr.split('-').map(Number);
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function formatDateToYYYYMMDD(date: Date | null): string | null {
-    if (!date) return null;
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-function getNextDayDate(date: Date): Date {
-    const d = new Date(date);
-    d.setDate(d.getDate() + 1);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function getPreviousDayDate(date: Date): Date {
-    const d = new Date(date);
-    d.setDate(d.getDate() - 1);
-    d.setHours(0, 0, 0, 0);
-    return d;
-}
-
-function clampTimeToRange(time: string): string {
-    if (!time) return '';
-    const [h, m] = time.split(':').map(Number);
-    if (h < 9) return '09:00';
-    if (h > 19 || (h === 19 && m > 0)) return '19:00';
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-}
 
 const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     onConfirmBooking,
@@ -93,135 +31,134 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         email: '',
         address: '',
         contact_number: '',
-        auth_id: undefined
+        auth_id: undefined,
     });
     const [pets, setPets] = useState<Pet[]>([]);
     const [currentPetIndex, setCurrentPetIndex] = useState(-1);
     const [confirmedInfo, setConfirmedInfo] = useState(false);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [loadingOwner, setLoadingOwner] = useState(true);
 
     useEffect(() => {
-        console.log('--- useEffect Mounted: Starting owner details fetch ---');
+        setLoadingOwner(true);
 
-        const fetchOwnerDetails = async () => {
-            console.log('fetchOwnerDetails: Calling supabase.auth.getSession()...');
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const autofillOwnerDetails = async () => {
+            console.log('Attempting to autofill owner details...');
+            const { data: { session }, error } = await supabase.auth.getSession();
 
-            if (sessionError) {
-                console.error('fetchOwnerDetails: Error fetching session:', sessionError);
+            if (error) {
+                console.error('Error getting session:', error);
+                setLoadingOwner(false);
                 return;
             }
 
-            console.log('fetchOwnerDetails: Session retrieved:', session);
-
-            if (session?.user) {
-                const user = session.user;
-                const userId = user.id;
-                console.log('fetchOwnerDetails: User found in session. User ID:', userId, 'User Email:', user.email, 'User Metadata:', user.user_metadata);
-
-                console.log('fetchOwnerDetails: Querying "Owner" table for userId:', userId);
-                const { data: ownerData, error: ownerError } = await supabase
-                    .from('Owner')
-                    .select('*')
-                    .eq('id', userId)
-                    .single();
-
-                if (ownerError && ownerError.code !== 'PGRST116') {
-                    console.error('fetchOwnerDetails: Error fetching owner data from database:', ownerError);
-                } else if (ownerError && ownerError.code === 'PGRST116') {
-                    console.log('fetchOwnerDetails: No Owner record found for this user in the database. Relying on user_metadata.');
-                } else if (ownerData) {
-                    console.log('fetchOwnerDetails: Owner data found in database:', ownerData);
-                }
-
-                setOwnerDetails(prevDetails => {
-                    let updatedName = prevDetails.name;
-                    let updatedEmail = prevDetails.email;
-                    let updatedAddress = prevDetails.address;
-                    let updatedContactNumber = prevDetails.contact_number;
-
-                    console.log('fetchOwnerDetails: Current prevDetails before update:', prevDetails);
-
-                    if (ownerData) {
-                        updatedName = prevDetails.name || ownerData.name || '';
-                        updatedEmail = prevDetails.email || ownerData.email || '';
-                        updatedAddress = prevDetails.address || ownerData.address || '';
-                        updatedContactNumber = prevDetails.contact_number || ownerData.contact_number || '';
-                        console.log('fetchOwnerDetails: Using ownerData from DB for updates.');
-                    } else {
-                        updatedName = prevDetails.name || user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '';
-                        updatedEmail = prevDetails.email || user.email || '';
-                        console.log('fetchOwnerDetails: Using user_metadata/email for updates as no ownerData found.');
-                    }
-
-                    const updatedDetails = {
-                        ...prevDetails,
-                        name: updatedName,
-                        email: updatedEmail,
-                        address: updatedAddress,
-                        contact_number: updatedContactNumber,
-                        auth_id: userId,
-                    };
-                    console.log('fetchOwnerDetails: setOwnerDetails called with updatedDetails:', updatedDetails);
-                    return updatedDetails;
-                });
-            } else {
-                console.log('fetchOwnerDetails: No active session or user found during initial fetch. session.user was NULL.');
+            if (!session?.user) {
+                console.log('No user session found. Not autofilling.');
+                setLoadingOwner(false);
+                return;
             }
+
+            const user = session.user;
+            console.log('Supabase user:', user); 
+            console.log('User metadata:', user.user_metadata); 
+            const newOwnerDetails = {
+                name: user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+                email: user.email || '',
+                address: '',
+                contact_number: '',
+                auth_id: user.id,
+            };
+            console.log('Autofilling with:', newOwnerDetails);
+            setOwnerDetails(newOwnerDetails);
+            setLoadingOwner(false);
         };
 
-        fetchOwnerDetails();
+        autofillOwnerDetails();
 
-        console.log('--- Setting up onAuthStateChange listener ---');
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            (event, session) => {
-                console.log('onAuthStateChange: Event:', event, 'Session:', session);
-
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    if (session?.user) {
-                        const user = session.user;
-                        console.log('onAuthStateChange: User found in session. User ID:', user.id, 'Email:', user.email, 'Metadata:', user.user_metadata);
-                        setOwnerDetails(prevDetails => {
-                            const newDetails = {
-                                ...prevDetails,
-                                name: prevDetails.name || user.user_metadata?.display_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-                                email: prevDetails.email || user.email || '',
-                                auth_id: user.id,
-                            };
-                            console.log('onAuthStateChange: setOwnerDetails called with:', newDetails);
-                            return newDetails;
-                        });
-                    } else {
-                        // This is the log you were seeing often. It means session.user is null at this specific event.
-                        console.log('onAuthStateChange: INITIAL_SESSION or SIGNED_IN but session.user is NULL. This is often transient. Keeping current form state.');
-                    }
-                } else if (event === 'SIGNED_OUT') {
-                    console.log('onAuthStateChange: User SIGNED_OUT. Clearing ownerDetails.');
-                    setOwnerDetails({ name: '', email: '', address: '', contact_number: '', auth_id: undefined });
-                } else if (event === 'USER_UPDATED') {
-                    console.log('onAuthStateChange: User profile updated. Consider re-fetching owner data if needed.');
-                    // You might want to re-run fetchOwnerDetails() here if user_metadata is updated and you want to reflect it
-                    // fetchOwnerDetails(); // Uncomment if you want to re-fetch on user updates
-                } else if (event === 'PASSWORD_RECOVERY') {
-                    console.log('onAuthStateChange: Password recovery initiated.');
-                }
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state change event:', event, 'Session:', session);
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+                const user = session.user;
+                const newOwnerDetails = {
+                    name: session.user.user_metadata?.display_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '',
+                    email: session.user.email || '',
+                    address: '',
+                    contact_number: '',
+                    auth_id: session.user.id,
+                };
+                console.log('Auth state change - setting owner details:', newOwnerDetails);
+                setOwnerDetails(newOwnerDetails);
+                setLoadingOwner(false);
+            } else if (event === 'SIGNED_OUT') {
+                console.log('Auth state change - signed out. Clearing owner details.');
+                setOwnerDetails({
+                    name: '',
+                    email: '',
+                    address: '',
+                    contact_number: '',
+                    auth_id: undefined,
+                });
+                setLoadingOwner(false);
             }
-        );
+        });
 
         return () => {
-            console.log('--- useEffect Cleanup: Unsubscribing from auth listener ---');
             authListener.subscription.unsubscribe();
         };
-
     }, [supabase]);
+
+
+    if (loadingOwner) return <div>Loading your info...</div>;
+
+    const validateCustomerForm = (details: OwnerDetails): Record<string, string> => {
+        const errors: Record<string, string> = {};
+
+        const nameRegex = /^[a-zA-ZÄÖÜäöüÀ-ÿ' -]{2,100}$/;
+        if (!details.name.trim()) {
+            errors.name = 'Full Name is required.';
+        } else if (!nameRegex.test(details.name.trim())) {
+            errors.name = 'Full Name can only contain letters, spaces, hyphens, and apostrophes.';
+        }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!details.email.trim()) {
+            errors.email = 'Email is required.';
+        } else if (!emailRegex.test(details.email.trim())) {
+            errors.email = 'Please enter a valid email address (e.g., example@gmail.com).';
+        } 
+
+        const phContactNumberRegex = /^09\d{9}$/; 
+        if (!details.contact_number.trim()) {
+            errors.contact_number = 'Contact Number is required.';
+        } else if (!phContactNumberRegex.test(details.contact_number.trim())) {
+            errors.contact_number = 'Please enter a valid 11-digit Philippine mobile number (e.g., 09123456789).';
+        }
+
+        if (!details.address.trim()) {
+            errors.address = 'Address is required.';
+        } else if (details.address.trim().length < 10) { 
+            errors.address = 'Make sure to input a complete address.';
+        }
+
+        return errors;
+    };
 
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setOwnerDetails(prev => ({ ...prev, [name]: value }));
-
-        if (formErrors[name]) {
-            setFormErrors(prev => ({ ...prev, [name]: '' }));
-        }
+        
+        setOwnerDetails(prev => {
+            const updatedDetails = { ...prev, [name]: value };
+            const newErrors = validateCustomerForm(updatedDetails);
+            setFormErrors(prevErrors => {
+                const currentErrors = JSON.stringify(prevErrors);
+                const updatedErrors = JSON.stringify(newErrors);
+                if (currentErrors !== updatedErrors) {
+                    return newErrors;
+                }
+                return prevErrors;
+            });
+            return updatedDetails; 
+        });
     };
 
     const handlePetChange = (updatedPet: Pet) => {
@@ -231,202 +168,104 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             );
             return newPets;
         });
+        if (formErrors[`pet-${updatedPet.id}`]) {
+            const petErrors = JSON.parse(formErrors[`pet-${updatedPet.id}`] || '{}');
+            const fieldName = Object.keys(updatedPet).find(key => updatedPet[key as keyof Pet] !== (pets[currentPetIndex] as any)[key]);
+            if (fieldName && petErrors[fieldName]) {
+                    validatePetForm(updatedPet);
+            } else {
+                validatePetForm(updatedPet); 
+            }
+        }
     };
 
-    const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
-        setPets(prev => {
-            const updatedPets = [...prev];
+const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
+    setPets(prevPets => {
+        return prevPets.map((pet, index) => {
+            if (index === currentPetIndex && isBoardingPet(pet)) {
+                const updatedPet: BoardingPet = { ...pet };
+                let currentPetErrors: Record<string, string> = JSON.parse(formErrors[`pet-${pet.id}`] || '{}');
 
-            if (currentPetIndex < 0 || currentPetIndex >= updatedPets.length) {
-                console.warn('Invalid currentPetIndex in handleScheduleChange');
-                return prev;
-            }
-
-            let currentPet = updatedPets[currentPetIndex];
-            let newErrors: Record<string, string> = {};
-
-            if (time !== undefined && time !== null && time !== '') time = clampTimeToRange(time);
-
-            if (isBoardingPet(currentPet)) {
-                let updatedPetInstance: BoardingPet = { ...currentPet };
-                const petErrorsKey = `pet-${currentPet.id}`;
-
-                try {
-                    newErrors = JSON.parse(formErrors[petErrorsKey] || '{}');
-                } catch (e) {
-                    newErrors = {};
-                }
+                delete currentPetErrors.check_in_date;
+                delete currentPetErrors.check_out_date;
+                delete currentPetErrors.check_in_time;
+                delete currentPetErrors.check_out_time;
+                delete currentPetErrors.boarding_type;
+                delete currentPetErrors.room_size;
 
                 if (type === 'boardingType') {
-                    const newBoardingType = value as unknown as BoardingType;
-                    const oldBoardingType = updatedPetInstance.boarding_type;
-                    updatedPetInstance.boarding_type = newBoardingType;
-
-                    delete newErrors.check_out_date;
-                    delete newErrors.check_in_date;
-
-                    // --- FROM DAY TO OVERNIGHT ---
-                    if (oldBoardingType === 'day' && newBoardingType === 'overnight') {
-                        if (
-                            updatedPetInstance.check_in_date &&
-                            updatedPetInstance.check_out_date &&
-                            updatedPetInstance.check_in_date.getTime() === updatedPetInstance.check_out_date.getTime()
-                        ) {
-                            updatedPetInstance.check_out_date = getNextDayDate(updatedPetInstance.check_in_date);
-                            newErrors.check_out_date = 'Check-out date adjusted to be after check-in for Overnight Boarding.';
-
-                            if (
-                                updatedPetInstance.check_in_time &&
-                                updatedPetInstance.check_out_time &&
-                                updatedPetInstance.check_in_time !== updatedPetInstance.check_out_time
-                            ) {
-                                updatedPetInstance.check_out_time = updatedPetInstance.check_in_time;
-                                newErrors.check_out_time = 'Check-in and Check-out time must be the same for Overnight Boarding.';
-                            }
-                        }
-                    }
-
-                    // --- FROM OVERNIGHT TO DAY ---
-                    if (oldBoardingType === 'overnight' && newBoardingType === 'day') {
-                        if (
-                            updatedPetInstance.check_in_date &&
-                            updatedPetInstance.check_out_date &&
-                            updatedPetInstance.check_in_date.getTime() !== updatedPetInstance.check_out_date.getTime()
-                        ) {
-                            updatedPetInstance.check_out_date = updatedPetInstance.check_in_date;
-                            newErrors.check_out_date = 'Check-out date auto-matched to Check-in date for Day Boarding.';
-                        }
-                    }
-
-                    if (updatedPetInstance.check_in_date) {
-                        updatedPetInstance.check_in_time = updatedPetInstance.check_in_time || '09:00';
-                        updatedPetInstance.check_out_time = updatedPetInstance.check_out_time || '17:00';
-                    } else {
-                        updatedPetInstance.check_in_time = '';
-                        updatedPetInstance.check_out_time = '';
+                    updatedPet.boarding_type = value as BoardingType;
+                    updatedPet.check_in_time = '';
+                    updatedPet.check_out_time = '';
+                    updatedPet.check_in_date = null;
+                    updatedPet.check_out_date = null;
+                    if (
+                        updatedPet.boarding_type === 'day' &&
+                        updatedPet.check_in_date &&
+                        updatedPet.check_out_date &&
+                        !isSameDay(updatedPet.check_in_date, updatedPet.check_out_date)
+                    ) {
+                        updatedPet.check_out_date = updatedPet.check_in_date;
                     }
                 } else if (type === 'checkIn') {
-                    const selectedDate = parseDate(value as Date | string | null);
-                    updatedPetInstance.check_in_date = selectedDate;
-                    updatedPetInstance.check_in_time = time !== undefined ? time : ''; 
-
-                    delete newErrors.check_in_date;
-
-                    if (updatedPetInstance.boarding_type === 'day') {
-                        if (selectedDate) {
-                            updatedPetInstance.check_out_date = selectedDate;
-                            delete newErrors.check_out_date;
-                            updatedPetInstance.check_in_time = updatedPetInstance.check_in_time || '09:00';
-                            updatedPetInstance.check_out_time = updatedPetInstance.check_out_time || '17:00';
-                        } else {
-                            updatedPetInstance.check_out_date = null;
-                            updatedPetInstance.check_in_time = ''; 
-                            updatedPetInstance.check_out_time = ''; 
-                        }
-                    } else if (updatedPetInstance.boarding_type === 'overnight') {
-                        if (selectedDate && updatedPetInstance.check_out_date) {
-                            if (selectedDate.getTime() >= updatedPetInstance.check_out_date.getTime()) {
-                                updatedPetInstance.check_out_date = getNextDayDate(selectedDate);
-                                newErrors.check_out_date = 'Check-out date adjusted to be after check-in.';
-                            } else {
-                                delete newErrors.check_out_date;
-                            }
-                        } else if (selectedDate && !updatedPetInstance.check_out_date) {
-                            updatedPetInstance.check_out_date = getNextDayDate(selectedDate);
-                            delete newErrors.check_out_date; 
-                        } else {
-                            updatedPetInstance.check_out_date = null;
-                            updatedPetInstance.check_in_time = ''; 
-                            updatedPetInstance.check_out_time = ''; 
-                        }
-                    
-                        updatedPetInstance.check_in_time = updatedPetInstance.check_in_time || '09:00';
-                        updatedPetInstance.check_out_time = updatedPetInstance.check_out_time || '17:00';
+                    updatedPet.check_in_date = parseDate(value);
+                    if (time !== undefined) updatedPet.check_in_time = time;
+                    else if (!updatedPet.check_in_date) updatedPet.check_in_time = '';
+                    if (updatedPet.boarding_type === 'day' && updatedPet.check_in_date) {
+                        updatedPet.check_out_date = updatedPet.check_in_date;
                     }
                 } else if (type === 'checkOut') {
-                    const selectedDate = parseDate(value as Date | string | null);
-                    updatedPetInstance.check_out_date = selectedDate;
-                    updatedPetInstance.check_out_time = time !== undefined ? time : ''; 
-
-                    delete newErrors.check_out_date;
-
-                    if (!updatedPetInstance.check_in_date && selectedDate) {
-                        updatedPetInstance.check_out_date = null; 
-                        updatedPetInstance.check_out_time = '';
-                        newErrors.check_out_date = 'Please select a Check-in Date first.';
-                    } else if (updatedPetInstance.boarding_type === 'day') {
-                        if (
-                            updatedPetInstance.check_in_date &&
-                            selectedDate &&
-                            updatedPetInstance.check_in_date.getTime() !== selectedDate.getTime()
-                        ) {
-                            updatedPetInstance.check_out_date = updatedPetInstance.check_in_date;
-                            newErrors.check_out_date = 'For Day Boarding, check-out date must be the same as check-in date.';
-                        } else if (!selectedDate) {
-                            updatedPetInstance.check_out_time = ''; 
-                        }
-                    } else if (updatedPetInstance.boarding_type === 'overnight') {
-                        if (
-                            updatedPetInstance.check_in_date &&
-                            selectedDate &&
-                            selectedDate.getTime() <= updatedPetInstance.check_in_date.getTime()
-                        ) {
-                            // Set error and do not allow invalid check-out
-                            newErrors.check_out_date = 'Check-out date must be after check-in date for Overnight Boarding.';
-                        } else if (!selectedDate) {
-                            updatedPetInstance.check_out_time = ''; 
-                        }
-                    }
+                    updatedPet.check_out_date = parseDate(value);
+                    if (time !== undefined) updatedPet.check_out_time = time;
+                    else if (!updatedPet.check_out_date) updatedPet.check_out_time = '';
                 } else if (type === 'checkInTime') {
-                    updatedPetInstance.check_in_time = time !== undefined ? time : '';
+                    updatedPet.check_in_time = time || '';
                 } else if (type === 'checkOutTime') {
-                    updatedPetInstance.check_out_time = time !== undefined ? time : '';
+                    updatedPet.check_out_time = time || '';
                 }
 
-                updatedPets[currentPetIndex] = updatedPetInstance;
-                // Only update formErrors if there are actual errors for this pet
-                if (Object.keys(newErrors).length > 0) {
-                    setFormErrors(prev => ({ ...prev, [petErrorsKey]: JSON.stringify(newErrors) }));
-                } else {
-                    setFormErrors(prev => {
-                        const updated = { ...prev };
-                        delete updated[petErrorsKey]; 
-                        return updated;
-                    });
-                }
-                return updatedPets;
+                const errorsAfterChange = validatePetForm(updatedPet, true);
 
-            } else if (isGroomingPet(currentPet)) {
-                const selectedDate = parseDate(value as Date | string | null);
-                const updatedPetInstance: GroomingPet = {
-                    ...currentPet,
-                    service_date: type === 'service' ? selectedDate : currentPet.service_date,
-                    service_time: type === 'service' ? (time !== undefined ? time : '') : currentPet.service_time, // Use empty string if time is undefined
-                };
-                const petErrorsKey = `pet-${currentPet.id}`;
-                try {
-                    newErrors = JSON.parse(formErrors[petErrorsKey] || '{}');
-                } catch (e) {
-                    newErrors = {};
-                }
-                if (type === 'service') {
-                    if (selectedDate) delete newErrors.service_date;
-                    if (time !== undefined && time !== '') delete newErrors.service_time;
-                }
-                updatedPets[currentPetIndex] = updatedPetInstance;
-                if (Object.keys(newErrors).length > 0) {
-                    setFormErrors(prev => ({ ...prev, [petErrorsKey]: JSON.stringify(newErrors) }));
-                } else {
-                    setFormErrors(prev => {
-                        const updated = { ...prev };
-                        delete updated[petErrorsKey];
-                        return updated;
-                    });
-                }
-                return updatedPets;
+                setFormErrors(prev => ({
+                    ...prev,
+                    [`pet-${pet.id}`]: JSON.stringify(errorsAfterChange)
+                }));
+                return updatedPet;
             }
-            return prev;
+
+            if (index === currentPetIndex && isGroomingPet(pet)) {
+                const updatedPet = { ...pet };
+                let currentPetErrors: Record<string, string> = JSON.parse(formErrors[`pet-${pet.id}`] || '{}');
+
+                delete currentPetErrors.service_date;
+                delete currentPetErrors.service_time;
+
+                if (type === 'service') {
+                    updatedPet.service_date = parseDate(value);
+                    if (time !== undefined) updatedPet.service_time = time;
+                } else if (type === 'serviceTime') {
+                    updatedPet.service_time = time || '';
+                }
+
+                const errorsAfterChange = validatePetForm(updatedPet, true);
+
+                setFormErrors(prev => ({
+                    ...prev,
+                    [`pet-${pet.id}`]: JSON.stringify(errorsAfterChange)
+                }));
+                return updatedPet;
+            }
+
+            return pet;
         });
+    });
+};
+
+
+    const timeToNumber = (timeStr: string): number => {
+        if (!timeStr) return 0;
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 100 + minutes;
     };
 
     const handleReviewConfirmChange = (checked: boolean) => {
@@ -440,75 +279,91 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         }
     };
 
-    const validateCustomerForm = (): boolean => {
+    const validatePetForm = (pet: Pet, silent: boolean = false): Record<string, string> => {
         const errors: Record<string, string> = {};
-        if (!ownerDetails.name.trim()) errors.name = 'Name is required';
-        if (!ownerDetails.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerDetails.email)) errors.email = 'Valid email is required';
-        if (!ownerDetails.contact_number.trim()) errors.contact_number = 'Contact number is required';
-        if (!ownerDetails.address.trim()) errors.address = 'Address is required';
+        let isValid = true; 
 
-        setFormErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-    const validatePetForm = (pet: Pet): boolean => {
-        const errors: Record<string, string> = {};
-        let isValid = true;
-
-        if (!pet.name.trim()) { errors.name = 'Pet name is required'; isValid = false; }
-        if (!pet.age.trim()) { errors.age = 'Pet age is required'; isValid = false; }
+        if (!pet.name?.trim()) { errors.name = 'Pet name is required'; isValid = false; }
         if (!pet.pet_type) { errors.pet_type = 'Pet type is required.'; isValid = false; }
         if (!pet.breed?.trim()) { errors.breed = 'Breed is required.'; isValid = false; }
         if (pet.vaccinated === 'unknown' || pet.vaccinated === '') { errors.vaccinated = 'Vaccination status is required.'; isValid = false; }
         if (!pet.size) { errors.size = 'Size is required.'; isValid = false; }
 
-        if (isBoardingPet(pet)) {
-            const checkInDate = pet.check_in_date;
-            const checkOutDate = pet.check_out_date;
+        const ageRegex = /^([1-9]|[1-9][0-9])\s*(month|months|year|years)$/i;
+        if (!pet.age || !ageRegex.test(pet.age.trim())) {
+            errors.age = 'Age is required and must be a number (1-99) followed by "months" or "years" (e.g., "6 months", "2 years").';
+            isValid = false;
+        }
 
-            if (!pet.room_size) { errors.room_size = 'Room size is required.'; isValid = false; }
-            if (!pet.boarding_type) { errors.boarding_type = 'Boarding type is required.'; isValid = false; }
+        if (isBoardingPet(pet)) {
+            const boardingPet = pet as BoardingPet;
+            const checkInDate = boardingPet.check_in_date;
+            const checkOutDate = boardingPet.check_out_date;
+            const checkInTime = boardingPet.check_in_time;
+            const checkOutTime = boardingPet.check_out_time;
+
+            if (!boardingPet.room_size) { errors.room_size = 'Room size is required.'; isValid = false; }
+            if (!boardingPet.boarding_type) { errors.boarding_type = 'Boarding type is required.'; isValid = false; }
             if (!checkInDate) { errors.check_in_date = 'Check-in date is required.'; isValid = false; }
             if (!checkOutDate) { errors.check_out_date = 'Check-out date is required.'; isValid = false; }
+            if (!checkInTime) { errors.check_in_time = 'Check-in time is required.'; isValid = false; }
+            if (!checkOutTime) { errors.check_out_time = 'Check-out time is required.'; isValid = false; }
 
-            if (checkInDate && checkOutDate) {
-                if (pet.boarding_type === 'day') {
-                    if (checkInDate.getTime() !== checkOutDate.getTime()) {
+            if (checkInDate && checkOutDate && checkInTime && checkOutTime) {
+                if (boardingPet.boarding_type === 'day') {
+                    if (!isSameDay(checkInDate, checkOutDate)) {
                         errors.check_out_date = 'For Day Boarding, check-out date must be the same as check-in date.';
                         isValid = false;
                     }
-                } else if (pet.boarding_type === 'overnight') {
-                    if (checkInDate.getTime() >= checkOutDate.getTime()) {
+                    const inTimeNum = timeToNumber(checkInTime);
+                    const outTimeNum = timeToNumber(checkOutTime);
+                    if (inTimeNum >= outTimeNum) { 
+                        errors.check_out_time = 'Check-out time must be after check-in time for Day Boarding.';
+                        isValid = false;
+                    }
+                    if (inTimeNum >= timeToNumber('22:00')) {
+                        errors.check_in_time = 'Day boarding check-in cannot be at 10:00 PM (22:00) or later.';
+                        isValid = false;
+                    }
+
+                } else if (boardingPet.boarding_type === 'overnight') {
+                    if (isSameDay(checkInDate, checkOutDate)) {
                         errors.check_out_date = 'For Overnight Boarding, check-out date must be after check-in date.';
+                        isValid = false;
+                    } else if (checkOutDate < checkInDate) {
+                        errors.check_out_date = 'Check-out date must be after check-in date.';
+                        isValid = false;
+                    }
+                    if (checkInTime !== checkOutTime) {
+                        errors.check_in_time = 'Check-in and check-out times must be the same for Overnight Boarding.';
+                        errors.check_out_time = 'Check-in and check-out times must be the same for Overnight Boarding.'; 
                         isValid = false;
                     }
                 }
             }
 
-            if (!pet.check_in_time) { errors.check_in_time = 'Check-in time is required.'; isValid = false; }
-            if (!pet.check_out_time) { errors.check_out_time = 'Check-out time is required.'; isValid = false; }
 
-            // Validate meal instructions only if they have data
-            if (pet.meal_instructions) {
-                ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
-                    const meal = pet.meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']];
-                    if (meal && (meal.time?.trim() || meal.food?.trim() || meal.notes?.trim())) {
-                        if (!meal.time?.trim()) { errors[`meal_instructions.${mealType}.time`] = `${mealType} time is required.`; isValid = false; }
-                        if (!meal.food?.trim()) { errors[`meal_instructions.${mealType}.food`] = `${mealType} food is required.`; isValid = false; }
-                    }
-                });
-            }
+            ['breakfast', 'lunch', 'dinner'].forEach(mealType => {
+                const meal = boardingPet.meal_instructions?.[mealType as keyof BoardingPet['meal_instructions']];
+                if (meal && (meal.time?.trim() || meal.food?.trim() || meal.notes?.trim())) {
+                    if (!meal.time?.trim()) { errors[`meal_instructions.${mealType}.time`] = `Time is required for ${mealType}.`; isValid = false; }
+                    if (!meal.food?.trim()) { errors[`meal_instructions.${mealType}.food`] = `Food is required for ${mealType}.`; isValid = false; }
+                }
+            });
 
         } else if (isGroomingPet(pet)) {
-            const serviceDate = pet.service_date;
-            if (!pet.service_variant) { errors.service_variant = 'Service variant is required.'; isValid = false; }
+            const groomingPet = pet as GroomingPet;
+            const serviceDate = groomingPet.service_date;
+            if (!groomingPet.service_variant) { errors.service_variant = 'Service variant is required.'; isValid = false; }
             if (!serviceDate) { errors.service_date = 'Service date is required.'; isValid = false; }
-            if (!pet.service_time) { errors.service_time = 'Service time is required.'; isValid = false; }
+            if (!groomingPet.service_time) { errors.service_time = 'Service time is required.'; isValid = false; }
         }
 
-        // Update errors for the specific pet
-        setFormErrors(prev => ({ ...prev, [`pet-${pet.id}`]: JSON.stringify(errors) }));
-        return isValid;
+        if (!silent) {
+            setFormErrors(prev => ({ ...prev, [`pet-${pet.id}`]: JSON.stringify(errors) }));
+        }
+
+        return errors; 
     };
 
     const createNewPet = (): Pet => {
@@ -518,10 +373,10 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             id: uniqueId,
             name: '',
             age: '',
-            pet_type: '', // Empty string for "Select pet type"
+            pet_type: '',
             breed: '',
             vaccinated: 'unknown' as const,
-            size: '', // Empty string for "Select size"
+            size: '',
             vitamins_or_medications: '',
             allergies: '',
             special_requests: '',
@@ -533,7 +388,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             return {
                 ...basePet,
                 service_type: 'boarding',
-                room_size: '', // Empty string for "Select room size"
+                room_size: '',
                 boarding_type: 'day',
                 check_in_date: null,
                 check_in_time: '',
@@ -558,32 +413,52 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     };
 
     const handleNextFromCustomer = () => {
-        if (!validateCustomerForm()) return;
+        const customerErrors = validateCustomerForm(ownerDetails);
+        if (Object.keys(customerErrors).length > 0) {
+            setFormErrors(customerErrors);
+            return;
+        }
         setCompletedSteps(prev => [...prev, 'customer']);
         setCurrentStep('pet');
         if (pets.length === 0) {
             setPets([createNewPet()]);
             setCurrentPetIndex(0);
         } else {
-            setCurrentPetIndex(0);
+            setCurrentPetIndex(0); 
         }
+        setFormErrors(prev => { 
+            const newErrors = { ...prev };
+            delete newErrors.general;
+            return newErrors;
+        });
     };
 
     const handleAddPet = () => {
-        // Validate the current pet before adding a new one
         if (currentPetIndex !== -1) {
             const currentPet = pets[currentPetIndex];
-            if (!validatePetForm(currentPet)) {
+            const errors = validatePetForm(currentPet); 
+            if (Object.keys(errors).length > 0) {
+                setFormErrors(prev => ({ ...prev, [`pet-${currentPet.id}`]: JSON.stringify(errors), general: 'Please correct pet details before adding a new pet.' }));
                 return;
             }
         }
         const newPet = createNewPet();
         setPets(prevPets => [...prevPets, newPet]);
-        setCurrentPetIndex(pets.length);
+        setCurrentPetIndex(pets.length); 
+        setFormErrors(prev => { 
+            const newErrors = { ...prev };
+            delete newErrors.general;
+            return newErrors;
+        });
     };
 
     const handleEditPet = (index: number) => {
         setCurrentPetIndex(index);
+        setFormErrors(prev => { 
+            const newErrors = { ...prev };
+            delete newErrors.general;
+            return newErrors;
+        });
     };
 
     const handleRemovePet = (indexToRemove: number) => {
@@ -597,9 +472,9 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                     return newErrors;
                 });
             } else if (indexToRemove === currentPetIndex) {
-                setCurrentPetIndex(0);
+                setCurrentPetIndex(0); 
             } else if (indexToRemove < currentPetIndex) {
-                setCurrentPetIndex(prevIndex => prevIndex - 1);
+                setCurrentPetIndex(prevIndex => prevIndex - 1); 
             }
             return newPets;
         });
@@ -609,36 +484,58 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             if (removedPetId) {
                 delete newErrors[`pet-${removedPetId}`];
             }
+            if (Object.keys(newErrors).length === 0) { 
+                delete newErrors.general;
+            }
             return newErrors;
         });
     };
 
     const handleNextFromPet = () => {
         if (pets.length === 0) {
-            setFormErrors({ ...formErrors, pets: 'Please add at least one pet' });
+            setFormErrors({ ...formErrors, pets: 'Please add at least one pet.' });
             return;
         }
 
         let allPetsValid = true;
         let firstInvalidPetIndex: number | null = null;
+        const newFormErrors: Record<string, string> = {};
 
         pets.forEach((pet, index) => {
-            if (!validatePetForm(pet)) {
+            const errorsForPet = validatePetForm(pet, true); 
+            if (Object.keys(errorsForPet).length > 0) {
                 allPetsValid = false;
+                newFormErrors[`pet-${pet.id}`] = JSON.stringify(errorsForPet);
                 if (firstInvalidPetIndex === null) {
                     firstInvalidPetIndex = index;
+                }
+            } else {
+                if (formErrors[`pet-${pet.id}`]) {
+                    const tempErrors = JSON.parse(formErrors[`pet-${pet.id}`] || '{}');
+                    if (Object.keys(tempErrors).length === 0) {
+                        delete formErrors[`pet-${pet.id}`];
+                    }
                 }
             }
         });
 
         if (!allPetsValid) {
+            setFormErrors(prev => ({ ...prev, ...newFormErrors, general: 'Please correct pet details before proceeding.' }));
             if (firstInvalidPetIndex !== null) {
                 setCurrentPetIndex(firstInvalidPetIndex);
             }
-            setFormErrors(prev => ({ ...prev, general: 'Please correct pet details before proceeding.' }));
             return;
         }
 
+        setFormErrors(prev => { 
+            const updatedErrors = { ...prev };
+            Object.keys(updatedErrors).forEach(key => {
+                if (key.startsWith('pet-') || key === 'pets' || key === 'general') {
+                    delete updatedErrors[key];
+                }
+            });
+            return updatedErrors;
+        });
         setCompletedSteps(prev => [...prev, 'pet']);
         setCurrentStep('review');
     };
@@ -651,40 +548,97 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         if (clickedIndex < currentIndex) {
             setCurrentStep(stepId);
         } else if (clickedIndex > currentIndex) {
-            if (currentStep === 'customer' && validateCustomerForm()) {
-                setCompletedSteps(prev => [...prev, 'customer']);
-                setCurrentStep('pet');
+            if (currentStep === 'customer') {
+                const customerErrors = validateCustomerForm(ownerDetails);
+                if (Object.keys(customerErrors).length === 0) {
+                    setCompletedSteps(prev => [...prev, 'customer']);
+                    setCurrentStep('pet');
+                } else {
+                    setFormErrors(customerErrors);
+                }
             } else if (currentStep === 'pet') {
                 let allPetsValid = true;
                 let firstInvalidPetIndex: number | null = null;
+                const newFormErrors: Record<string, string> = {};
 
                 pets.forEach((pet, index) => {
-                    if (!validatePetForm(pet)) {
+                    const errorsForPet = validatePetForm(pet, true); 
+                    if (Object.keys(errorsForPet).length > 0) {
                         allPetsValid = false;
+                        newFormErrors[`pet-${pet.id}`] = JSON.stringify(errorsForPet);
                         if (firstInvalidPetIndex === null) {
                             firstInvalidPetIndex = index;
+                        }
+                    } else {
+                        if (formErrors[`pet-${pet.id}`]) {
+                            const tempErrors = JSON.parse(formErrors[`pet-${pet.id}`] || '{}');
+                            if (Object.keys(tempErrors).length === 0) {
+                                delete formErrors[`pet-${pet.id}`];
+                            }
                         }
                     }
                 });
 
                 if (allPetsValid) {
+                    setFormErrors(prev => { 
+                        const updatedErrors = { ...prev };
+                        Object.keys(updatedErrors).forEach(key => {
+                            if (key.startsWith('pet-') || key === 'pets' || key === 'general') {
+                                delete updatedErrors[key];
+                            }
+                        });
+                        return updatedErrors;
+                    });
                     setCompletedSteps(prev => [...prev, 'pet']);
                     setCurrentStep('review');
                 } else {
+                    setFormErrors(prev => ({ ...prev, ...newFormErrors, general: 'Please correct pet details before proceeding.' }));
                     if (firstInvalidPetIndex !== null) {
                         setCurrentPetIndex(firstInvalidPetIndex);
                     }
-                    setFormErrors(prev => ({ ...prev, general: 'Please correct pet details before proceeding.' }));
                 }
             }
         }
     };
 
     const handleConfirmBooking = async (): Promise<BookingResult> => {
+        const customerErrors = validateCustomerForm(ownerDetails);
+        if (Object.keys(customerErrors).length > 0) {
+            setFormErrors(customerErrors);
+            setCurrentStep('customer');
+            return { success: false, error: 'Validation failed: Please correct customer details.' };
+        }
+
+        let allPetsValid = true;
+        let firstInvalidPetIndex: number | null = null;
+        const newFormErrors: Record<string, string> = {};
+
+        pets.forEach((pet, index) => {
+            const errorsForPet = validatePetForm(pet, true); 
+            if (Object.keys(errorsForPet).length > 0) {
+                allPetsValid = false;
+                newFormErrors[`pet-${pet.id}`] = JSON.stringify(errorsForPet);
+                if (firstInvalidPetIndex === null) {
+                    firstInvalidPetIndex = index;
+                }
+            }
+        });
+
+        if (!allPetsValid) {
+            setFormErrors(prev => ({ ...prev, ...newFormErrors, general: 'Please correct pet details before confirming.' }));
+            if (firstInvalidPetIndex !== null) {
+                setCurrentPetIndex(firstInvalidPetIndex);
+            }
+            setCurrentStep('pet'); 
+            return { success: false, error: 'Validation failed: Please correct pet details.' };
+        }
+
         if (!confirmedInfo) {
             setFormErrors({ ...formErrors, confirmation: 'Please confirm the information is correct' });
             return { success: false, error: 'Confirmation required' };
         }
+
+        setFormErrors({});
 
         try {
             const totalAmounts: number[] = [];
@@ -715,7 +669,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                     if (boardingPet.boarding_type === 'day') {
                         basePrice = pricing.boarding.day[roomSizeKey] || 0;
                         petTotalAmount = basePrice;
-                    } else {
+                    } else { // overnight
                         basePrice = (pricing.boarding.overnight[roomSizeKey] || 0) * nights;
                         if (nights >= 15) discount = 20;
                         else if (nights >= 7) discount = 10;
@@ -753,14 +707,10 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         return 0;
     };
 
-    const getPetErrors = (petId: string) => {
-        try {
-            return JSON.parse(formErrors[`pet-${petId}`] || '{}');
-        } catch (e) {
-            console.error("Error parsing pet errors:", e);
-            return {};
-        }
-    };
+    const hasCustomerErrors = Object.keys(formErrors).some(key =>
+        ['name', 'email', 'address', 'contact_number'].includes(key) && formErrors[key] !== ''
+    );
+    const areCustomerFieldsFilled = !!ownerDetails.name && !!ownerDetails.email && !!ownerDetails.contact_number && !!ownerDetails.address;
 
     return (
         <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] text-gray-900 overflow-hidden flex flex-col">
@@ -796,12 +746,11 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                     <CustomerStep
                         ownerDetails={ownerDetails}
                         onChange={handleOwnerChange}
-                        errors={formErrors}
-                        onNext={handleNextFromCustomer}
+                        errors={formErrors} 
+                        onNext={handleNextFromCustomer} 
                         isSubmitting={isSubmitting}
                     />
                 )}
-
                 {currentStep === 'pet' && (
                     <PetStep
                         pets={pets}

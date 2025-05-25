@@ -13,13 +13,14 @@ import {
     PetType,
     OwnerDetails,
     Pet,
-    BasePetDetailsProps 
+    BasePetDetailsProps,
+    GroomingVariant
 } from '../types';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import BasePetDetails from '../Form Components/BasePetDetails';
-import DateDropdown from '../Schedule Picker/DatePicker';
-import TimeDropdown from '../Schedule Picker/TimePicker';
+import DatePicker from '../Schedule Picker/DatePicker';
+import TimeDropdown from '../Schedule Picker/TimePicker'; 
 import { createBooking } from '../bookingService';
 import { isGroomingPet } from '../types';
 
@@ -38,8 +39,8 @@ interface GroomingBookingFormProps {
 const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
     onConfirmBooking,
     onClose,
-    unavailableDates = [], 
-    unavailableTimes = [], 
+    unavailableDates = [],
+    unavailableTimes = [],
 }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const router = useRouter();
@@ -51,6 +52,9 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
         discountsApplied?: number[]
     ): Promise<BookingResult> => {
         setIsSubmitting(true);
+
+        // Define grooming specific hours for validation
+        const groomingAllowedHours = Array.from({ length: 10 }, (_, i) => `${(9 + i).toString().padStart(2, '0')}:00`); // 09:00 to 18:00
 
         try {
             const bookingResults = await Promise.all(
@@ -72,8 +76,13 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                         throw new Error('Pet size is required for dog grooming');
                     }
 
+                    // *** Important: Server-side/Submission-time validation for grooming hours ***
+                    if (!groomingAllowedHours.includes(pet.service_time)) {
+                        throw new Error('Grooming appointments are only available from 9 AM to 6 PM.');
+                    }
+
+
                     let basePrice = 0;
-                    // Correct type inference for cat grooming variant
                     if (pet.pet_type === 'cat' && pet.service_variant === 'cat') {
                         basePrice = pricing.grooming.cat.cat;
                     } else if (pet.pet_type === 'dog' && pet.service_variant) {
@@ -85,16 +94,19 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                     const currentTotalAmount = totalAmounts[index] !== undefined ? totalAmounts[index] : basePrice;
                     const currentDiscountApplied = discountsApplied && discountsApplied[index] !== undefined ? discountsApplied[index] : 0;
 
+                    const petForBooking = {
+                        ...pet,
+                        service_date: pet.service_date ? pet.service_date : null,
+                    };
+
                     return await createBooking(
                         ownerDetails,
-                        [pet],
+                        [petForBooking],
                         [currentTotalAmount],
                         [currentDiscountApplied]
                     );
                 })
             );
-
-            console.log(bookingResults)
 
             const allSuccessful = bookingResults.every(result => result.success);
 
@@ -113,14 +125,14 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
             return { success: false, error: errorMsg };
         } finally {
             setIsSubmitting(false);
-            onClose(); 
+            onClose();
         }
     };
 
     const getServiceVariantOptions = (petType: PetType) => {
         if (petType === 'cat') {
             return [
-                { value: 'cat', label: 'Standard Grooming (P450)' } 
+                { value: 'cat', label: 'Standard Grooming (P450)' }
             ];
         }
         return [
@@ -134,7 +146,7 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
         const sizeMap: Record<string, string> = {
             teacup: 'Teacup [1-3kg]',
             small: 'Small [3.1-7kg]',
-            medium: 'Medium [7.1-13kg',
+            medium: 'Medium [7.1-13kg]',
             large: 'Large [13.1-19kg]',
             xlarge: 'Extra Large [19kg-up]'
         };
@@ -162,7 +174,6 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
             unavailableDates={unavailableDates}
             unavailableTimes={unavailableTimes}
         >
-
             {({ pet, onChange, onScheduleChange, errors, unavailableDates: childUnavailableDates, unavailableTimes: childUnavailableTimes }) => {
                 if (!isGroomingPet(pet)) return null;
 
@@ -219,11 +230,11 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">Appointment Date *</label>
-                                        <DateDropdown
+                                        <DatePicker
                                             name="service_date"
                                             selectedDate={parseDate(pet.service_date)}
                                             onChange={(date) => onScheduleChange('service', date, pet.service_time)}
-                                            unavailableDates={childUnavailableDates} 
+                                            unavailableDates={childUnavailableDates}
                                             minDate={new Date()}
                                         />
                                         {errors.service_date && (
@@ -239,9 +250,26 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
                                             onChange={(time) => onScheduleChange('service', parseDate(pet.service_date), time)}
                                             unavailableTimes={childUnavailableTimes}
                                             disabled={!pet.service_date}
+                                            serviceDate={pet.service_date}
+                                            serviceType="grooming" 
                                         />
                                         {errors.service_time && (
                                             <p className="mt-1 text-sm text-red-600">{errors.service_time}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700">Special Requests</label>
+                                        <textarea
+                                            name="special_requests"
+                                            value={pet.special_requests}
+                                            onChange={onChange}
+                                            className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm`}
+                                            rows={3}
+                                            placeholder="Any specific requests or instructions for grooming..."
+                                        />
+                                        {errors.special_requests && (
+                                            <p className="text-red-500 text-xs mt-1">{errors.special_requests}</p>
                                         )}
                                     </div>
                                 </div>

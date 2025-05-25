@@ -78,7 +78,7 @@ export default function CustomerPage() {
   };
 
   return (
-    <div className="container bg-purple-900 mx-auto px-4 py-8">
+    <div className="container bg-purple-950 mx-auto px-4 md:px-16 lg:px-32 py-8">
       <CustomerDashboardHeader
         onOpenBookingForm={() => openBookingFormModal(null)}
         activeTab={activeTab}

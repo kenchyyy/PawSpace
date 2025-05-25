@@ -93,7 +93,7 @@ export async function checkAvailability(params: AvailabilityParams): Promise<Ava
     };
 
   } catch (error) {
-    console.error('Error checking availability:', error);
+    console.error('Error checking availability:', error); 
     throw new Error('Failed to check room availability');
   }
 }

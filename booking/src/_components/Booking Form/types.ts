@@ -9,7 +9,6 @@ export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 export type PetSize = 'teacup' | 'small' | 'medium' | 'large' | 'xlarge';
 export type VaccinationStatus = 'yes' | 'no' | 'unknown' | '';
 export type MealType = 'breakfast' | 'lunch' | 'dinner';
-
 export type DogGroomingVariant = 'basic' | 'deluxe';
 export type CatGroomingVariant = 'cat';
 export type GroomingVariant = DogGroomingVariant | CatGroomingVariant;
@@ -294,4 +293,7 @@ export interface BasePetDetailsProps {
     unavailableDates: Date[]; 
     unavailableTimes: string[]; 
 }
+
+
+
 

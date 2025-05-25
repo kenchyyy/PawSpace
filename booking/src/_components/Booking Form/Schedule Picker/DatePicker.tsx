@@ -1,7 +1,6 @@
-// DatePicker.tsx
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import { format, addMonths, subMonths, isSameMonth, isSameDay, getDay } from 'date-fns';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { format, addMonths, subMonths, isSameMonth, isSameDay, getDay, startOfDay } from 'date-fns';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 interface DatePickerProps {
@@ -20,30 +19,30 @@ const DatePicker: React.FC<DatePickerProps> = ({
     selectedDate,
     onChange,
     unavailableDates,
-    minDate = new Date(),
+    minDate,
     maxDate,
     disabled = false,
     placeholder = "Select a date",
     name,
     className
 }) => {
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [currentMonth, setCurrentMonth] = useState(startOfDay(selectedDate || new Date()));
     const [isOpen, setIsOpen] = useState(false);
     const datePickerRef = useRef<HTMLDivElement>(null);
 
-    const sanitizedMinDate = (() => {
-        const d = new Date(minDate);
-        d.setHours(0, 0, 0, 0);
-        return d;
-    })();
+    const sanitizedMinDate = useMemo(() => {
+        return minDate ? startOfDay(minDate) : startOfDay(new Date());
+    }, [minDate]);
+
+    const sanitizedUnavailableDates = useMemo(() => {
+        return unavailableDates.map(d => startOfDay(d));
+    }, [unavailableDates]);
 
     useEffect(() => {
-        // When the selectedDate changes (e.g., from BaseBookingForm),
-        // ensure the calendar displays the month of the selected date.
-        if (selectedDate && !isSameMonth(selectedDate, currentMonth)) {
-            setCurrentMonth(selectedDate);
+        if (isOpen && selectedDate && !isSameMonth(selectedDate, currentMonth)) {
+            setCurrentMonth(startOfDay(selectedDate));
         }
-    }, [selectedDate]); // Add selectedDate as a dependency
+    }, [isOpen, selectedDate]);
 
     const nextMonth = () => {
         setCurrentMonth(addMonths(currentMonth, 1));
@@ -54,12 +53,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
     };
 
     const isDateDisabled = (date: Date) => {
-        const comparableDate = new Date(date);
-        comparableDate.setHours(0, 0, 0, 0);
-
+        const comparableDate = startOfDay(date);
         return comparableDate < sanitizedMinDate ||
-            (maxDate && comparableDate > maxDate) ||
-            unavailableDates.some(d => isSameDay(d, comparableDate));
+            (maxDate && comparableDate > startOfDay(maxDate)) ||
+            sanitizedUnavailableDates.some(d => isSameDay(d, comparableDate));
     };
 
     useEffect(() => {
@@ -76,12 +73,23 @@ const DatePicker: React.FC<DatePickerProps> = ({
     }, []);
 
     const renderHeader = () => {
+        const disablePrevMonth = () => {
+            const prevMonth = subMonths(currentMonth, 1);
+            return prevMonth < new Date(sanitizedMinDate.getFullYear(), sanitizedMinDate.getMonth(), 1);
+        };
+
+        const disableNextMonth = () => {
+            if (!maxDate) return false;
+            const nextMonth = addMonths(currentMonth, 1);
+            const maxDateMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+            return nextMonth > maxDateMonth;
+        };
+
         return (
             <div className="flex justify-between items-center p-2 border-b">
                 <button
                     onClick={prevMonth}
-                    // More precise disable for previous month button
-                    disabled={isSameMonth(currentMonth, sanitizedMinDate) && currentMonth.getDate() <= sanitizedMinDate.getDate() && currentMonth.getFullYear() === sanitizedMinDate.getFullYear()}
+                    disabled={disablePrevMonth()}
                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
                 >
                     <FiChevronLeft />
@@ -91,8 +99,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 </h2>
                 <button
                     onClick={nextMonth}
-                    // More precise disable for next month button
-                    disabled={maxDate && isSameMonth(currentMonth, maxDate) && currentMonth.getDate() >= maxDate.getDate() && currentMonth.getFullYear() === maxDate.getFullYear()}
+                    disabled={disableNextMonth()}
                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-50"
                 >
                     <FiChevronRight />
@@ -115,16 +122,15 @@ const DatePicker: React.FC<DatePickerProps> = ({
     };
 
     const renderCells = () => {
-        const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-        const numEmptyCellsAtStart = getDay(monthStart); // 0 for Sunday, 1 for Monday, etc.
+        const monthStart = startOfDay(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
+        const numEmptyCellsAtStart = getDay(monthStart);
 
         const cells = [];
         let day = new Date(monthStart);
-        day.setDate(monthStart.getDate() - numEmptyCellsAtStart); // Start from the correct day in the previous month
+        day.setDate(monthStart.getDate() - numEmptyCellsAtStart);
 
-        // Loop to create 6 weeks (42 days) to cover all calendar possibilities
-        for (let i = 0; i < 42; i++) { // 6 weeks * 7 days
-            const cloneDay = new Date(day);
+        for (let i = 0; i < 42; i++) {
+            const cloneDay = startOfDay(new Date(day));
             const isOutOfMonth = !isSameMonth(cloneDay, currentMonth);
             const isDisabled = isDateDisabled(cloneDay);
             const isSelected = selectedDate && isSameDay(cloneDay, selectedDate);
@@ -140,7 +146,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                         ${isOutOfMonth ? 'text-gray-400 opacity-40 cursor-default' : ''}
                     `}
                     onClick={() => {
-                        if (!isDisabled && !isOutOfMonth) { // Ensure only clickable dates are selected
+                        if (!isDisabled && !isOutOfMonth) {
                             onChange(cloneDay);
                             setIsOpen(false);
                         }
@@ -152,7 +158,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     )}
                 </div>
             );
-            day.setDate(day.getDate() + 1); // Increment day for the next iteration
+            day.setDate(day.getDate() + 1);
         }
 
         return <div className="grid grid-cols-7">{cells}</div>;
@@ -165,11 +171,18 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 id={name}
                 name={name}
                 value={selectedDate ? format(selectedDate, 'MMM d, yyyy') : ''}
-                onClick={() => !disabled && setIsOpen(!isOpen)}
+                onClick={() => {
+                    if (!disabled) {
+                        if (selectedDate) {
+                            setCurrentMonth(startOfDay(selectedDate));
+                        }
+                        setIsOpen(!isOpen);
+                    }
+                }}
                 readOnly
                 disabled={disabled}
                 placeholder={placeholder}
-                className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm cursor-pointer ${className || ''}`}
+                className={`w-full p-3 border rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm cursor-pointer ${className || ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             />
 
             {isOpen && !disabled && (
