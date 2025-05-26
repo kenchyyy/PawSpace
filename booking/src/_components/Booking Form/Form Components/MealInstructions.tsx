@@ -19,7 +19,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
             target: {
                 name: `meal_instructions.${meal}.time`,
                 value: time || '',
-                type: 'text' // Add type to match HTMLInputElement
+                type: 'text'
             },
         } as unknown as React.ChangeEvent<HTMLInputElement>;
         onChange(event);
@@ -27,8 +27,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        
-        // Create a proper event object for nested structure
+
         const event = {
             target: {
                 ...e.target,
@@ -36,7 +35,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
                 value
             }
         } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>;
-        
+
         onChange(event);
     };
 
@@ -52,7 +51,9 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
     return (
         <div className="space-y-6">
             <h3 className="font-medium text-gray-800 text-lg">Meal Instructions</h3>
-
+            <p className="text-sm text-gray-500 mb-4">
+                Please provide details for each meal as applicable to your pet's stay. You can leave sections blank if not applicable.
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {(Object.keys(pet.meal_instructions) as (keyof MealInstructions)[]).map(meal => (
                     <div key={meal} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -87,7 +88,7 @@ const MealInstructions: React.FC<MealInstructionsProps> = ({ pet, onChange, erro
                                     value={pet.meal_instructions[meal].notes || ''}
                                     onChange={handleInputChange}
                                     className={`w-full p-2 border rounded ${getError(`meal_instructions.${meal}.notes`)}`}
-                                    placeholder="Special instructions"
+                                    placeholder="Special instructions (e.g., portion size, specific days)"
                                     rows={2}
                                 />
                             </div>
