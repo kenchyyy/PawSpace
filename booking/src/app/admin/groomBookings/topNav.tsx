@@ -34,7 +34,7 @@ export default function TopNav() {
           onClick={() => router.push("/admin/groomBookings/")}
         >
           <ToApproveIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">To Approve</span>
+          <span className="hidden sm:inline">Pending</span>
         </Button>
         <ArrowRight className="w-4 h-4" />
         <Button
@@ -67,7 +67,7 @@ export default function TopNav() {
           onClick={() => router.push("/admin/groomBookings/cancellation-notice")}
         >
           <CancellationIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Cancellation Notice</span>
+          <span className="hidden sm:inline">Cancelled</span>
         </Button>
       </div>
     </nav>

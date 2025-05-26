@@ -15,7 +15,7 @@ export default function HomePageTab({ title , bookingType, bookingStatusFilter}:
         <span className="font-bold"> {title}</span>
         
             <div className="flex flex-col gap-4 p-4 w-full h-60 overflow-y-auto">
-                <BookingDialogByDate Date={new Date(2025, 4, 22)} bookingType={bookingType} bookingStatusFilter={bookingStatusFilter} />
+                <BookingDialogByDate Date={new Date()} bookingType={bookingType} bookingStatusFilter={bookingStatusFilter} />
             </div>
         
     </div>

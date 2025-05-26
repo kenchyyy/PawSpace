@@ -4,6 +4,12 @@ import { useState } from "react";
 import HomePageTab from "@/_components/admin/HomePageTab";
 import { format } from "date-fns";
 
+const ActiveTabMessages = {
+  pending: "The following bookings are published today and await your confirmation. For bookings made before today, please check the 'Boarding Bookings' page.",
+  confirmed: "The following bookings are scheduled for arrival today.",
+  ongoing: "The following bookings are scheduled for check-out today.",
+}
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"pending" | "confirmed" | "ongoing">("pending");
 
@@ -39,9 +45,7 @@ export default function HomePage() {
             Bookings with status "{activeTab}" Today: {format(new Date(), 'MMMM dd, yyyy')}
           </span>
           <span className="text-sm text-gray-400">
-            {activeTab === "pending"
-              ? "The following bookings await your confirmation."
-              : `View ${activeTab} bookings.`}
+            {ActiveTabMessages[activeTab] ? ActiveTabMessages[activeTab] : ""}
           </span>
         </div>
         

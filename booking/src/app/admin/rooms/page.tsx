@@ -99,7 +99,7 @@ export default function RoomsPage() {
                     <div className="w-64 bg-violet-800 h-[calc(100vh-3.5rem)] sticky top-14 flex-shrink-0 gap-4 hidden lg:block">
                         {renderBooks && 
                             <div className="flex flex-col">
-                                <span className=" h-16 flex items-center text-lg font-bold">Bookings scheduled for check-in and check-out</span>
+                                <span className=" h-16 flex items-center text-lg font-bold">Confirmed and Ongoing bookings:</span>
                                 <div className="h-[calc(100vh-7.5rem)]">
                                     <BookingDialogByDate key={selectedDate.toISOString()} Date={selectedDate} onRemoveBooking={onBookingStatusChange} bookingType='boarding' bookingStatusFilter="confirmed&ongoing"/>
                                 </div>

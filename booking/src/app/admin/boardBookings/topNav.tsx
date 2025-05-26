@@ -32,11 +32,11 @@ export default function TopNav() {
           onClick={() => router.push("/admin/boardBookings/")}
         >
           <ToApproveIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">To Approve</span>
+          <span className="hidden sm:inline">Pending</span>
         </Button>
         <ArrowRight className="w-4 h-4" />
         <Button
-          className={`${isActive("/admin/boardBookings/confirmed") ? "bg-violet-800" : "bg-purple-600"} hover:bg-purple-600 flex items-center gap-2`}
+          className={`${isActive("/admin/Cancelled/confirmed") ? "bg-violet-800" : "bg-purple-600"} hover:bg-purple-600 flex items-center gap-2`}
           onClick={() => router.push("/admin/boardBookings/confirmed")}
         >
           <ConfirmedIcon className="w-4 h-4" />
@@ -65,7 +65,7 @@ export default function TopNav() {
           onClick={() => router.push("/admin/boardBookings/cancellation-notice")}
         >
           <CancellationIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Cancellation Notice</span>
+          <span className="hidden sm:inline">Cancelled</span>
         </Button>
       </div>
     </nav>
