@@ -128,6 +128,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
                     totalAmount={booking.totalAmount}
                     ownerId={booking.ownerDetails.id}
                     bookingType={bookingType}
+                    discountApplied={booking.discountApplied}
                     >
                       
                       <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm border-2 border-purple-400`}>
@@ -156,6 +157,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
                       totalAmount={booking.totalAmount}
                       ownerId={booking.ownerDetails.id}
                       bookingType={bookingType}
+                      discountApplied={booking.discountApplied}
                       >
 
                       <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm border-2 border-purple-400`}>

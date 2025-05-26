@@ -15,7 +15,7 @@ const ManageBookingScrollArea = forwardRef<HTMLDivElement, ManageBookingScrollAr
           className ?? ""
         }`}
       >
-        <div className="flex flex-col gap-4 p-6 text-white">{children}</div>
+        <div className="flex flex-col gap-4 p-2 text-white">{children}</div>
       </ScrollArea>
     );
   }

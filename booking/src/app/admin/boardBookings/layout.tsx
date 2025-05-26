@@ -11,7 +11,7 @@ export default async function manageBookingsLayout({children}: {children: React.
             >
                 <TopNav/>
             </header>
-            <div className="w-full h-full pl-10 pr-10 pt-24 lg:pr-20 lg:pl-20"
+            <div className="w-full h-full px-6 pt-24 "
             style={{ backgroundColor: "#3b0764", color: "white" }}
             >
                 {children}

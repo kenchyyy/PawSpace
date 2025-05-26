@@ -134,6 +134,7 @@ export default function ManageBookingsPageLayout({ bookingStatus, bookingService
               totalAmount={booking.totalAmount}
               ownerId={booking.ownerDetails.id}
               bookingType={bookingServiceType}
+              discountApplied={booking.discountApplied}
             >
               
             </BoardingDialog>
@@ -157,6 +158,7 @@ export default function ManageBookingsPageLayout({ bookingStatus, bookingService
               totalAmount={booking.totalAmount}
               ownerId={booking.ownerDetails.id}
               bookingType={bookingServiceType}
+              discountApplied={booking.discountApplied}
             />
           
           }
