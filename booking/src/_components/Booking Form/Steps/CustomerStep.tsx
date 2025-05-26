@@ -42,7 +42,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
     };
 
     fetchUser();
-  }, []);
+  }, [onChange, supabase]);
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-xl border border-gray-200">

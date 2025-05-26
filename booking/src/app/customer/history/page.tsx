@@ -1,127 +1,134 @@
-// app/customer/history/page.tsx
-'use client';
-import { Booking, BoardingPet, GroomingPet } from '@/_components/Booking History/types';
-import BookingHistory from '@/_components/Booking History/BookingHistory';
+'use server';
 
-export default function CustomerHistoryPage() {
-  // Hardcoded sample bookings
-  const bookings: Booking[] = [
-    {
-      id: '1',
-      booking_uuid: 'b1',
-      date_booked: '2023-11-15',
-      service_date_start: '2023-12-10',
-      service_date_end: '2023-12-15',
-      status: 'confirmed',
-      owner_details: {
-        name: 'John Doe',
-        email: 'john@example.com',
-        address: '123 Main St, City',
-        contact_number: '555-123-4567'
-      },
-      pet: {
-        id: 'p1',
-        name: 'Buddy',
-        age: '3',
-        pet_type: 'dog',
-        breed: 'Golden Retriever',
-        vaccinated: 'yes',
-        size: 'large',
-        vitamins_or_medications: 'None',
-        allergies: 'None',
-        special_requests: 'Needs extra walks',
-        completed: false,
-        service_type: 'boarding',
-        room_size: 'large',
-        boarding_type: 'overnight',
-        check_in_date: '2023-12-10',
-        check_in_time: '10:00 AM',
-        check_out_date: '2023-12-15',
-        check_out_time: '04:00 PM',
-        meal_instructions: {
-          breakfast: { time: '08:00', food: 'Kibble', notes: '1 cup' },
-          lunch: { time: '12:00', food: 'Wet food', notes: '1 can' },
-          dinner: { time: '06:00', food: 'Kibble', notes: '1.5 cups' }
-        },
-        special_feeding_request: 'Add fish oil to dinner'
-      } as BoardingPet,
-      special_requests: 'Please provide daily updates',
-      total_amount: 800,
-      discount_applied: 0
-    },
-    {
-      id: '2',
-      booking_uuid: 'b2',
-      date_booked: '2023-11-20',
-      service_date_start: '2023-12-05',
-      service_date_end: '2023-12-05',
-      status: 'completed',
-      owner_details: {
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        address: '456 Oak Ave, Town',
-        contact_number: '555-987-6543'
-      },
-      pet: {
-        id: 'p2',
-        name: 'Whiskers',
-        age: '5',
-        pet_type: 'cat',
-        breed: 'Siamese',
-        vaccinated: 'yes',
-        size: 'small',
-        vitamins_or_medications: 'Joint supplements',
-        allergies: 'None',
-        special_requests: 'Gentle handling please',
-        completed: true,
-        service_type: 'grooming',
-        service_variant: 'standard',
-        service_date: '2023-12-05',
-        service_time: '02:00 PM'
-      } as GroomingPet,
-      special_requests: 'No perfumed products',
-      total_amount: 450,
-      discount_applied: 0.1 // 10% discount
-    },
-    {
-      id: '3',
-      booking_uuid: 'b3',
-      date_booked: '2023-12-01',
-      service_date_start: '2023-12-20',
-      service_date_end: '2023-12-20',
-      status: 'pending',
-      owner_details: {
-        name: 'Mike Johnson',
-        email: 'mike@example.com',
-        address: '789 Pine Rd, Village',
-        contact_number: '555-456-7890'
-      },
-      pet: {
-        id: 'p3',
-        name: 'Rex',
-        age: '2',
-        pet_type: 'dog',
-        breed: 'German Shepherd',
-        vaccinated: 'yes',
-        size: 'xlarge',
-        vitamins_or_medications: 'None',
-        allergies: 'Chicken',
-        special_requests: 'Needs gentle introduction',
-        completed: false,
-        service_type: 'grooming',
-        service_variant: 'deluxe',
-        service_date: '2023-12-20',
-        service_time: '11:00 AM'
-      } as GroomingPet,
-      special_requests: 'Use hypoallergenic shampoo',
-      total_amount: 750,
-      discount_applied: 0
+import React from 'react';
+import { createServerSideClient } from '@/lib/supabase/CreateServerSideClient';
+import { BookingRecord, OwnerDetails } from '@/_components/BookingHistory/types/bookingRecordType';
+import BookingHistoryClient from '@/_components/BookingHistory/BookingHistoryClient';
+import { redirect } from 'next/navigation';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+const ITEMS_PER_PAGE = 5;
+
+async function getBookingHistory(page: number, userId: string, supabase: SupabaseClient): Promise<{ bookings: BookingRecord[] | null; error: Error | null; totalCount: number | null }> {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE - 1;
+
+    try {
+        const { count, error: countError } = await supabase
+            .from('Booking')
+            .select('*', { count: 'exact' })
+            .eq('owner_details', userId);
+
+        if (countError) {
+            console.error('Error fetching total booking count for user:', countError);
+            return { bookings: null, error: countError, totalCount: null };
+        }
+
+        const { data, error } = await supabase
+            .from('Booking')
+            .select(`
+                booking_uuid,
+                date_booked,
+                service_date_start,
+                service_date_end,
+                status,
+                special_requests,
+                total_amount,
+                discount_applied,
+                Owner (
+                    id,
+                    name,
+                    address,
+                    contact_number,
+                    email
+                ),
+                Pet (
+                    pet_uuid,
+                    name,
+                    pet_type,
+                    grooming_id,
+                    boarding_id_extension,
+                    GroomingPet (
+                        id,
+                        service_variant
+                    ),
+                    BoardingPet (
+                        id,
+                        boarding_type
+                    )
+                )
+            `)
+            .eq('owner_details', userId)
+            .order('date_booked', { ascending: false })
+            .range(startIndex, endIndex);
+
+        if (error) {
+            console.error(`Error fetching booking history with pets for user (page ${page}):`, error);
+            return { bookings: null, error, totalCount: null };
+        }
+
+        if (data) {
+            const bookingRecords = data.map(booking => ({
+                booking_uuid: booking.booking_uuid,
+                date_booked: booking.date_booked,
+                service_date_start: booking.service_date_start,
+                service_date_end: booking.service_date_end,
+                status: booking.status,
+                special_requests: booking.special_requests ?? null,
+                total_amount: booking.total_amount,
+                discount_applied: booking.discount_applied ?? null,
+                owner_details: Array.isArray(booking.Owner) ? booking.Owner[0] as OwnerDetails : booking.Owner as OwnerDetails,
+                pets: booking.Pet ? booking.Pet.map(pet => ({
+                    pet_uuid: pet.pet_uuid,
+                    name: pet.name,
+                    pet_type: pet.pet_type,
+                    grooming_id: pet.grooming_id ?? null,
+                    groom_service: Array.isArray(pet.GroomingPet) && pet.GroomingPet.length > 0
+                        ? { id: (pet.GroomingPet[0] as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet[0] as { id: string; service_variant: string }).service_variant }
+                        : (pet.GroomingPet && !Array.isArray(pet.GroomingPet) && typeof pet.GroomingPet === 'object'
+                            ? { id: (pet.GroomingPet as { id: string; service_variant: string }).id, service_variant: (pet.GroomingPet as { id: string; service_variant: string }).service_variant }
+                            : null),
+                    boarding_id_extension: pet.grooming_id ?? null,
+                    boarding_pet: Array.isArray(pet.BoardingPet) && pet.BoardingPet.length > 0
+                        ? { id: (pet.BoardingPet[0] as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet[0] as { id: string; boarding_type: string }).boarding_type }
+                        : (pet.BoardingPet && !Array.isArray(pet.BoardingPet) && typeof pet.BoardingPet === 'object'
+                            ? { id: (pet.BoardingPet as { id: string; boarding_type: string }).id, boarding_type: (pet.BoardingPet as { id: string; boarding_type: string }).boarding_type }
+                            : null),
+                })) : [],
+            })) as BookingRecord[];
+            return { bookings: bookingRecords, error: null, totalCount: count };
+        }
+
+        return { bookings: null, error: null, totalCount: count };
+    } catch (error: unknown) {
+        console.error('An unexpected error occurred:', error);
+        return { bookings: null, error: new Error('Failed to fetch booking history with pets'), totalCount: null };
     }
-  ];
+}
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <BookingHistory bookings={bookings} />
-    </div>
-  );
+export default async function BookingHistoryPage() {
+    const supabase = await createServerSideClient();
+
+    const {
+        data: { session },
+        error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session?.user) {
+        redirect('/login');
+    }
+
+    const userId = session.user.id;
+    const { bookings: initialBookings, error: initialError, totalCount } = await getBookingHistory(1, userId, supabase);
+
+    return (
+        <div>
+            <BookingHistoryClient
+                bookings={initialBookings}
+                loading={!initialBookings && !initialError}
+                error={initialError}
+                totalCount={totalCount}
+            />
+        </div>
+    );
 }

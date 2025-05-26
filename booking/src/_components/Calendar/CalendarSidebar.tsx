@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { EventApi } from "@fullcalendar/core";
 import { formatDateTime } from "@/lib/utils";
 
@@ -30,6 +30,23 @@ const CalendarSidebar = ({
     }).format(dateObj);
   };
 
+  // Fix for checkout dates: adjust end dates that are at midnight (00:00:00)
+  // by subtracting 1 millisecond to show them as the previous day at 11:59:59 PM
+  const adjustEndDate = (date: Date | null): Date | null => {
+    if (!date) return null;
+    
+    // Check if the time is midnight (00:00:00)
+    if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
+      // Create a new date object to avoid mutating the original
+      const adjustedDate = new Date(date);
+      // Subtract 1 millisecond to make it 11:59:59.999 PM of the previous day
+      adjustedDate.setMilliseconds(-1);
+      return adjustedDate;
+    }
+    
+    return date;
+  };
+
   const today = new Date();
   const todayYear = today.getFullYear();
   const todayMonth = today.getMonth();
@@ -40,12 +57,17 @@ const CalendarSidebar = ({
       typeof event.start === "string"
         ? new Date(event.start)
         : new Date(event.start || new Date());
+    
     let endDate = event.end
       ? typeof event.end === "string"
         ? new Date(event.end)
         : new Date(event.end)
       : null;
-    return { ...event, _startDate: startDate, _endDate: endDate };
+    
+    // Apply the end date adjustment
+    const adjustedEndDate = adjustEndDate(endDate);
+    
+    return { ...event, _startDate: startDate, _endDate: adjustedEndDate };
   });
 
   const todayEvents = parsedEvents.filter((event) => {
@@ -202,8 +224,27 @@ const CalendarEventItem = ({
   isToday?: boolean;
   isUpcoming?: boolean;
 }) => {
+  // Function to adjust checkout date for display purposes
+  const adjustEndDateForDisplay = (date: Date | string | null): Date | undefined => {
+    if (!date) return undefined;
+    
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // If it's midnight (00:00:00), adjust to previous day 11:59:59 PM
+    if (dateObj.getHours() === 0 && dateObj.getMinutes() === 0 && dateObj.getSeconds() === 0) {
+      const adjustedDate = new Date(dateObj);
+      adjustedDate.setTime(adjustedDate.getTime() - 1); // Subtract 1 millisecond
+      return adjustedDate;
+    }
+    
+    return dateObj;
+  };
+  
+  // Apply the adjustment to end date before formatting
   const checkIn = formatDateTime(event.start || new Date());
-  const checkOut = event.end ? formatDateTime(event.end) : undefined;
+  const checkOut = event.end 
+    ? formatDateTime(adjustEndDateForDisplay(event.end)) 
+    : undefined;
 
   let bookingType: string | null = null;
   if (isToday) {
@@ -212,18 +253,37 @@ const CalendarEventItem = ({
     const todayMonth = today.getMonth();
     const todayDay = today.getDate();
 
-    const startYear = (event.start ?? new Date()).getFullYear();
-    const startMonth = (event.start ?? new Date()).getMonth();
-    const startDay = (event.start ?? new Date()).getDate();
+    const startDate =
+    typeof event.start === "string"
+    ? new Date(event.start)
+    : event.start instanceof Date
+    ? event.start
+    : new Date();
+
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth();
+    const startDay = startDate.getDate();
+
     const startsToday =
       startYear === todayYear &&
       startMonth === todayMonth &&
       startDay === todayDay;
 
-    const endsToday = event.end
-      ? event.end.getFullYear() === todayYear &&
-        event.end.getMonth() === todayMonth &&
-        event.end.getDate() === todayDay
+    // Adjust the end date for checking if it ends today
+    const rawEndDate = event.end
+      ? typeof event.end === "string"
+        ? new Date(event.end)
+        : event.end instanceof Date
+        ? event.end
+        : null
+      : null;
+    
+    const endDate = adjustEndDateForDisplay(rawEndDate);
+
+    const endsToday = endDate
+      ? endDate.getFullYear() === todayYear &&
+        endDate.getMonth() === todayMonth &&
+        endDate.getDate() === todayDay
       : false;
 
     if (startsToday && endsToday) {
@@ -235,19 +295,20 @@ const CalendarEventItem = ({
     }
   } else if (isUpcoming) {
     const today = new Date();
-    const todayYear = today.getFullYear();
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
 
-    const startsAfterToday = (event.start ?? new Date()) > today;
-    const endsAfterToday = event.end && event.end > today;
+    // Get adjusted dates for comparison
+    const startDate = event.start || new Date();
+    const adjustedEndDate = event.end ? adjustEndDateForDisplay(event.end) : null;
+
+    const startsAfterToday = new Date(startDate) > today;
+    const endsAfterToday = adjustedEndDate && new Date(adjustedEndDate) > today;
 
     const sevenDaysFromToday = new Date();
     sevenDaysFromToday.setDate(today.getDate() + 7);
     sevenDaysFromToday.setHours(23, 59, 59, 999);
 
-    const startsInNext7Days = (event.start ?? new Date()) <= sevenDaysFromToday;
-    const endsInNext7Days = event.end && event.end <= sevenDaysFromToday;
+    const startsInNext7Days = new Date(startDate) <= sevenDaysFromToday;
+    const endsInNext7Days = adjustedEndDate && new Date(adjustedEndDate) <= sevenDaysFromToday;
 
     if (
       startsAfterToday &&
@@ -281,14 +342,8 @@ const CalendarEventItem = ({
           <span className='text-xs text-[#FBBF24] ml-1'>({bookingType})</span>
         )}
       </div>
-
-      <div className='text-sm text-[#C4B5FD] mt-2'>
-        <span className='font-medium text-[#FBBF24]'>Pet:</span>
-        {event.extendedProps.petName} ({event.extendedProps.petType})
-      </div>
-
       <div className='text-sm text-[#C4B5FD] mt-1'>
-        <span className='font-medium text-[#FBBF24]'>Owner:</span>
+        <span className='font-medium text-[#FBBF24]'>Owner:</span>{" "}
         {event.extendedProps.ownerName}
       </div>
 
@@ -311,7 +366,7 @@ const CalendarEventItem = ({
           border: `1px solid ${event.backgroundColor || "#9F7AEA"}`,
         }}
       >
-        {event.extendedProps.status}
+        {event.extendedProps.status.toLowerCase()}
       </div>
     </li>
   );

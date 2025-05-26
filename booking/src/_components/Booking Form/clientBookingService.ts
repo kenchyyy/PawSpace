@@ -2,7 +2,7 @@
 'use client'
 
 import { SupabaseClient } from '@supabase/supabase-js'
-import type { Booking, OwnerDetails, Pet, BookingResult, BookingStatus, PetType, VaccinationStatus, GroomingVariant, RoomSize, BoardingType, ServiceType, MealInstruction, GroomingPet, BoardingPet } from './types'
+import type { Booking, Pet, BookingStatus, PetType, VaccinationStatus, GroomingVariant, RoomSize, BoardingType, ServiceType, MealInstruction, GroomingPet, BoardingPet } from './types'
 
 export class ClientBookingService {
   private supabase: SupabaseClient;

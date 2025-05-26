@@ -20,38 +20,21 @@ const meta: Meta<typeof AddBookingButton> = {
 export default meta;
 type Story = StoryObj<typeof AddBookingButton>;
 
-export const PurpleGradient: Story = {
-  name: 'Default Gradient (Medium)',
+export const Default: Story = {
+  name: 'Default Button',
   args: {
     variant: 'default',
     size: 'md',
+    children: 'Book Now',
   },
 };
 
-export const RoseLarge: Story = {
-  name: 'Romantic Rose (Large)',
+export const Disabled: Story = {
+  name: 'Disabled Button',
   args: {
-    variant: 'rose',
-    size: 'lg',
-    children: 'Reserve a Stay',
-  },
-};
-
-export const AquaSmall: Story = {
-  name: 'Aqua Fresh (Small)',
-  args: {
-    variant: 'aqua',
-    size: 'sm',
-    children: 'Quick Book',
-    withIcon: false,
-  },
-};
-
-export const GoldLuxury: Story = {
-  name: 'Gold Luxury (Large)',
-  args: {
-    variant: 'gold',
-    size: 'lg',
-    children: 'VIP Booking',
+    variant: 'default',
+    size: 'md',
+    children: 'Book Now',
+    disabled: true,
   },
 };

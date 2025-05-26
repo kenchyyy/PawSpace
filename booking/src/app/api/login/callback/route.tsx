@@ -15,15 +15,9 @@ export async function POST(request: Request) {
 
     // Check whitelist directly without auth session
     const { data, error } = await supabase
-<<<<<<< HEAD
       .from('AdminAccessUsers')
       .select('*')
       .eq('email', email)
-=======
-      .from("AdminAccessUsers")
-      .select("*")
-      .eq("email", email)
->>>>>>> origin/BookingForm
       .maybeSingle();
 
     if (error) {

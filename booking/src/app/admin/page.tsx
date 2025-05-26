@@ -1,22 +1,77 @@
-"use server";
+"use client";
 
+import { useState } from "react";
 import HomePageTab from "@/_components/admin/HomePageTab";
+import { format } from "date-fns";
 
-export default async function HomePage() {
+export default function HomePage() {
+  const [activeTab, setActiveTab] = useState<"pending" | "confirmed" | "ongoing">("pending");
 
   return (
-    <div>
-      <div className="flex p-8 w-fit mx-auto gap-4">
-        <HomePageTab text="Requests" notify={true} pageRedirect=""></HomePageTab>
-
-        <HomePageTab text="Current" notify={false} pageRedirect=""></HomePageTab>
-
-        <HomePageTab text="Transfer Request" notify={false} pageRedirect=""></HomePageTab>
-
-        <HomePageTab text="Cancellations" notify={false} pageRedirect=""></HomePageTab>
+    <div className="flex flex-col h-screen w-full">
+      {/* Header */}
+      <div className="p-4 border-b border-violet-800">
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
       </div>
-      <div className="flex w-fit mx-auto gap-4">
+      
+      {/* Main content area */}
+      <div className="flex-1 overflow-y-auto p-8 w-full h-full flex flex-col items-center">
+        {/* Tab selector */}
+        <div className="flex gap-2 mb-6">
+          {(["pending", "confirmed", "ongoing"] as const).map((tab) => (
+            <button
+              key={tab}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                activeTab === tab
+                  ? "bg-violet-600 text-white"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
 
+        {/* Content based on active tab */}
+        <div className="mb-4 flex flex-col items-center text-center">
+          <span className="text-lg font-medium">
+            Bookings with status "{activeTab}" Today: {format(new Date(), 'MMMM dd, yyyy')}
+          </span>
+          <span className="text-sm text-gray-400">
+            {activeTab === "pending"
+              ? "The following bookings await your confirmation."
+              : `View ${activeTab} bookings.`}
+          </span>
+        </div>
+        
+        {/* Only render active tab content */}
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-4 my-4 place-items-center">
+          {activeTab === "pending" && (
+            <>
+              <HomePageTab title="Boarding" bookingType="boarding" bookingStatusFilter="pending"/>
+              <HomePageTab title="Grooming" bookingType="grooming" bookingStatusFilter="pending"/>
+            </>
+          )}
+          {activeTab === "confirmed" && (
+            <>
+              <HomePageTab title="Boarding" bookingType="boarding" bookingStatusFilter="confirmed"/>
+              <HomePageTab title="Grooming" bookingType="grooming" bookingStatusFilter="confirmed"/>
+            </>
+          )}
+          {activeTab === "ongoing" && (
+            <>
+              <HomePageTab title="Boarding" bookingType="boarding" bookingStatusFilter="ongoing"/>
+              <HomePageTab title="Grooming" bookingType="grooming" bookingStatusFilter="ongoing"/>
+            </>
+          )}
+        </div>
+        
+        <div className="w-full border-t-2 border-violet-800 pt-8 mt-8">
+          <div className="text-lg font-semibold text-violet-300">
+            <span>Welcome to the Admin Dashboard</span>
+          </div>
+        </div>
       </div>
     </div>
   );

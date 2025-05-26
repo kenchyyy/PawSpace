@@ -8,6 +8,7 @@ type AddBookingButtonProps = {
   withIcon?: boolean;
   variant?: 'default' | 'rose' | 'aqua' | 'gold';
   size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
 };
 
 export function AddBookingButton({
@@ -17,6 +18,7 @@ export function AddBookingButton({
   withIcon = true,
   variant = 'default',
   size = 'md',
+  disabled = false,
 }: AddBookingButtonProps) {
   const baseStyles =
     'relative inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-300 shadow-md group overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2';
@@ -40,10 +42,15 @@ export function AddBookingButton({
       ? 'before:absolute before:inset-0 before:bg-white/10 before:scale-0 before:rounded-full before:opacity-0 group-hover:before:scale-150 group-hover:before:opacity-100 before:transition-all before:duration-500'
       : '';
 
+  const disabledStyles = disabled
+    ? 'bg-gray-300 text-gray-600 cursor-not-allowed opacity-100 shadow-none ring-0'
+    : '';
+
   return (
     <button
       onClick={onClick}
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${rippleEffect} ${className}`}
+      disabled={disabled}
+      className={`${baseStyles} ${disabled ? disabledStyles : variantStyles[variant]} ${sizeStyles[size]} ${!disabled ? rippleEffect : ''} ${className}`}
     >
       {withIcon && <PawPrint className="w-5 h-5" />}
       {children}

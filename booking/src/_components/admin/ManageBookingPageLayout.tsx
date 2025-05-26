@@ -1,17 +1,19 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import AdminSideBookingDialog from "@/_components/admin/AdminSideBookingDialog";
+import BoardingDialog from "@/_components/admin/BoardingDialog";
 import ManageBookingScrollArea from "@/_components/admin/ManageBookingScrollArea";
 import { GetBookingDataByStatus, FormattedBooking } from "@/_components/serverSide/BookDataFetching";
 import AlertMessage from "@/_components/AlertMessage";
 import { Skeleton } from "@/_components/ui/skeleton";
+import GroomingPetDialog from "./Grooming/GroomingPetDialog";
 
 interface ManageBookingPageLayoutProps {
   bookingStatus: "pending" | "confirmed" | "cancelled" | "completed" | "ongoing";
+  bookingServiceType: "boarding" | "grooming" ;
 }
 
-export default function ManageBookingsPageLayout({ bookingStatus }: ManageBookingPageLayoutProps) {
+export default function ManageBookingsPageLayout({ bookingStatus, bookingServiceType }: ManageBookingPageLayoutProps) {
   const [bookings, setBookings] = useState<FormattedBooking[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -36,7 +38,12 @@ export default function ManageBookingsPageLayout({ bookingStatus }: ManageBookin
       const from = page * 10;
       const to = from + 9;
 
-      const { message, returnData } = await GetBookingDataByStatus(from, to, bookingStatus);
+      const { message, returnData } = await GetBookingDataByStatus(
+        from, 
+        to, 
+        bookingStatus, 
+        {field: bookingServiceType === "grooming" ? "grooming_id" : "boarding_id_extension", hasField: true}
+      );
 
       if (!returnData) {
         showMessage(message);
@@ -94,7 +101,12 @@ export default function ManageBookingsPageLayout({ bookingStatus }: ManageBookin
   }
 
   return (
-    <ManageBookingScrollArea className="bg-purple-800 rounded-lg border border-purple-600 shadow-inner p-4 h-full">
+    <ManageBookingScrollArea className={
+      bookingServiceType === 'boarding' ? 
+      "bg-purple-800 rounded-lg border border-purple-600 shadow-inner p-4 h-full"
+      :
+      "bg-indigo-800 rounded-lg border border-indigo-600 shadow-inner p-4 h-full"
+    }>
       {bookings.length === 0 && !loading && (
         <div className="py-8 text-center text-purple-300 font-semibold">No Bookings to show here</div>
       )}
@@ -103,7 +115,9 @@ export default function ManageBookingsPageLayout({ bookingStatus }: ManageBookin
         const isLast = index === bookings.length - 1;
         return (
           <div key={booking.bookingUUID} ref={isLast ? lastBookingRef : undefined} className="mb-4 last:mb-0">
-            <AdminSideBookingDialog
+            {bookingServiceType === 'boarding' ?
+            
+            <BoardingDialog
               bookingUUID={booking.bookingUUID}
               publishDateTime={booking.dateBooked}
               ownerName={booking.ownerDetails.name}
@@ -117,10 +131,36 @@ export default function ManageBookingsPageLayout({ bookingStatus }: ManageBookin
               status={booking.status}
               specialRequest={booking.specialRequests}
               ondelete={removeBooking}
+              totalAmount={booking.totalAmount}
               ownerId={booking.ownerDetails.id}
+              bookingType={bookingServiceType}
             >
               
-            </AdminSideBookingDialog>
+            </BoardingDialog>
+
+            :
+
+            <GroomingPetDialog
+              bookingUUID={booking.bookingUUID}
+              publishDateTime={booking.dateBooked}
+              ownerName={booking.ownerDetails.name}
+              address={booking.ownerDetails.address}
+              email={booking.ownerDetails.email}
+              contactNumber={booking.ownerDetails.contactNumber}
+              checkInDate={booking.serviceDateStart.split("T")[0]}
+              checkInTime={booking.serviceDateStart.split("T")[1].split(".")[0]}
+              checkOutDate={booking.serviceDateEnd.split("T")[0]}
+              checkOutTime={booking.serviceDateEnd.split("T")[1].split(".")[0]}
+              status={booking.status}
+              specialRequest={booking.specialRequests}
+              ondelete={removeBooking}
+              totalAmount={booking.totalAmount}
+              ownerId={booking.ownerDetails.id}
+              bookingType={bookingServiceType}
+            />
+          
+          }
+
           </div>
         );
       })}

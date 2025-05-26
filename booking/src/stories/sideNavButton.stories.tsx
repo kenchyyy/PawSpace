@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
-import { sideNavButtonProps } from "@/_components/SideNavButton";
+import { SideNavButtonProps } from "@/_components/SideNavButton";
 import SideNavButton from "@/_components/SideNavButton";
 import { fn } from "@storybook/test";
 import { FaNode } from "react-icons/fa";

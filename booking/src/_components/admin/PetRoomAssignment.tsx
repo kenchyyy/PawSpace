@@ -15,14 +15,20 @@ import { getAllRooms, RoomData, getPetsSceduledForRoomStay, assignRoomToPet } fr
 import { ScrollArea } from "../ui/scroll-area";
 import { RoomButton } from "./RoomButton";
 
+function truncate(str : string, maxLength = 30) {
+  if (!str) return "";
+  str = String(str);
+  return str.length > maxLength ? str.substring(0, maxLength) + "..." : str;
+}
+
 interface PetRoomAssignmentProps {
   onClose: (newRoom: string, newRoomId: string) => void;
   pet_name: string;
   children?: React.ReactNode;
-  checkInDateTime: string;  // ISO date string, e.g. "2025-05-21"
+  checkInDateTime: string;
   checkOutDate: string;
   checkInDate: string;
-  checkOutDateTime: string; // ISO date string
+  checkOutDateTime: string;
 }
 
 export interface PetSummary {
@@ -30,13 +36,9 @@ export interface PetSummary {
   name: string;
   petType: string;
   breed: string;
-  checkInDate?: string;   // Added these fields
+  checkInDate?: string;
   checkOutDate?: string;
 }
-
-
-
-
 
 export default function PetRoomAssignment({
   onClose,
@@ -53,12 +55,10 @@ export default function PetRoomAssignment({
   const [errorRooms, setErrorRooms] = useState<string | null>(null);
   const hiddenbutton = useRef<HTMLButtonElement>(null);
 
-  // Store pets per roomId
   const [petsByRoom, setPetsByRoom] = useState<Record<string, PetSummary[]>>({});
   const [loadingPetsByRoom, setLoadingPetsByRoom] = useState<Record<string, boolean>>({});
   const [errorPetsByRoom, setErrorPetsByRoom] = useState<Record<string, string | null>>({});
 
-  // Load all rooms on mount
   useEffect(() => {
     const loadRooms = async () => {
       setIsLoadingRooms(true);
@@ -79,26 +79,21 @@ export default function PetRoomAssignment({
     loadRooms();
   }, []);
 
-  // For each room, load pets scheduled overlapping the check-in date
   useEffect(() => {
     if (rooms.length === 0) return;
 
     rooms.forEach((room) => {
-      // Avoid duplicate fetches
       if (petsByRoom[room.id]) return;
 
-      // Mark loading
       setLoadingPetsByRoom((prev) => ({ ...prev, [room.id]: true }));
       setErrorPetsByRoom((prev) => ({ ...prev, [room.id]: null }));
 
-      // Fetch pets scheduled for this room with check-in date filter
-      getPetsSceduledForRoomStay(checkInDateTime, checkOutDateTime, room.id.toString()) // petUuid param empty because we want all pets
+      getPetsSceduledForRoomStay(checkInDateTime, checkOutDateTime, room.id.toString())
         .then(({ returnData, message }) => {
           if (!returnData) {
             setErrorPetsByRoom((prev) => ({ ...prev, [room.id]: message || "Failed to fetch pets" }));
             setPetsByRoom((prev) => ({ ...prev, [room.id]: [] }));
           } else {
-            // Map to PetSummary including check-in/out dates
             const pets: PetSummary[] = returnData.map((pet: any) => ({
               petUuid: pet.petUuid,
               name: pet.name,
@@ -124,24 +119,35 @@ export default function PetRoomAssignment({
   const handleConfirm = () => {
     if (!selectedRoom) return;
     onClose(selectedRoom.name, selectedRoom.id);
-     hiddenbutton.current?.click()
-
+    hiddenbutton.current?.click();
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="bg-purple-700 text-white border-purple-600">
+      <DialogContent className="bg-purple-900 text-white border-purple-800">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
-            Assign a room for <span className="font-extrabold text-orange-400">{pet_name}</span>
+            Assign a room for{" "}
+            <span className="font-extrabold text-orange-400 break-words">
+              {truncate(pet_name, 30)}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-white" asChild>
-            <div className=" flex flex-col">
-              <span> Assign their room scheduled at</span>
-              <span className="text-orange-200"> {checkInDateTime.replace("T" , " at ")}</span>
-              <span> to </span>
-              <span className="text-orange-200"> {checkOutDateTime.replace("T" , " at ")}</span>
+            <div className="flex flex-col">
+              <span>Assign their room scheduled at</span>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-green-400 break-all">
+                  {truncate(checkInDateTime.replace("T", " at "), 30)}
+                </span>
+                <span>to</span>
+                <span className="text-red-400 break-all">
+                  {truncate(checkOutDateTime.replace("T", " at "), 30)}
+                </span>
+              </div>
+              <span className="text-xs font-bold pt-4 break-words">
+                The following are the rooms that house pets at the given range of time:
+              </span>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -150,7 +156,9 @@ export default function PetRoomAssignment({
           {isLoadingRooms ? (
             <div className="text-center py-4">Loading rooms...</div>
           ) : errorRooms ? (
-            <div className="text-red-300 p-4">{errorRooms}</div>
+            <div className="text-red-300 p-4 break-words">
+              {truncate(errorRooms, 100)}
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {rooms.map((room) => (

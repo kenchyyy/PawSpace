@@ -7,9 +7,9 @@ import {
   GroomingPet,
   BoardingPet,
   BookingResult,
-  BookingStatus,
-  MealInstructions, 
-} from "./types";
+  BoardingPet,
+  GroomingPet
+} from './types'
 
 export async function createBooking(
   ownerDetails: OwnerDetails,
@@ -21,30 +21,43 @@ export async function createBooking(
   const supabase = await createServerSideClient();
 
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) { 
-      return { success: false, error: "User not authenticated" };
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return { success: false, error: 'User not authenticated' }
     }
 
-    console.log("user data found: ", user); 
+    const { error: transactionError } = await supabase.rpc('start_transaction');
+    if (transactionError) {
+        console.error('Transaction start error', transactionError);
+        return { success: false, error: 'Failed to start transaction' };
+    }
 
-    const { data: owner, error: ownerError } = await supabase
-      .from("Owner")
-      .upsert(
-        {
-          id: user.id,
-          name: ownerDetails.name,
-          email: ownerDetails.email,
-          address: ownerDetails.address,
-          contact_number: ownerDetails.contact_number,
-        },
-        { onConflict: "id" }
-      )
-      .select("id")
-      .single();
+    let ownerId: number;
+    try {
+      const { data: existingOwner, error: ownerQueryError } = await supabase
+        .from('Owner')
+        .select('id')
+        .eq('auth_id', user.id)
+        .single();
+
+        if (ownerQueryError) {
+            throw ownerQueryError; 
+        }
+
+      if (existingOwner) {
+        ownerId = existingOwner.id;
+      } else {
+        const { data: newOwner, error: ownerInsertError } = await supabase
+          .from('Owner')
+          .insert({
+            auth_id: user.id,
+            name: ownerDetails.name,
+            email: ownerDetails.email,
+            address: ownerDetails.address,
+            contact_number: ownerDetails.contact_number,
+          })
+          .select('id')
+          .single();
 
     if (ownerError || !owner) {
       return {
@@ -55,102 +68,69 @@ export async function createBooking(
 
     console.log("upsert complete"); 
 
-    const bookingInserts = pets.map((pet, idx) => ({
-      owner_details: owner.id,
-      date_booked: new Date().toISOString().split("T")[0],
-      service_date_start:
-        pet.service_type === "boarding"
-          ? (pet as BoardingPet).check_in_date
-          : (pet as GroomingPet).service_date,
-      service_date_end:
-        pet.service_type === "boarding"
-          ? (pet as BoardingPet).check_out_date
-          : (pet as GroomingPet).service_date,
-      status: "pending" as BookingStatus,
-      special_requests: pet.special_requests || "",
-      total_amount: totalAmounts[idx] ?? 0,
-      discount_applied: discountsApplied[idx] || 0,
-    }));
+    const { data: bookingData, error: bookingInsertError } = await supabase
+      .from('Booking')
+      .insert({
+        owner_id: ownerId,
+        date_booked: new Date(),
+        service_date_start: pets.reduce((min, p) => {
+          const date = p.service_type === 'boarding' ? (p as BoardingPet).check_in_date : (p as GroomingPet).service_date;
+          return (!min || new Date(date!).getTime() < min.getTime() ? new Date(date!) : min)
+        }, null as Date | null), 
+        service_date_end: pets.reduce((max, p) => {
+          const date = p.service_type === 'boarding' ? (p as BoardingPet).check_out_date : (p as GroomingPet).service_date;
+          return (!max || new Date(date!).getTime() > max.getTime() ? new Date(date!) : max)
+        }, null as Date | null),  
+        status: 'pending',
+        special_requests: '', 
+        total_amount: totalAmounts.reduce((sum, val) => sum + val, 0),
+        discount_applied: discountsApplied.reduce((sum, val) => sum + val, 0),
+        service_type: pets[0]?.service_type || 'boarding'
+      })
+      .select('booking_uuid')
+      .single();
 
-    const { data: bookings, error: bookingError } = await supabase
-      .from("Booking")
-      .insert(bookingInserts)
-      .select("booking_uuid");
-    if (bookingError || !bookings || bookings.length === 0) {
-      console.error(bookingError);
-      return {
-        success: false,
-        error: bookingError?.message || "Booking creation failed",
-      };
-    }
-
-    console.log("bookings success");
-    bookings.forEach((booking) => {
-      console.log(booking);
-    });
-
-    const petInserts = pets.map((pet, idx) => ({
-      Owner_ID: owner.id,
-      booking_uuid: bookings[idx].booking_uuid,
-      name: pet.name,
-      age: pet.age,
-      pet_type: pet.pet_type,
-      breed: pet.breed || "",
-      vaccinated: pet.vaccinated,
-      size: pet.size,
-      vitamins_or_medications: pet.vitamins_or_medications || "",
-      allergies: pet.allergies || "",
-      completed: false,
-    }));
-
-    const { data: createdPets, error: petError } = await supabase
-      .from("Pet")
-      .insert(petInserts)
-      .select("pet_uuid, name");
-
-    console.log(petError);
-
-    if (petError || !createdPets || createdPets.length === 0) {
-      console.log(petError);
-    
-      await supabase
-        .from("Booking")
-        .delete()
-        .in(
-          "booking_uuid",
-          bookings.map((b) => b.booking_uuid)
-        );
-      return {
-        success: false,
-        error: petError?.message || "Pet creation failed",
-      };
-    } 
-    createdPets?.forEach((pet, idx) => {
-      console.log("pet number:", idx);
-      console.log(pet);
-    });
-
-
-    const { data: samplePetGetting, error: getPetError } = await supabase
-      .from("Pet")
-      .select("name, pet_uuid")
-      .eq("pet_uuid", createdPets[0].pet_uuid);
-
-    console.log("✨ Getting the new pet", samplePetGetting);
-    if (getPetError) {
-      console.log("❌ Error getting the pet", getPetError);
-    }
+      if (bookingInsertError) {
+          await supabase.rpc('rollback_transaction');
+          console.error("Booking Insert Error", bookingInsertError);
+          return {success: false, error: "Failed to create booking"};
+      }
+    const bookingId = bookingData.booking_uuid;
 
     for (let i = 0; i < pets.length; i++) {
       const pet = pets[i];
-      const pet_uuid = createdPets[i].pet_uuid;
+      const totalAmount = totalAmounts[i];
+      const discountApplied = discountsApplied[i] || 0;
+
+      const { data: petData, error: petInsertError } = await supabase
+        .from('Pet')
+        .insert({
+          owner_id: ownerId,
+          name: pet.name,
+          age: pet.age,
+          pet_type: pet.pet_type,
+          breed: pet.breed,
+          vaccinated: pet.vaccinated,
+          size: pet.size,
+          vitamins_or_medications: pet.vitamins_or_medications,
+          allergies: pet.allergies,
+          completed: false,
+          total_amount: totalAmount,
+          discount_applied: discountApplied
+        })
+        .select('pet_uuid')
+        .single();
+        if(petInsertError){
+           await supabase.rpc('rollback_transaction');
+           console.error("Pet Insert error", petInsertError);
+           return {success:false, error: "Failed to insert pet"};
+        }
+        const petId = petData.pet_uuid;
 
       if (pet.service_type === "boarding") {
         const boardingPet = pet as BoardingPet;
-
-        
-        const { data: newBoardingPets, error: boardingError } = await supabase
-          .from("BoardingPet")
+        const { error: boardingInsertError } = await supabase
+          .from('BoardingPet')
           .insert({
             service_type: "boarding",
             room_size: boardingPet.room_size,
@@ -198,44 +178,21 @@ export async function createBooking(
           return { success: false, error: updatePetError.message };
         } 
 
-        if (boardingPet.meal_instructions) {
-          for (const mealType of [
-            "breakfast",
-            "lunch",
-            "dinner",
-          ] as (keyof MealInstructions)[]) {
-            const meal = boardingPet.meal_instructions[mealType];
-            if (meal && (meal.time || meal.food || meal.notes)) {
-              const { error: mealError } = await supabase
-                .from("MealInstructions")
-                .insert({
-                  boarding_pet_meal_instructions: newBoardingPet.id, 
-                  meal_type: mealType,
-                  time: meal.time || null, 
-                  food: meal.food || null,
-                  notes: meal.notes || null,
-                })
-                .select(); 
-
-              if (mealError) {
-                console.log("❌ Error on meal Instructions: ", mealError);
-                await supabase
-                  .from("MealInstructions")
-                  .delete()
-                  .eq("boarding_pet_meal_instructions", newBoardingPet.id);
-                await supabase
-                  .from("BoardingPet")
-                  .delete()
-                  .eq("id", newBoardingPet.id);
-                await supabase.from("Pet").delete().eq("pet_uuid", pet_uuid);
-                await supabase
-                  .from("Booking")
-                  .delete()
-                  .in(
-                    "booking_uuid",
-                    bookings.map((b) => b.booking_uuid)
-                  );
-                return { success: false, error: mealError.message };
+        if (boardingPet.meal_instructions && Array.isArray(boardingPet.meal_instructions)) {
+          for (const meal of boardingPet.meal_instructions) {
+            const { error: mealInsertError } = await supabase
+              .from('MealInstructions')
+              .insert({
+                booking_id: bookingId,
+                meal_type: meal.meal_type,
+                time: meal.time,
+                food: meal.food,
+                notes: meal.notes,
+              });
+              if(mealInsertError){
+                 await supabase.rpc('rollback_transaction');
+                 console.error("Meal Instruction Insert Error", mealInsertError);
+                 return {success:false, error: "Failed to insert meal instruction"};
               }
             }
           }
@@ -244,10 +201,8 @@ export async function createBooking(
 
       if (pet.service_type === "grooming") {
         const groomingPet = pet as GroomingPet;
-        const groomingId = crypto.randomUUID(); 
-
-        const { error: groomingError } = await supabase
-          .from("GroomingPet")
+        const { error: groomingInsertError } = await supabase
+          .from('GroomingPet')
           .insert({
             id: groomingId,
             service_type_size: "grooming",
@@ -296,10 +251,83 @@ export async function createBooking(
     console.error("Booking process failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred during booking.",
-    };
+      error: error.message || 'An unexpected error occurred'
+    }
+  }
+}
+
+export async function getBookings(authId: string) {
+  const supabase = await createServerSideClient()
+
+  try {
+    const { data: bookings, error } = await supabase
+      .from('Booking')
+      .select(`
+        booking_uuid,
+        date_booked,
+        service_date_start,
+        service_date_end,
+        status,
+        special_requests,
+        total_amount,
+        discount_applied,
+        owner(
+          id,
+          name,
+          email,
+          address,
+          contact_number,
+          auth_id
+        ),
+        pets(
+          pet_uuid,
+          name,
+          age,
+          pet_type,
+          breed,
+          vaccinated,
+          size,
+          vitamins_or_medications,
+          allergies,
+          completed,
+          boarding_id_extention,
+          grooming_id,
+          boarding(
+            id,
+            room_size,
+            boarding_type,
+            check_in_date,
+            check_in_time,
+            check_out_date,
+            check_out_time,
+            special_feeding_request,
+            meals(
+              id,
+              meal_type,
+              time,
+              food,
+              notes
+            )
+          ),
+          grooming(
+            id,
+            service_variant,
+            service_date,
+            service_time
+          )
+        )
+      `)
+      .eq('owner.auth_id', authId)
+      .order('date_booked', { ascending: false })
+
+    if (error) throw error
+    return { data: bookings, error: null }
+
+  } catch (error: any) { 
+    console.error('Error fetching bookings:', error)
+    return {
+      data: null,
+      error: error.message || 'Failed to fetch bookings'
+    }
   }
 }

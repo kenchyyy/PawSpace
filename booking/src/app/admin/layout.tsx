@@ -17,14 +17,12 @@ export default async function Layout({
   }
   return (
     <DashboardLayout
-      colorTheme='gray'  
       buttons={[
         { icon: "FaHome", text: "Home", href: "/admin" },
         { icon: "FaCalendar", text: "Calendar", href: "/admin/calendar" },
         { icon: "FaList", text: "Manage Access", href: "/admin/manageAccess" },
-        { icon: "FaBox", text: "Inbox", href: "/admin/inbox" },
-      {icon: "FaBook", text: "Manage Bookings", href: "/admin/manageBookings"},
-      {icon: "FaAddressCard", text: "Grooming Apointments", href: "/admin/groomingAppointments"},
+      {icon: "FaBook", text: "Boarding Bookings", href: "/admin/boardBookings"},
+      {icon: "FaAddressCard", text: "Grooming Bookings", href: "/admin/groomBookings"},
       {icon: "FaDoorOpen", text: "Rooms", href: "/admin/rooms"}
       ]}
     >
