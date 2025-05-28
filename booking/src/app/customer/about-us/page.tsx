@@ -43,11 +43,11 @@ export default function AboutPage() {
           <p className="text-gray-700 mb-2">
             📍 2nd Floor, AMJB Building, Aguinaldo Highway, Palico 4, Imus, Philippines
           </p>
-          <p className="mb-2">📞 0945 302 7955</p>
-          <p className="mb-2">📧 pawspace2023@gmail.com</p>
-          <p className="mb-2">📱 Instagram: @pawspace_amjb</p>
-          <p className="mb-2">📘 Facebook: PawSpace Pet Hotel and Grooming</p>
-          <p className="">🕘 Open daily from 9:00 AM to 6:00 PM</p>
+          <p className="text-gray-700 mb-2">📞 0945 302 7955</p>
+          <p className="text-gray-700 mb-2">📧 pawspace2023@gmail.com</p>
+          <p className="text-gray-700 mb-2">📱 Instagram: @pawspace_amjb</p>
+          <p className="text-gray-700 mb-2">📘 Facebook: PawSpace Pet Hotel and Grooming</p>
+          <p className="text-gray-700">🕘 Open daily from 9:00 AM to 6:00 PM</p>
         </div>
       </section>
 
