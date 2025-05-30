@@ -50,20 +50,21 @@ interface BoardingDialogProps {
   ondelete: (id: string) => void;
   children?: React.ReactNode;
   bookingType: "grooming" | "boarding";
+  discountApplied: string;
 }
 
 const statusColors: Record<string, string> = {
-  pending: "bg-violet-400 border-violet-400 text-violet-900 hover:bg-violet-500 shadow-violet-400",
-  confirmed: "bg-purple-500 border-purple-600 text-white hover:bg-purple-600 shadow-purple-600",
-  ongoing: "bg-violet-700 border-violet-800 text-white hover:bg-violet-800 shadow-violet-900",
-  completed: "bg-purple-900 border-purple-950 text-white hover:bg-purple-950 shadow-purple-950",
-  cancelled: "bg-gray-400 border-gray-500 text-gray-700 hover:bg-gray-500 shadow-gray-500",
+  pending: "bg-violet-900 border-white text-white hover:bg-violet-950 shadow-violet-950",
+  confirmed: "bg-violet-900 border-yellow-600 text-white hover:bg-violet-950 shadow-violet-950",
+  ongoing: "bg-violet-900 border-orange-600 text-white hover:bg-violet-950 shadow-violet-950",
+  completed: "bg-violet-900 border-green-600 text-white hover:bg-violet-950 shadow-violet-950",
+  cancelled: "bg-violet-900 border-red-600 text-white hover:bg-violet-950 shadow-violet-950",
 };
 
 export default function BoardingDialog({
   bookingUUID, ownerName, ownerId, address, contactNumber, email, publishDateTime,
   checkInDate, checkInTime, checkOutDate, checkOutTime, status, specialRequest, ondelete, children, totalAmount,
-  bookingType
+  bookingType, discountApplied
 }: BoardingDialogProps) {
   const [loading, setLoading] = useState(false);
   const [petData, setPetData] = useState<BoardingPetData[]>([]);
@@ -238,38 +239,51 @@ export default function BoardingDialog({
   }
 
   return (
-    <div className={`flex w-full ${children ? "h-20" : "h-40"}`}>
+    <div className={`flex w-full ${children ? "h-20" : "h-65 lg:h-45"}`}>
       <Dialog onOpenChange={(open) => { if (open) onOpenDialog(); }}>
         <DialogTrigger className="w-full">
           {children ? (
             children
           ) : (
             <div
-              className={`relative flex w-full justify-between h-full p-3 rounded-2xl shadow-2xl border-2 transition-colors
-                ${statusColors[status] ?? "bg-gray-600 border-gray-500 text-white"}
-              `}
+              className={`relative flex w-full justify-between h-full p-3 rounded-2xl shadow-2xl border-2 transition-colors ${statusColors[status]}`}
               onClick={onOpenDialog}
             >
-              <section className="flex flex-col items-start text-white">
+              {/* Main content - always visible */}
+              <section className="flex flex-col items-start text-white w-full lg:w-auto">
                 <h1 className="text-lg font-bold text-orange-400">{truncate(ownerName, 30)}</h1>
                 <p className="text-sm"><span className="text-yellow-300">Address:</span> {address}</p>
                 <p className="text-sm"><span className="text-yellow-300">Contact Number: </span>{contactNumber}</p>
                 <p className="text-sm"><span className="text-yellow-300">Email: </span>{email}</p>
                 <p className="text-sm"><span className="text-yellow-300">Status:</span> {status}</p>
-                <p className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount ? totalAmount : "None"}</p>
+                <p className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount || "None"}</p>
+                <p className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</p>
+                
+                {/* Check-in/out for mobile - hidden on lg and up */}
+                <div className="flex gap-2 mt-2 lg:hidden w-full">
+                  <div className="flex flex-col items-start w-1/2 border-2 bg-purple-600 border-purple-400 rounded-xl p-2 text-white">
+                    <span className="text-xs">Check-in:</span>
+                    <h1 className="text-md font-bold">{checkInDate}</h1>
+                  </div>
+                  <div className="flex flex-col items-start w-1/2 border-2 bg-purple-600 border-purple-400 rounded-xl p-2 text-white">
+                    <span className="text-xs">Check-out:</span>
+                    <h1 className="text-md font-bold">{checkOutDate}</h1>
+                  </div>
+                </div>
               </section>
-              <div className="flex items-start w-80 gap-2">
+
+              {/* Check-in/out for desktop - hidden on mobile */}
+              <div className="hidden lg:flex items-start w-80 gap-2">
                 <div className="flex flex-col items-start w-40 border-2 bg-purple-600 border-purple-400 rounded-xl p-2 text-white">
                   <span className="text-xs">Check-in:</span>
                   <h1 className="text-md font-bold">{checkInDate}</h1>
-                  <h2 className="text-sm">{checkInTime}</h2>
                 </div>
                 <div className="flex flex-col items-start w-40 border-2 bg-purple-600 border-purple-400 rounded-xl p-2 text-white">
                   <span className="text-xs">Check-out:</span>
                   <h1 className="text-md font-bold">{checkOutDate}</h1>
-                  <h2 className="text-sm">{checkOutTime}</h2>
                 </div>
               </div>
+
               <footer className="text-xs absolute right-5 bottom-2 text-purple-200">Published at: {publishDateTime}</footer>
             </div>
           )}
@@ -283,6 +297,8 @@ export default function BoardingDialog({
               <span><span className="text-yellow-300">Email: </span>{email}</span>
               <span><span className="text-yellow-300">Status:</span> {status}</span>
               <span className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount ? totalAmount : "None"}</span>
+              <span className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</span>
+
             </DialogDescription>
           </DialogHeader>
           <p className="text-xl text-orange-400 mt-2">Pets:</p>
@@ -393,7 +409,7 @@ export default function BoardingDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div className={`flex flex-col pl-1 pt-2 gap-1 h-40 text-white ${children ? "w-10" : "w-20"}`}>
+      <div className={`flex flex-col pl-1 pt-2 gap-1 h-40 text-white w-10`}>
         {status !== "completed" && status !== "cancelled" && (
           <TooltipProvider>
             <Tooltip>

@@ -26,6 +26,7 @@ export interface FormattedBooking {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'ongoing' ;
   specialRequests: string;
   ownerDetails: OwnerDetails;
+  discountApplied: string;
 }
 
 export async function getCancelledBookingMessageByBookingUuid(bookingUuid : string): Promise<{message: string | null; date: string | null}> {
@@ -140,6 +141,7 @@ export async function GetBookingDataByStatus(
     status: item.status,
     specialRequests: item.special_requests,
     totalAmount: item.total_amount,
+    discountApplied: item.discount_applied ?? "None",
     ownerDetails: {
       id: item.owner_details?.id ?? "",
       name: item.owner_details?.name ?? "",
@@ -248,6 +250,7 @@ export async function GetBookingDataByDateRange(
     status: item.status,
     specialRequests: item.special_requests,
     totalAmount: item.total_amount,
+    discountApplied: item.discount_applied ?? "None",
     ownerDetails: {
       id: item.owner_details?.id ?? "",
       name: item.owner_details?.name ?? "",

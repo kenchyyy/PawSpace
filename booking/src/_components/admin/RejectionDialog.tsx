@@ -66,11 +66,9 @@ export function RejectionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-violet-900 text-white rounded-lg shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-orange-400">Confirm Rejection</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-orange-400">Rejection Message</DialogTitle>
           <DialogDescription className="mt-1 text-violet-300">
-            {description}
-            <br />
-            Please select or provide a reason:
+            Please select or provide a reason for rejecting:
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3 mt-4">

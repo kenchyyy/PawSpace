@@ -98,7 +98,7 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
           backgroundColor: calendarBackgroundColor,
           color: calendarTextColor,
         }}
-        className={`h-full p-4 space-y-4 shadow-lg cursor-pointer ${
+        className={`h-full p-4 space-y-4 shadow-lg cursor-pointer overflow-y-auto ${
           expandSideNav
             ? "w-64 shadow-2xl"
             : isLg

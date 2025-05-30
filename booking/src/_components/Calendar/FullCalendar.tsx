@@ -26,7 +26,6 @@ const CalendarComponent = ({
   onEventsSet,
   calendarRef,
 }: CalendarProps) => {
-  // Helper to get emoji by serviceType
   const getServiceEmoji = (serviceType: string | undefined) => {
     switch (serviceType?.toLowerCase()) {
       case "boarding":
@@ -34,11 +33,10 @@ const CalendarComponent = ({
       case "grooming":
         return "✂️";
       default:
-        return "🐾"; // fallback emoji
+        return "🐾";
     }
   };
 
-  // Customize event content to show emoji instead of time
   const eventContent = (arg: EventContentArg) => {
     const serviceType = arg.event.extendedProps.serviceType as
       | string
@@ -74,7 +72,7 @@ const CalendarComponent = ({
       eventClassNames='event-with-status'
       allDayContent={false}
       allDaySlot={false}
-      eventContent={eventContent} // <-- Add this prop
+      eventContent={eventContent}
     />
   );
 };

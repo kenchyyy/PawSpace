@@ -13,7 +13,7 @@ return (
       <TopNav />
     </header>
     <div
-      className="w-full h-full pl-10 pr-10 pt-24 lg:pr-20 lg:pl-20"
+      className="w-full h-full px-6 pt-24"
       style={{ backgroundColor: "#312e81", color: "white" }} // indigo-800-like, or use "#3730a3" for indigo-700
     >
       {children}
