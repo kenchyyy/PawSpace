@@ -153,7 +153,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
         {/* Expanded Information */}
         {isExpanded && (
           <div className='px-0.3 mt-2 space-y-4'>
-            {/* Pets container */}
             <div className='bg-[#1E1B4B] border border-[#4C1D95] shadow-md px-4 py-3 rounded-md'>
               <h4 className='text-md font-semibold text-[#E9D5FF] mb-3'>
                 Pets
