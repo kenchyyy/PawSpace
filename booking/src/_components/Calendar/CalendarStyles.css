@@ -106,6 +106,9 @@ margin: 1px 2px;
 border: none !important;
 box-shadow: 0 0 10px rgba(99, 102, 241, 0.3) !important;
 transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 .fc-event[style*="background-color"] .fc-event-main {
@@ -326,3 +329,4 @@ border-radius: 0.75rem;
 .fc-popover-body .fc-event:hover {
   background-color: #7B1FA2 !important;
 }
+

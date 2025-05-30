@@ -30,20 +30,19 @@ const CalendarSidebar = ({
     }).format(dateObj);
   };
 
-  // Fix for checkout dates: adjust end dates that are at midnight (00:00:00)
-  // by subtracting 1 millisecond to show them as the previous day at 11:59:59 PM
   const adjustEndDate = (date: Date | null): Date | null => {
     if (!date) return null;
-    
-    // Check if the time is midnight (00:00:00)
-    if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
-      // Create a new date object to avoid mutating the original
+
+    if (
+      date.getHours() === 0 &&
+      date.getMinutes() === 0 &&
+      date.getSeconds() === 0
+    ) {
       const adjustedDate = new Date(date);
-      // Subtract 1 millisecond to make it 11:59:59.999 PM of the previous day
       adjustedDate.setMilliseconds(-1);
       return adjustedDate;
     }
-    
+
     return date;
   };
 
@@ -57,16 +56,15 @@ const CalendarSidebar = ({
       typeof event.start === "string"
         ? new Date(event.start)
         : new Date(event.start || new Date());
-    
+
     let endDate = event.end
       ? typeof event.end === "string"
         ? new Date(event.end)
         : new Date(event.end)
       : null;
-    
-    // Apply the end date adjustment
+
     const adjustedEndDate = adjustEndDate(endDate);
-    
+
     return { ...event, _startDate: startDate, _endDate: adjustedEndDate };
   });
 
@@ -95,7 +93,7 @@ const CalendarSidebar = ({
 
       const sevenDaysFromToday = new Date();
       sevenDaysFromToday.setDate(today.getDate() + 7);
-      sevenDaysFromToday.setHours(23, 59, 59, 999); // Include the very end of the 7th day
+      sevenDaysFromToday.setHours(23, 59, 59, 999);
 
       const startsAfterToday = eventDate > today;
       const startsInNext7Days = eventDate <= sevenDaysFromToday;
@@ -131,7 +129,8 @@ const CalendarSidebar = ({
       <div className='flex-1 overflow-y-auto mt-4'>
         <div>
           <h3 className='text-md font-semibold text-[#E9D5FF] mb-2 px-4 flex justify-between items-center'>
-            <span>Today</span>
+            {/* Keeping truncation here for "Today" title if it somehow gets too long */}
+            <span className='truncate'>Today</span>
             {todayEvents.length > 2 && !showMoreToday && (
               <button
                 onClick={() => setShowMoreToday(true)}
@@ -156,6 +155,7 @@ const CalendarSidebar = ({
               ))}
             </ul>
           ) : (
+            // Removed truncate from 'p' tag for "No check-ins..." as it's short and fixed
             <p className='italic text-center text-[#9F7AEA] py-2 px-4'>
               No check-ins or check-outs today
             </p>
@@ -172,7 +172,8 @@ const CalendarSidebar = ({
 
         <div className='mt-6'>
           <h3 className='text-md font-semibold text-[#E9D5FF] mb-2 px-4 flex justify-between items-center'>
-            <span>Upcoming (Next 7 Days)</span>
+            {/* Keeping truncation here for "Upcoming (Next 7 Days)" title if it gets too long */}
+            <span className='truncate'>Upcoming (Next 7 Days)</span>
             {upcomingEvents.length > 2 && !showMoreUpcoming && (
               <button
                 onClick={() => setShowMoreUpcoming(true)}
@@ -197,6 +198,7 @@ const CalendarSidebar = ({
               ))}
             </ul>
           ) : (
+            // Removed truncate from 'p' tag for "No upcoming..." as it's short and fixed
             <p className='italic text-center text-[#9F7AEA] py-2 px-4'>
               No upcoming check-ins or check-outs in the next 7 days
             </p>
@@ -224,26 +226,29 @@ const CalendarEventItem = ({
   isToday?: boolean;
   isUpcoming?: boolean;
 }) => {
-  // Function to adjust checkout date for display purposes
-  const adjustEndDateForDisplay = (date: Date | string | null): Date | undefined => {
+  const adjustEndDateForDisplay = (
+    date: Date | string | null
+  ): Date | undefined => {
     if (!date) return undefined;
-    
+
     const dateObj = typeof date === "string" ? new Date(date) : date;
-    
-    // If it's midnight (00:00:00), adjust to previous day 11:59:59 PM
-    if (dateObj.getHours() === 0 && dateObj.getMinutes() === 0 && dateObj.getSeconds() === 0) {
+
+    if (
+      dateObj.getHours() === 0 &&
+      dateObj.getMinutes() === 0 &&
+      dateObj.getSeconds() === 0
+    ) {
       const adjustedDate = new Date(dateObj);
-      adjustedDate.setTime(adjustedDate.getTime() - 1); // Subtract 1 millisecond
+      adjustedDate.setTime(adjustedDate.getTime() - 1);
       return adjustedDate;
     }
-    
+
     return dateObj;
   };
-  
-  // Apply the adjustment to end date before formatting
+
   const checkIn = formatDateTime(event.start || new Date());
-  const checkOut = event.end 
-    ? formatDateTime(adjustEndDateForDisplay(event.end)) 
+  const checkOut = event.end
+    ? formatDateTime(adjustEndDateForDisplay(event.end))
     : undefined;
 
   let bookingType: string | null = null;
@@ -254,11 +259,11 @@ const CalendarEventItem = ({
     const todayDay = today.getDate();
 
     const startDate =
-    typeof event.start === "string"
-    ? new Date(event.start)
-    : event.start instanceof Date
-    ? event.start
-    : new Date();
+      typeof event.start === "string"
+        ? new Date(event.start)
+        : event.start instanceof Date
+        ? event.start
+        : new Date();
 
     const startYear = startDate.getFullYear();
     const startMonth = startDate.getMonth();
@@ -269,7 +274,6 @@ const CalendarEventItem = ({
       startMonth === todayMonth &&
       startDay === todayDay;
 
-    // Adjust the end date for checking if it ends today
     const rawEndDate = event.end
       ? typeof event.end === "string"
         ? new Date(event.end)
@@ -277,7 +281,7 @@ const CalendarEventItem = ({
         ? event.end
         : null
       : null;
-    
+
     const endDate = adjustEndDateForDisplay(rawEndDate);
 
     const endsToday = endDate
@@ -296,9 +300,10 @@ const CalendarEventItem = ({
   } else if (isUpcoming) {
     const today = new Date();
 
-    // Get adjusted dates for comparison
     const startDate = event.start || new Date();
-    const adjustedEndDate = event.end ? adjustEndDateForDisplay(event.end) : null;
+    const adjustedEndDate = event.end
+      ? adjustEndDateForDisplay(event.end)
+      : null;
 
     const startsAfterToday = new Date(startDate) > today;
     const endsAfterToday = adjustedEndDate && new Date(adjustedEndDate) > today;
@@ -308,7 +313,8 @@ const CalendarEventItem = ({
     sevenDaysFromToday.setHours(23, 59, 59, 999);
 
     const startsInNext7Days = new Date(startDate) <= sevenDaysFromToday;
-    const endsInNext7Days = adjustedEndDate && new Date(adjustedEndDate) <= sevenDaysFromToday;
+    const endsInNext7Days =
+      adjustedEndDate && new Date(adjustedEndDate) <= sevenDaysFromToday;
 
     if (
       startsAfterToday &&
@@ -316,7 +322,7 @@ const CalendarEventItem = ({
       endsAfterToday &&
       endsInNext7Days
     ) {
-      bookingType = "Check-in / Check-out"; // Could span within the 7 days
+      bookingType = "Check-in / Check-out";
     } else if (startsAfterToday && startsInNext7Days) {
       bookingType = "Check-in";
     } else if (endsAfterToday && endsInNext7Days) {
@@ -337,16 +343,21 @@ const CalendarEventItem = ({
           className='inline-block w-2 h-2 rounded-full'
           style={{ backgroundColor: event.backgroundColor || "#9F7AEA" }}
         ></span>
-        {event.title}
-        {bookingType && (
-          <span className='text-xs text-[#FBBF24] ml-1'>({bookingType})</span>
-        )}
+        {/* Keep truncation for the main event title */}
+        <span className='truncate'>
+          {event.title}
+          {bookingType && (
+            <span className='text-xs text-[#FBBF24] ml-1'>({bookingType})</span>
+          )}
+        </span>
       </div>
-      <div className='text-sm text-[#C4B5FD] mt-1'>
+      {/* Keep truncation for owner name as it can be long */}
+      <div className='text-sm text-[#C4B5FD] mt-1 truncate'>
         <span className='font-medium text-[#FBBF24]'>Owner:</span>{" "}
         {event.extendedProps.ownerName}
       </div>
 
+      {/* Removed truncation for check-in/check-out as dates are generally fixed width */}
       <div className='text-sm text-[#C4B5FD] mt-1'>
         <span className='font-medium text-[#FBBF24]'>Check-in:</span> {checkIn}
       </div>
@@ -358,8 +369,9 @@ const CalendarEventItem = ({
         </div>
       )}
 
+      {/* Keep truncation for status tag if it might contain very long custom statuses */}
       <div
-        className='mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block'
+        className='mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block truncate'
         style={{
           backgroundColor: `${event.backgroundColor || "#9F7AEA"}20`,
           color: event.backgroundColor || "#E9D5FF",
