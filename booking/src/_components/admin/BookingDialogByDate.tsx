@@ -100,7 +100,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
   }
 
   return (
-    <ScrollArea className="bg-purple-800 rounded-lg border border-purple-600 shadow-inner p-0.5 h-full w-full">
+    <ScrollArea className="bg-purple-800 rounded-lg border border-purple-600 shadow-inner p-0.5 h-full w-full pt-4">
         <div className="flex flex-col gap-1 px-2 text-white">
             {bookings.length === 0 && !loading && (
                 <div className="py-8 text-center text-purple-300 font-semibold">No Bookings to show here</div>
@@ -131,7 +131,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
                     discountApplied={booking.discountApplied}
                     >
                       
-                      <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm border-2 border-purple-400`}>
+                      <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm `}>
                           <span>{truncate(booking.ownerDetails.name, 20)}</span>
                           <span className="text-xs text-gray-200">{booking.status}</span>
                       </div>
@@ -160,7 +160,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
                       discountApplied={booking.discountApplied}
                       >
 
-                      <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm border-2 border-purple-400`}>
+                      <div className={`w-full h-20 ${booking.status === "ongoing" ? "bg-violet-700 hover:bg-violet-800":"bg-indigo-700 hover:bg-indigo-800"} flex flex-col items-start p-1 rounded-sm border-2 `}>
                           <span>{truncate(booking.ownerDetails.name, 20)}</span>
                           <span className="text-xs text-gray-200">{booking.status}</span>
                       </div>

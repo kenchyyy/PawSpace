@@ -71,11 +71,6 @@ export default function HomePage() {
           )}
         </div>
         
-        <div className="w-full border-t-2 border-violet-800 pt-8 mt-8">
-          <div className="text-lg font-semibold text-violet-300">
-            <span>Welcome to the Admin Dashboard</span>
-          </div>
-        </div>
       </div>
     </div>
   );
