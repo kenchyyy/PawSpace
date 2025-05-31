@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { EventApi } from "@fullcalendar/core";
+import { EventApi } from "@fullcalendar/core"; // Keep EventApi for FullCalendar's internal event objects
 import { formatDateTime } from "@/lib/utils";
 
+// --- START: ADJUSTMENT REQUIRED ---
+// Removed: Local type definitions for MealInstruction, PetWithDetails, BookingEvent
+import {
+  BookingEvent,
+  MealInstruction,
+  PetWithDetails,
+} from "@/_components/Calendar/types"; // Import BookingEvent type
+
 type CalendarSidebarProps = {
-  events: EventApi[];
+  events: BookingEvent[]; // Use BookingEvent type here
   loading?: boolean;
   title?: string;
 };
@@ -47,20 +55,24 @@ const CalendarSidebar = ({
   };
 
   const today = new Date();
-  const todayYear = today.getFullYear();
-  const todayMonth = today.getMonth();
-  const todayDay = today.getDate();
+  today.setHours(0, 0, 0, 0);
 
   const parsedEvents = events.map((event) => {
     let startDate =
       typeof event.start === "string"
         ? new Date(event.start)
-        : new Date(event.start || new Date());
+        : event.start instanceof Date
+        ? event.start
+        : new Date();
 
     let endDate = event.end
       ? typeof event.end === "string"
         ? new Date(event.end)
-        : new Date(event.end)
+        : event.end instanceof Date
+        ? event.end
+        : Array.isArray(event.end)
+        ? new Date(event.end[0])
+        : null
       : null;
 
     const adjustedEndDate = adjustEndDate(endDate);
@@ -69,41 +81,40 @@ const CalendarSidebar = ({
   });
 
   const todayEvents = parsedEvents.filter((event) => {
-    const startYear = event._startDate.getFullYear();
-    const startMonth = event._startDate.getMonth();
-    const startDay = event._startDate.getDate();
-    const startsToday =
-      startYear === todayYear &&
-      startMonth === todayMonth &&
-      startDay === todayDay;
+    const eventStartDay = new Date(event._startDate);
+    eventStartDay.setHours(0, 0, 0, 0);
 
-    const endsToday = event._endDate
-      ? event._endDate.getFullYear() === todayYear &&
-        event._endDate.getMonth() === todayMonth &&
-        event._endDate.getDate() === todayDay
-      : false;
+    const eventEndDay = event._endDate ? new Date(event._endDate) : null;
+    if (eventEndDay) eventEndDay.setHours(0, 0, 0, 0);
 
-    return startsToday || endsToday;
+    const startsToday = eventStartDay.getTime() === today.getTime();
+    const endsToday = eventEndDay && eventEndDay.getTime() === today.getTime();
+
+    return startsToday || (eventStartDay < today && endsToday);
   });
 
   const upcomingEvents = parsedEvents
     .filter((event) => {
-      const eventDate = event._startDate;
-      const eventEndDate = event._endDate;
+      const eventStartDay = new Date(event._startDate);
+      eventStartDay.setHours(0, 0, 0, 0);
 
-      const sevenDaysFromToday = new Date();
+      const eventEndDay = event._endDate ? new Date(event._endDate) : null;
+      if (eventEndDay) eventEndDay.setHours(0, 0, 0, 0);
+
+      const sevenDaysFromToday = new Date(today);
       sevenDaysFromToday.setDate(today.getDate() + 7);
       sevenDaysFromToday.setHours(23, 59, 59, 999);
 
-      const startsAfterToday = eventDate > today;
-      const startsInNext7Days = eventDate <= sevenDaysFromToday;
-      const endsAfterToday = eventEndDate && eventEndDate > today;
-      const endsInNext7Days =
-        eventEndDate && eventEndDate <= sevenDaysFromToday;
+      const isFutureEvent = eventStartDay > today;
+      const startsWithinNext7Days = eventStartDay <= sevenDaysFromToday;
+      const endsWithinNext7Days =
+        eventEndDay && eventEndDay <= sevenDaysFromToday;
 
       return (
-        ((startsAfterToday && startsInNext7Days) ||
-          (endsAfterToday && endsInNext7Days)) &&
+        ((isFutureEvent && startsWithinNext7Days) ||
+          (eventStartDay <= today &&
+            endsWithinNext7Days &&
+            eventEndDay >= today)) &&
         !todayEvents.some((todayEvent) => todayEvent.id === event.id)
       );
     })
@@ -218,7 +229,7 @@ const CalendarEventItem = ({
   isToday,
   isUpcoming,
 }: {
-  event: EventApi;
+  event: BookingEvent; // Use BookingEvent type here
   isToday?: boolean;
   isUpcoming?: boolean;
 }) => {
@@ -242,91 +253,49 @@ const CalendarEventItem = ({
     return dateObj;
   };
 
-  const checkIn = formatDateTime(event.start || new Date());
-  const checkOut = event.end
-    ? formatDateTime(adjustEndDateForDisplay(event.end))
-    : undefined;
+  const checkIn = event.extendedProps.checkIn
+    ? formatDateTime(event.extendedProps.checkIn)
+    : "N/A";
+  const checkOut = event.extendedProps.checkOut
+    ? formatDateTime(adjustEndDateForDisplay(event.extendedProps.checkOut))
+    : "N/A";
 
   let bookingType: string | null = null;
+
   if (isToday) {
-    const today = new Date();
-    const todayYear = today.getFullYear();
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
+    if (event.extendedProps.checkIn && event.extendedProps.checkOut) {
+      const checkInDate = new Date(event.extendedProps.checkIn);
+      const checkOutDate = new Date(event.extendedProps.checkOut);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      checkInDate.setHours(0, 0, 0, 0);
+      checkOutDate.setHours(0, 0, 0, 0);
 
-    const startDate =
-      typeof event.start === "string"
-        ? new Date(event.start)
-        : event.start instanceof Date
-        ? event.start
-        : new Date();
+      const startsToday = checkInDate.getTime() === today.getTime();
+      const endsToday = checkOutDate.getTime() === today.getTime();
 
-    const startYear = startDate.getFullYear();
-    const startMonth = startDate.getMonth();
-    const startDay = startDate.getDate();
-
-    const startsToday =
-      startYear === todayYear &&
-      startMonth === todayMonth &&
-      startDay === todayDay;
-
-    const rawEndDate = event.end
-      ? typeof event.end === "string"
-        ? new Date(event.end)
-        : event.end instanceof Date
-        ? event.end
-        : null
-      : null;
-
-    const endDate = adjustEndDateForDisplay(rawEndDate);
-
-    const endsToday = endDate
-      ? endDate.getFullYear() === todayYear &&
-        endDate.getMonth() === todayMonth &&
-        endDate.getDate() === todayDay
-      : false;
-
-    if (startsToday && endsToday) {
-      bookingType = "Check-in & Check-out";
-    } else if (startsToday) {
-      bookingType = "Check-in";
-    } else if (endsToday) {
-      bookingType = "Check-out";
+      if (startsToday && endsToday) {
+        bookingType = "Check-in & Check-out";
+      } else if (startsToday) {
+        bookingType = "Check-in";
+      } else if (endsToday) {
+        bookingType = "Check-out";
+      } else if (checkInDate < today && checkOutDate > today) {
+        bookingType = "Ongoing";
+      }
+    } else if (event.extendedProps.checkIn) {
+      const checkInDate = new Date(event.extendedProps.checkIn);
+      const today = new Date();
+      checkInDate.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      if (checkInDate.getTime() === today.getTime()) {
+        bookingType = "Check-in";
+      }
     }
   } else if (isUpcoming) {
-    const today = new Date();
-
-    const startDate = event.start || new Date();
-    const adjustedEndDate = event.end
-      ? adjustEndDateForDisplay(event.end)
-      : null;
-
-    const startsAfterToday = new Date(startDate) > today;
-    const endsAfterToday = adjustedEndDate && new Date(adjustedEndDate) > today;
-
-    const sevenDaysFromToday = new Date();
-    sevenDaysFromToday.setDate(today.getDate() + 7);
-    sevenDaysFromToday.setHours(23, 59, 59, 999);
-
-    const startsInNext7Days = new Date(startDate) <= sevenDaysFromToday;
-    const endsInNext7Days =
-      adjustedEndDate && new Date(adjustedEndDate) <= sevenDaysFromToday;
-
-    if (
-      startsAfterToday &&
-      startsInNext7Days &&
-      endsAfterToday &&
-      endsInNext7Days
-    ) {
-      bookingType = "Check-in / Check-out";
-    } else if (startsAfterToday && startsInNext7Days) {
-      bookingType = "Check-in";
-    } else if (endsAfterToday && endsInNext7Days) {
-      bookingType = "Check-out";
-    }
+    bookingType = "Upcoming";
   }
 
-  // Get service type display
   const serviceType = event.extendedProps?.serviceType || "N/A";
 
   return (
@@ -345,7 +314,7 @@ const CalendarEventItem = ({
         <span className='truncate'>
           {event.title}
           {bookingType && (
-            <span className='text-xs text-[#FBBF24] ml-1'>({bookingType})</span>
+            <span className='xs text-[#FBBF24] ml-1'>({bookingType})</span>
           )}
         </span>
       </div>
@@ -364,12 +333,13 @@ const CalendarEventItem = ({
         <span className='font-medium text-[#FBBF24]'>Check-in:</span> {checkIn}
       </div>
 
-      {event.end && (
-        <div className='text-sm text-[#C4B5FD] mt-1'>
-          <span className='font-medium text-[#FBBF24]'>Check-out:</span>{" "}
-          {checkOut}
-        </div>
-      )}
+      {event.extendedProps.checkOut &&
+        event.extendedProps.checkOut !== "N/A" && (
+          <div className='text-sm text-[#C4B5FD] mt-1'>
+            <span className='font-medium text-[#FBBF24]'>Check-out:</span>{" "}
+            {checkOut}
+          </div>
+        )}
 
       <div
         className='mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block truncate'
