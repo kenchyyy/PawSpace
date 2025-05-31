@@ -7,43 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/StoryComponents/ui/dialog";
-import { EventInput } from "@fullcalendar/core";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
-type MealInstruction = {
-  food: string;
-  notes?: string;
-  mealType: string;
-  time: string;
-};
-
-type PetWithDetails = {
-  petName: string;
-  petBreed: string;
-  petType: string;
-  mealInstructions: MealInstruction | null;
-  checkIn: string | null;
-  checkOut: string | null;
-  serviceType: "boarding" | "grooming";
-};
-
-type ExtendedProps = {
-  bookingId?: string;
-  ownerName?: string;
-  contactNumber?: string;
-  status?: string;
-  specialRequests?: string;
-  totalAmount?: number;
-  serviceType?: string;
-  pets?: PetWithDetails[];
-  checkIn?: string | null;
-  checkOut?: string | null;
-};
+import {
+  BookingEvent,
+  MealInstruction,
+  PetWithDetails,
+} from "@/_components/Calendar/types";
 
 type CalendarModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  event?: EventInput | null;
+  event: BookingEvent | null;
 };
 
 const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
@@ -62,7 +37,7 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
     pets = [],
     checkIn,
     checkOut,
-  } = event.extendedProps as ExtendedProps;
+  } = event.extendedProps;
 
   const formatDateTime = (dateStr?: string | null) => {
     if (!dateStr) return "Not set";
@@ -86,24 +61,24 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
 
     switch (status?.toLowerCase()) {
       case "confirmed":
-        backgroundColor = "#10B981"; // emerald-500 (green)
-        color = "#064E3B"; // emerald-900
-        borderColor = "#059669"; // emerald-600
+        backgroundColor = "#10B981";
+        color = "#064E3B";
+        borderColor = "#059669";
         break;
       case "ongoing":
-        backgroundColor = "#F59E0B"; // amber-500
-        color = "#78350F"; // amber-900
-        borderColor = "#D97706"; // amber-600
+        backgroundColor = "#F59E0B";
+        color = "#78350F";
+        borderColor = "#D97706";
         break;
       case "completed":
-        backgroundColor = "#3B82F6"; // blue-500
-        color = "#1E40AF"; // blue-900
-        borderColor = "#2563EB"; // blue-600
+        backgroundColor = "#3B82F6";
+        color = "#1E40AF";
+        borderColor = "#2563EB";
         break;
       default:
-        backgroundColor = "#4B5563"; // gray-600
-        color = "#F3F4F6"; // gray-100
-        borderColor = "#6B7280"; // gray-500
+        backgroundColor = "#4B5563";
+        color = "#F3F4F6";
+        borderColor = "#6B7280";
     }
     return {
       backgroundColor,
@@ -126,7 +101,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        {/* Booking Overview */}
         <div className='px-4 py-2 bg-[#1E1B4B] border border-[#4C1D95] shadow-md rounded-md'>
           <h4 className='text-md font-semibold text-[#E9D5FF] mb-1'>
             Booking Overview
@@ -172,7 +146,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
           )}
         </div>
 
-        {/* Expanded Information */}
         {isExpanded && (
           <div className='px-0.3 mt-2 space-y-4'>
             <div className='bg-[#1E1B4B] border border-[#4C1D95] shadow-md px-4 py-3 rounded-md'>
@@ -200,7 +173,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
                       </span>
                     </div>
 
-                    {/* Individual Pet Check-in/out Times */}
                     <div className='mb-2 space-y-1'>
                       {pet.checkIn && (
                         <p className='text-xs text-[#C4B5FD]'>
@@ -222,7 +194,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
                       )}
                     </div>
 
-                    {/* Meal Instructions (only for boarding pets) */}
                     {pet.serviceType === "boarding" && pet.mealInstructions ? (
                       <div className='bg-[#2A0D45] border border-[#4C1D95] px-3 py-2 rounded-md'>
                         <h6 className='text-xs font-semibold text-[#FBBF24] mb-1'>
@@ -259,7 +230,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
               )}
             </div>
 
-            {/* Special Requests */}
             {specialRequests && (
               <div className='bg-[#1E1B4B] border border-[#4C1D95] shadow-md px-4 py-3 rounded-md'>
                 <h4 className='text-md font-semibold text-[#E9D5FF] mb-1'>
@@ -271,7 +241,6 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
           </div>
         )}
 
-        {/* Expand/Collapse Button */}
         <div className='flex justify-center mt-2'>
           <button
             onClick={() => setIsExpanded((prev) => !prev)}

@@ -6,39 +6,7 @@ import CalendarSidebar from "@/_components/Calendar/CalendarSidebar";
 import CalendarModal from "@/_components/Calendar/CalendarModal";
 import CalendarSkeleton from "@/_components/Calendar/CalendarSkeleton";
 import { EventApi, EventClickArg, EventInput } from "@fullcalendar/core";
-
-// Define types to match the updated fetchBookings function
-type MealInstruction = {
-  food: string;
-  notes?: string;
-  mealType: string;
-  time: string;
-};
-
-type PetWithDetails = {
-  petName: string;
-  petBreed: string;
-  petType: string;
-  mealInstructions: MealInstruction | null;
-  checkIn: string | null;
-  checkOut: string | null;
-  serviceType: "boarding" | "grooming";
-};
-
-type BookingEvent = EventInput & {
-  extendedProps: {
-    bookingId: string;
-    ownerName: string;
-    contactNumber: string;
-    status: string;
-    specialRequests: string;
-    totalAmount: number;
-    serviceType: string;
-    pets: PetWithDetails[];
-    checkIn?: string | null;
-    checkOut?: string | null;
-  };
-};
+import { MealInstruction, PetWithDetails, BookingEvent } from "@/_components/Calendar/types";
 
 export default function CalendarPage() {
   const [currentEvents, setCurrentEvents] = useState<BookingEvent[]>([]);
@@ -48,7 +16,6 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null);
   const calendarRef = useRef<any>(null);
 
-  // Define colors for the statuses you want to display
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
@@ -62,7 +29,6 @@ export default function CalendarPage() {
     }
   };
 
-  // Get service type color for mixed services
   const getServiceTypeAccent = (serviceType: string) => {
     if (serviceType.includes("Boarding") && serviceType.includes("Grooming")) {
       return "#8B5CF6"; // purple for mixed services
@@ -74,67 +40,64 @@ export default function CalendarPage() {
     return "#6B7280"; // gray fallback
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Define loadData function within the component or memoize it if needed
+  // This helps avoid the "Function not implemented" error for loadData later
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const response = await fetch("/api/calendar");
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Error fetching bookings:", errorData);
-          setError("Failed to load calendar data");
-          return;
-        }
-
-        const events: BookingEvent[] = await response.json();
-
-        // Filter to only show confirmed, ongoing, or completed bookings
-        const filteredEvents = events.filter((event) => {
-          const status = event.extendedProps?.status?.toLowerCase();
-          return (
-            status === "confirmed" ||
-            status === "ongoing" ||
-            status === "completed"
-          );
-        });
-
-        // Format events with colors based on status and service type
-        const formattedEvents: BookingEvent[] = filteredEvents.map((event) => {
-          const status = event.extendedProps.status;
-          const serviceType = event.extendedProps.serviceType;
-
-          return {
-            ...event,
-            backgroundColor: getStatusColor(status),
-            borderColor: getServiceTypeAccent(serviceType),
-            textColor: "#FFFFFF",
-            // Add additional styling for mixed service events
-            classNames:
-              serviceType.includes("Boarding") &&
-              serviceType.includes("Grooming")
-                ? ["mixed-service-event"]
-                : [],
-          };
-        });
-
-        setCurrentEvents(formattedEvents);
-      } catch (error) {
-        console.error("Error loading bookings:", error);
+      const response = await fetch("/api/calendar");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error fetching bookings:", errorData);
         setError("Failed to load calendar data");
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
+      const events: BookingEvent[] = await response.json();
+
+      const filteredEvents = events.filter((event) => {
+        const status = event.extendedProps?.status?.toLowerCase();
+        return (
+          status === "confirmed" ||
+          status === "ongoing" ||
+          status === "completed"
+        );
+      });
+
+      const formattedEvents: BookingEvent[] = filteredEvents.map((event) => {
+        const status = event.extendedProps.status;
+        const serviceType = event.extendedProps.serviceType;
+
+        return {
+          ...event,
+          backgroundColor: getStatusColor(status),
+          borderColor: getServiceTypeAccent(serviceType),
+          textColor: "#FFFFFF",
+          classNames:
+            serviceType.includes("Boarding") && serviceType.includes("Grooming")
+              ? ["mixed-service-event"]
+              : [],
+        };
+      });
+
+      setCurrentEvents(formattedEvents);
+    } catch (error) {
+      console.error("Error loading bookings:", error);
+      setError("Failed to load calendar data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const { event } = clickInfo;
 
-    // Construct the event object with proper typing
     const selectedEventData: BookingEvent = {
       id: event.id,
       title: event.title,
@@ -165,12 +128,15 @@ export default function CalendarPage() {
     await loadData();
   };
 
-  // Helper function to get readable service duration
   const getServiceDuration = (event: BookingEvent) => {
     if (!event.start || !event.end) return null;
 
-    const start = event.start instanceof Date ? event.start : new Date(event.start as string);
-    const end = event.end instanceof Date ? event.end : new Date(event.end as string);
+    const start =
+      event.start instanceof Date
+        ? event.start
+        : new Date(event.start as string);
+    const end =
+      event.end instanceof Date ? event.end : new Date(event.end as string);
     const diffHours =
       Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60);
 
@@ -212,7 +178,7 @@ export default function CalendarPage() {
             ) : (
               <>
                 <CalendarSidebar
-                  events={currentEvents as unknown as EventApi[]}
+                  events={currentEvents} // No need for 'as unknown as EventApi[]' now
                   loading={loading}
                 />
                 <Calendar
@@ -234,7 +200,3 @@ export default function CalendarPage() {
     </main>
   );
 }
-function loadData() {
-  throw new Error("Function not implemented.");
-}
-
