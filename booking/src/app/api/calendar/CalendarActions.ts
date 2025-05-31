@@ -1,27 +1,72 @@
 "use server";
 
 import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
-import { MealInstruction, BookingEvent, PetWithDetails } from "@/_components/Calendar/types";
+import { EventInput } from "@fullcalendar/core";
+
+type MealInstruction = {
+  food: string;
+  notes?: string;
+  mealType: string;
+  time: string;
+};
+
+type PetWithDetails = {
+  petName: string;
+  petBreed: string;
+  petType: string;
+  mealInstructions: MealInstruction | null;
+};
+
+type BookingEvent = EventInput & {
+  extendedProps: {
+    bookingId: string;
+    ownerName: string;
+    contactNumber: string;
+    status: string;
+    specialRequests: string;
+    totalAmount: number;
+    serviceType: string;
+    pets: PetWithDetails[];
+    checkIn?: string | null;
+    checkOut?: string | null;
+  };
+};
+
+function createDateTime(dateString: string, timeString: string): Date | null {
+  if (!dateString || !timeString) {
+    return null;
+  }
+  try {
+    const fullDateTimeString = `${dateString}T${timeString}+08:00`;
+
+    const date = new Date(fullDateTimeString);
+
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  } catch (e) {
+    console.error("Error parsing date/time:", dateString, timeString, e);
+    return null;
+  }
+}
 
 export async function fetchBookings(): Promise<BookingEvent[]> {
   const supabase = createClientSideClient();
 
   try {
-    console.log("Attempting to fetch bookings from Supabase...");
     const { data: bookings, error: bookingsError } = await supabase
       .from("Booking")
       .select(
         `
         booking_uuid,
         status,
-        special_requests,
-        total_amount,
         owner_details:Owner(name, contact_number),
         pet_uuid:Pet(
           name,
           pet_type,
           breed,
-          boarding_id_extension,
+          boarding_id_extension, 
           grooming_id,
           BoardingPet:boarding_id_extension(
             id,
@@ -35,42 +80,44 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
             service_date,
             service_time
           )
-        )
-      `
+        ),
+        special_requests,
+        total_amount
+        `
       )
       .neq("status", "pending")
       .order("booking_uuid", { ascending: true });
 
     if (bookingsError) {
-      console.error("Supabase query error:", bookingsError);
+      console.error("Supabase error fetching bookings:", bookingsError);
       throw bookingsError;
     }
-
     if (!bookings || bookings.length === 0) {
-      console.log("No bookings found in initial Supabase query.");
+      console.log("No bookings found in Supabase.");
       return [];
     }
-    console.log(`Fetched ${bookings.length} raw bookings from Supabase.`);
 
+    // Extract all BoardingPet IDs for fetching meal instructions
     const boardingPetIds: string[] = [];
-    bookings.forEach((booking: any) => {
-      const pets = Array.isArray(booking.pet_uuid)
+    bookings.forEach((booking) => {
+      // Adjusted type here: BoardingPet is an object, not an array
+      const pets = (Array.isArray(booking.pet_uuid)
         ? booking.pet_uuid
         : booking.pet_uuid
         ? [booking.pet_uuid]
-        : [];
+        : []) as unknown as {
+        BoardingPet?: { id: string } | null; // Changed to object or null
+      }[];
 
-      pets.forEach((pet: any) => {
-        if (pet?.BoardingPet?.[0]?.id) {
-          boardingPetIds.push(pet.BoardingPet[0].id);
+      pets.forEach((pet) => {
+        // Access BoardingPet directly, not pet.BoardingPet[0]
+        if (pet?.BoardingPet?.id) {
+          boardingPetIds.push(pet.BoardingPet.id);
         }
       });
     });
-    console.log(
-      "Extracted BoardingPet IDs for meal instructions:",
-      boardingPetIds
-    );
 
+    // Fetch MealInstructions for relevant BoardingPet IDs
     let mealInstructionsMap: Record<
       string,
       {
@@ -78,17 +125,14 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
         notes?: string;
         meal_type: string;
         time: string;
-        boarding_pet_meal_instructions_id: string;
       }
     > = {};
 
     if (boardingPetIds.length > 0) {
       const { data: mealInstructions, error: mealError } = await supabase
         .from("MealInstructions")
-        .select(
-          "food, notes, meal_type, time, boarding_pet_meal_instructions_id"
-        )
-        .in("boarding_pet_meal_instructions_id", boardingPetIds);
+        .select("food, notes, meal_type, time, boarding_pet_meal_instructions")
+        .in("boarding_pet_meal_instructions", boardingPetIds);
 
       if (mealError) {
         console.error("Supabase error fetching meal instructions:", mealError);
@@ -97,195 +141,197 @@ export async function fetchBookings(): Promise<BookingEvent[]> {
 
       if (mealInstructions) {
         for (const mi of mealInstructions) {
-          mealInstructionsMap[mi.boarding_pet_meal_instructions_id] = mi;
+          mealInstructionsMap[mi.boarding_pet_meal_instructions] = mi;
         }
       }
-      console.log(
-        `Fetched ${mealInstructions?.length || 0} meal instructions.`
-      );
     }
 
     const events: BookingEvent[] = [];
 
-    bookings.forEach((booking: any) => {
-      const owner = Array.isArray(booking.owner_details)
-        ? booking.owner_details[0]
-        : booking.owner_details;
+    bookings.forEach((booking) => {
+      const owner = (
+        Array.isArray(booking.owner_details)
+          ? booking.owner_details[0]
+          : booking.owner_details
+      ) as { name: string; contact_number: string };
+
       if (!owner) {
         console.warn(
-          `Booking ${booking.booking_uuid} missing owner details, skipping.`
+          `Booking ${booking.booking_uuid}: Missing owner details, skipping.`
         );
         return;
       }
 
-      const rawPets = Array.isArray(booking.pet_uuid)
+      const pets = (Array.isArray(booking.pet_uuid)
         ? booking.pet_uuid
         : booking.pet_uuid
         ? [booking.pet_uuid]
-        : [];
+        : []) as unknown as {
+        name: string;
+        pet_type: string;
+        breed: string;
+        boarding_id_extension?: string;
+        grooming_id?: string;
+        BoardingPet?: {
+          // Changed to object or null
+          id: string;
+          check_in_date: string;
+          check_in_time: string;
+          check_out_date: string;
+          check_out_time: string;
+        } | null;
+        GroomingPet?: {
+          // Changed to object or null
+          id: string;
+          service_date: string;
+          service_time: string;
+        } | null;
+      }[];
 
-      if (rawPets.length === 0) {
+      if (pets.length === 0) {
         console.warn(
-          `Booking ${booking.booking_uuid} has no associated pets, skipping.`
+          `Booking ${booking.booking_uuid}: Has no pets or invalid pet data, skipping.`
         );
         return;
       }
 
       const serviceTypes = new Set<string>();
-      const allServiceDates: Date[] = [];
-      const allEndDates: Date[] = [];
+      let overallEarliestStart: Date | null = null;
+      let overallLatestEnd: Date | null = null;
 
-      const petsWithDetails = rawPets
-        .map((pet: any): PetWithDetails | null => {
-          let petCheckIn: string | null = null;
-          let petCheckOut: string | null = null;
-          let petServiceType: "boarding" | "grooming" | "unknown" = "unknown";
-          let mealInst: MealInstruction | null = null;
+      const petsWithDetails: PetWithDetails[] = pets.map((pet) => {
+        let petDetails: PetWithDetails = {
+          petName: pet.name,
+          petBreed: pet.breed,
+          petType: pet.pet_type,
+          mealInstructions: null,
+        };
 
-          if (
-            pet.boarding_id_extension &&
-            pet.BoardingPet &&
-            pet.BoardingPet.length > 0
-          ) {
-            serviceTypes.add("Boarding");
-            petServiceType = "boarding";
-            const boardingPet = pet.BoardingPet[0];
+        // Access BoardingPet directly, not pet.BoardingPet[0]
+        if (pet.BoardingPet) {
+          // Check if it's not null/undefined
+          serviceTypes.add("Boarding");
+          const boardingPet = pet.BoardingPet; // boardingPet is now the object
 
-            if (boardingPet.check_in_date) {
-              const checkInDateTime = boardingPet.check_in_time
-                ? `${boardingPet.check_in_date}T${boardingPet.check_in_time}`
-                : `${boardingPet.check_in_date}T00:00:00`;
-              petCheckIn = checkInDateTime;
+          const checkInDateTime = createDateTime(
+            boardingPet.check_in_date,
+            boardingPet.check_in_time
+          );
+          const checkOutDateTime = createDateTime(
+            boardingPet.check_out_date,
+            boardingPet.check_out_time
+          );
 
-              const checkInDate = new Date(checkInDateTime);
-              if (!isNaN(checkInDate.getTime())) {
-                allServiceDates.push(checkInDate);
-              } else {
-                console.warn(
-                  `Invalid Boarding check-in date/time for pet ${pet.name} in booking ${booking.booking_uuid}: ${checkInDateTime}`
-                );
-              }
+          if (checkInDateTime) {
+            if (
+              overallEarliestStart === null ||
+              checkInDateTime.getTime() < overallEarliestStart.getTime()
+            ) {
+              overallEarliestStart = checkInDateTime;
             }
-
-            if (boardingPet.check_out_date) {
-              const checkOutDateTime = boardingPet.check_out_time
-                ? `${boardingPet.check_out_date}T${boardingPet.check_out_time}`
-                : `${boardingPet.check_out_date}T23:59:59`;
-              petCheckOut = checkOutDateTime;
-
-              const checkOutDate = new Date(checkOutDateTime);
-              if (!isNaN(checkOutDate.getTime())) {
-                allEndDates.push(checkOutDate);
-              } else {
-                console.warn(
-                  `Invalid Boarding check-out date/time for pet ${pet.name} in booking ${booking.booking_uuid}: ${checkOutDateTime}`
-                );
-              }
+          }
+          if (checkOutDateTime) {
+            if (
+              overallLatestEnd === null ||
+              checkOutDateTime.getTime() > overallLatestEnd.getTime()
+            ) {
+              overallLatestEnd = checkOutDateTime;
             }
-
-            const boardingPetId = boardingPet.id;
-            const mi = boardingPetId
-              ? mealInstructionsMap[boardingPetId]
-              : null;
-            if (mi) {
-              mealInst = {
-                food: mi.food,
-                notes: mi.notes,
-                mealType: mi.meal_type,
-                time: mi.time,
-              };
-            }
-          } else if (
-            pet.grooming_id &&
-            pet.GroomingPet &&
-            pet.GroomingPet.length > 0
-          ) {
-            serviceTypes.add("Grooming");
-            petServiceType = "grooming";
-            const groomingPet = pet.GroomingPet[0];
-
-            if (groomingPet.service_date) {
-              const serviceDateTime = groomingPet.service_time
-                ? `${groomingPet.service_date}T${groomingPet.service_time}`
-                : `${groomingPet.service_date}T09:00:00`;
-              petCheckIn = serviceDateTime;
-
-              const serviceDate = new Date(serviceDateTime);
-              if (!isNaN(serviceDate.getTime())) {
-                allServiceDates.push(serviceDate);
-                const endDate = new Date(
-                  serviceDate.getTime() + 2 * 60 * 60 * 1000
-                );
-                allEndDates.push(endDate);
-              } else {
-                console.warn(
-                  `Invalid Grooming service date/time for pet ${pet.name} in booking ${booking.booking_uuid}: ${serviceDateTime}`
-                );
-              }
-            }
-          } else {
-            console.warn(
-              `Pet ${pet.name} in booking ${booking.booking_uuid} has no valid boarding or grooming data.`
-            );
-            return null;
           }
 
-          return {
-            petName: pet.name,
-            petBreed: pet.breed,
-            petType: pet.pet_type,
-            mealInstructions: mealInst,
-            checkIn: petCheckIn,
-            checkOut: petCheckOut,
-            serviceType: petServiceType,
-          };
-        })
-        .filter((pet: PetWithDetails | null): pet is PetWithDetails => pet !== null);
+          const mi = boardingPet.id
+            ? mealInstructionsMap[boardingPet.id]
+            : null;
+          if (mi) {
+            petDetails.mealInstructions = {
+              food: mi.food,
+              notes: mi.notes,
+              mealType: mi.meal_type,
+              time: mi.time,
+            };
+          }
+        }
 
-      if (petsWithDetails.length === 0 || allServiceDates.length === 0) {
+        // Access GroomingPet directly, not pet.GroomingPet[0]
+        if (pet.GroomingPet) {
+          // Check if it's not null/undefined
+          serviceTypes.add("Grooming");
+          const groomingPet = pet.GroomingPet; // groomingPet is now the object
+
+          const groomingServiceStart = createDateTime(
+            groomingPet.service_date,
+            groomingPet.service_time
+          );
+
+          if (groomingServiceStart) {
+            const groomingDurationMs = 60 * 60 * 1000;
+            const groomingServiceEnd = new Date(
+              groomingServiceStart.getTime() + groomingDurationMs
+            );
+
+            if (
+              overallEarliestStart === null ||
+              groomingServiceStart.getTime() < overallEarliestStart.getTime()
+            ) {
+              overallEarliestStart = groomingServiceStart;
+            }
+            if (
+              overallLatestEnd === null ||
+              groomingServiceEnd.getTime() > overallLatestEnd.getTime()
+            ) {
+              overallLatestEnd = groomingServiceEnd;
+            }
+          }
+        }
+        return petDetails;
+      });
+
+      let finalEventStart: Date;
+      if (overallEarliestStart === null) {
         console.warn(
-          `Booking ${booking.booking_uuid} has no valid pets with service dates after processing, skipping event creation.`
+          `Booking ${booking.booking_uuid}: No valid service dates found from pets for event time. Skipping event creation.`
         );
         return;
+      } else {
+        finalEventStart = overallEarliestStart;
       }
 
-      const overallEventStartDate = new Date(
-        Math.min(...allServiceDates.map((d) => d.getTime()))
-      );
-      const overallEventEndDate =
-        allEndDates.length > 0
-          ? new Date(Math.max(...allEndDates.map((d) => d.getTime())))
-          : null;
+      let finalEventEnd: Date;
+      if (overallLatestEnd === null) {
+        finalEventEnd = finalEventStart;
+      } else {
+        finalEventEnd = overallLatestEnd;
+      }
 
-      const serviceTypeString = Array.from(serviceTypes).join(", ") || "N/A";
-      const petNames = petsWithDetails.map((p: { petName: any; }) => p.petName).join(", ");
+      const serviceTypeString =
+        Array.from(serviceTypes).join(", ") || "Unknown";
+
+      const petNames = petsWithDetails.map((p) => p.petName).join(", ");
 
       events.push({
         id: booking.booking_uuid,
         title: `${petNames} - ${owner.name}`,
-        start: overallEventStartDate,
-        end: overallEventEndDate || undefined,
+        start: finalEventStart,
+        end: finalEventEnd,
         allDay: false,
         extendedProps: {
           bookingId: booking.booking_uuid,
           ownerName: owner.name,
           contactNumber: owner.contact_number,
           status: booking.status,
-          specialRequests: booking.special_requests || "",
-          totalAmount: booking.total_amount || 0,
+          specialRequests: booking.special_requests,
+          totalAmount: booking.total_amount,
           serviceType: serviceTypeString,
           pets: petsWithDetails,
-          checkIn: overallEventStartDate.toISOString(),
-          checkOut: overallEventEndDate?.toISOString() || null,
+          checkIn: finalEventStart.toISOString(),
+          checkOut: finalEventEnd.toISOString(),
         },
       });
-      console.log(`Successfully processed booking ${booking.booking_uuid}.`);
     });
 
-    console.log(`Total events ready for calendar: ${events.length}`);
     return events;
   } catch (error) {
-    console.error("Critical error in fetchBookings:", error);
+    console.error("CRITICAL ERROR in fetchBookings:", error);
     return [];
   }
 }
