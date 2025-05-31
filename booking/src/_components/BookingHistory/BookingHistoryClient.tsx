@@ -83,7 +83,12 @@ const BookingHistoryClient: React.FC<BookingHistoryClientProps> = ({ bookings: i
   }
 
   if (!bookings || bookings.length === 0) {
-    return <div className='text-gray-400 text-center'>No booking history found.</div>;
+    return (
+      // Added flex, items-center, justify-center, and h-full (or a specific height)
+      <div className='flex items-center justify-center h-full text-gray-400'>
+        No booking history found.
+      </div>
+    );
   }
 
   return (
