@@ -15,9 +15,9 @@ export async function POST(request: Request) {
 
     // Check whitelist directly without auth session
     const { data, error } = await supabase
-      .from("AdminAccessUsers")
-      .select("*")
-      .eq("email", email)
+      .from('AdminAccessUsers')
+      .select('*')
+      .eq('email', email)
       .maybeSingle();
 
     if (error) {

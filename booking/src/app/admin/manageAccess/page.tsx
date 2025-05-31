@@ -8,7 +8,7 @@ import { removeAdmin } from "@/_components/serverSide/AdminDataHandler";
 type AdminAccessUser = {
   name: string;
   email: string;
-  role: string
+  role: string;
 }
 
 export default async function AdminPage() {
@@ -18,11 +18,6 @@ export default async function AdminPage() {
     .select("*");
   if (error) {
     return( <div> {error.message} </div>  )
-  }
-
-  async function processRemoveAdmin(email: string) {
-    const { success, message } = await removeAdmin(email);
-    
   }
 
   return (
