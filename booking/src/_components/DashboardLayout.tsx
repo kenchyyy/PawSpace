@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaBox, FaList, FaCalendar, FaUser } from "react-icons/fa";
+import { FaHome, FaBox, FaList, FaCalendar, FaUser, FaAddressCard, FaBook, FaDoorOpen} from "react-icons/fa";
 import SideNavButton from "@/_components/SideNavButton";
 import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
 import { usePathname } from "next/navigation";
@@ -20,18 +20,23 @@ interface SideNavProps {
 }
 
 const Icons = {
-  FaHome: FaHome,
-  FaList: FaList,
-  FaBox: FaBox,
-  FaCalendar: FaCalendar,
-  FaUser: FaUser,
-};
+  "FaHome": FaHome,
+  "FaList": FaList,
+  "FaBox": FaBox,
+  "FaCalendar": FaCalendar,
+  "FaUser": FaUser,
+  "FaAddressCard": FaAddressCard,
+  "FaBook": FaBook,
+  "FaDoorOpen": FaDoorOpen
+}
 
 export default function DashboardLayout({ children, buttons }: SideNavProps) {
   const [expandSideNav, toggleSideNav] = useState(false);
   const [isLg, setIsLg] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
 
   const calendarBackgroundColor = "#2e0249"; // Purple background color
   const calendarTextColor = "white"; // Text color
@@ -93,7 +98,7 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
           backgroundColor: calendarBackgroundColor,
           color: calendarTextColor,
         }}
-        className={`h-full p-4 space-y-4 shadow-lg cursor-pointer ${
+        className={`h-full p-4 space-y-4 shadow-lg cursor-pointer overflow-y-auto ${
           expandSideNav
             ? "w-64 shadow-2xl"
             : isLg
@@ -146,14 +151,14 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
       </nav>
 
       {/* Main Content */}
-      <div
-        className={`flex-1 transition-all duration-300 ease-in-out overflow-x-hidden overflow-y-auto ${
-          expandSideNav ? "opacity-20" : "opacity-100"
+      <main
+        className={`flex-1 transition-all duration-300 ease-in-out overflow-x-hidden ${
+          mounted && expandSideNav ? "opacity-20" : "opacity-100"
         }`}
         style={{ backgroundColor: "#3b0764", color: calendarTextColor }}
       >
         {children}
-      </div>
+      </main>
     </div>
   );
 }

@@ -15,14 +15,15 @@ export default async function Layout({
   if (!sessionCheck) {
     redirect("/customer");
   }
-
   return (
     <DashboardLayout
       buttons={[
         { icon: "FaHome", text: "Home", href: "/admin" },
         { icon: "FaCalendar", text: "Calendar", href: "/admin/calendar" },
         { icon: "FaList", text: "Manage Access", href: "/admin/manageAccess" },
-        { icon: "FaBox", text: "Inbox", href: "/admin/inbox" },
+      {icon: "FaBook", text: "Boarding Bookings", href: "/admin/boardBookings"},
+      {icon: "FaAddressCard", text: "Grooming Bookings", href: "/admin/groomBookings"},
+      {icon: "FaDoorOpen", text: "Rooms", href: "/admin/rooms"}
       ]}
     >
       {children}

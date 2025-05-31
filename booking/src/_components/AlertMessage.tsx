@@ -24,7 +24,7 @@ export default function AlertMessage({message, borderColor = ""}: AlertMessagePr
     }[borderColor];
 
     return (
-    <Alert className={`fixed bottom-4 left-4 z-50 border-2 ${colorClass} w-fit`}>
+    <Alert className={`fixed bottom-4 left-4 z-[9999] border-2 ${colorClass} w-fit`}>
         <Terminal className="h-4 w-4" />
         <AlertTitle>Heads up!</AlertTitle>
         <AlertDescription>

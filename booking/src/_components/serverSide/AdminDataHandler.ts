@@ -8,7 +8,6 @@ export async function removeAdmin(email: string) : Promise<{ success: boolean; m
         .from("AdminAccessUsers")
         .delete()
         .eq("email", email);
-
     if (error) {
         console.error("Error removing admin:", error);
         return { success: false, message: "Failed to remove admin" };
