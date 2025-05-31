@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, ChangeEvent, ReactNode, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createBrowserClient } from '@supabase/ssr';
 import { isSameDay, addDays } from 'date-fns';
 import { FiX } from 'react-icons/fi';
 import CustomerStep from '../Steps/CustomerStep';
@@ -11,6 +11,7 @@ import {
     OwnerDetails, Pet, ServiceType, BoardingPet, GroomingPet, pricing, calculateNights, isBoardingPet, isGroomingPet, BookingResult, ScheduleChangeHandler, BaseBookingFormProps, PetType, GroomingVariant, PetSize, DogGroomingVariant, RoomSize, BoardingType, MealInstruction,
     BasePetDetailsProps, parseDate
 } from '../types';
+import { getGroomingPrice, getBoardingPrice } from '../Steps/ReviewItems/Functions/pricingCalculations';
 
 const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     onConfirmBooking,
@@ -23,7 +24,10 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     dateHighlight,
     dateDefaultMessage,
 }) => {
-    const supabase = createClientComponentClient();
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const [currentStep, setCurrentStep] = useState<'customer' | 'pet' | 'review'>('customer');
     const [completedSteps, setCompletedSteps] = useState<('customer' | 'pet')[]>([]);
     const [ownerDetails, setOwnerDetails] = useState<OwnerDetails>({
@@ -132,6 +136,8 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             errors.contact_number = 'Contact Number is required.';
         } else if (!phContactNumberRegex.test(details.contact_number.trim())) {
             errors.contact_number = 'Please enter a valid 11-digit Philippine mobile number (e.g., 09123456789).';
+        } else if (details.contact_number.length > 11) {
+            errors.contact_number = 'Contact number must be exactly 11 digits.';
         }
 
         if (!details.address.trim()) {
@@ -145,6 +151,10 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
 
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        
+        if (name === 'contact_number' && value.length > 11) {
+            return;
+        }
         
         setOwnerDetails(prev => {
             const updatedDetails = { ...prev, [name]: value };
@@ -283,7 +293,14 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
         const errors: Record<string, string> = {};
         let isValid = true; 
 
-        if (!pet.name?.trim()) { errors.name = 'Pet name is required'; isValid = false; }
+        if (!pet.name?.trim()) { 
+            errors.name = 'Pet name is required'; 
+            isValid = false; 
+        } else if (pet.name.trim().split(/\s+/).length < 2) {
+            errors.name = 'Please enter the pet\'s full name (e.g., "Max Smith" or "Luna Brown")';
+            isValid = false;
+        }
+
         if (!pet.pet_type) { errors.pet_type = 'Pet type is required.'; isValid = false; }
         if (!pet.breed?.trim()) { errors.breed = 'Breed is required.'; isValid = false; }
         if (pet.vaccinated === 'unknown' || pet.vaccinated === '') { errors.vaccinated = 'Vaccination status is required.'; isValid = false; }
@@ -547,7 +564,10 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
 
         if (clickedIndex < currentIndex) {
             setCurrentStep(stepId);
-        } else if (clickedIndex > currentIndex) {
+            return;
+        }
+
+        if (clickedIndex > currentIndex) {
             if (currentStep === 'customer') {
                 const customerErrors = validateCustomerForm(ownerDetails);
                 if (Object.keys(customerErrors).length === 0) {
@@ -568,13 +588,6 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
                         newFormErrors[`pet-${pet.id}`] = JSON.stringify(errorsForPet);
                         if (firstInvalidPetIndex === null) {
                             firstInvalidPetIndex = index;
-                        }
-                    } else {
-                        if (formErrors[`pet-${pet.id}`]) {
-                            const tempErrors = JSON.parse(formErrors[`pet-${pet.id}`] || '{}');
-                            if (Object.keys(tempErrors).length === 0) {
-                                delete formErrors[`pet-${pet.id}`];
-                            }
                         }
                     }
                 });
@@ -645,41 +658,21 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
             const discountsApplied: number[] = [];
 
             pets.forEach(pet => {
-                let petTotalAmount = 0;
-                let petDiscount = 0;
-
                 if (isGroomingPet(pet)) {
                     const groomingPet = pet as GroomingPet;
-                    petTotalAmount = getGroomingPrice(
+                    const price = getGroomingPrice(
                         groomingPet.pet_type,
                         groomingPet.service_variant,
-                        groomingPet.size as PetSize
+                        groomingPet.size
                     );
+                    totalAmounts.push(price);
+                    discountsApplied.push(0);
                 } else if (isBoardingPet(pet)) {
                     const boardingPet = pet as BoardingPet;
-                    const checkInDate = boardingPet.check_in_date;
-                    const checkOutDate = boardingPet.check_out_date;
-
-                    const nights = calculateNights(checkInDate, checkOutDate);
-
-                    let basePrice = 0;
-                    let discount = 0;
-                    let roomSizeKey = boardingPet.room_size;
-
-                    if (boardingPet.boarding_type === 'day') {
-                        basePrice = pricing.boarding.day[roomSizeKey] || 0;
-                        petTotalAmount = basePrice;
-                    } else { // overnight
-                        basePrice = (pricing.boarding.overnight[roomSizeKey] || 0) * nights;
-                        if (nights >= 15) discount = 20;
-                        else if (nights >= 7) discount = 10;
-                        petTotalAmount = basePrice * (1 - (discount / 100));
-                    }
-                    petDiscount = discount;
+                    const priceDetails = getBoardingPrice(boardingPet);
+                    totalAmounts.push(priceDetails.total);
+                    discountsApplied.push(priceDetails.discount);
                 }
-
-                totalAmounts.push(petTotalAmount);
-                discountsApplied.push(petDiscount);
             });
 
             return await onConfirmBooking(ownerDetails, pets, totalAmounts, discountsApplied);
@@ -692,19 +685,6 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
                 error: errorMessage
             };
         }
-    };
-
-    const getGroomingPrice = (
-        petType: PetType,
-        variant: GroomingVariant,
-        size?: PetSize
-    ): number => {
-        if (petType === 'dog') {
-            return pricing.grooming.dog[variant as DogGroomingVariant]?.[size as PetSize] || 0;
-        } else if (petType === 'cat') {
-            return pricing.grooming.cat.cat;
-        }
-        return 0;
     };
 
     const hasCustomerErrors = Object.keys(formErrors).some(key =>
