@@ -129,7 +129,6 @@ const CalendarSidebar = ({
       <div className='flex-1 overflow-y-auto mt-4'>
         <div>
           <h3 className='text-md font-semibold text-[#E9D5FF] mb-2 px-4 flex justify-between items-center'>
-            {/* Keeping truncation here for "Today" title if it somehow gets too long */}
             <span className='truncate'>Today</span>
             {todayEvents.length > 2 && !showMoreToday && (
               <button
@@ -155,7 +154,6 @@ const CalendarSidebar = ({
               ))}
             </ul>
           ) : (
-            // Removed truncate from 'p' tag for "No check-ins..." as it's short and fixed
             <p className='italic text-center text-[#9F7AEA] py-2 px-4'>
               No check-ins or check-outs today
             </p>
@@ -172,7 +170,6 @@ const CalendarSidebar = ({
 
         <div className='mt-6'>
           <h3 className='text-md font-semibold text-[#E9D5FF] mb-2 px-4 flex justify-between items-center'>
-            {/* Keeping truncation here for "Upcoming (Next 7 Days)" title if it gets too long */}
             <span className='truncate'>Upcoming (Next 7 Days)</span>
             {upcomingEvents.length > 2 && !showMoreUpcoming && (
               <button
@@ -198,7 +195,6 @@ const CalendarSidebar = ({
               ))}
             </ul>
           ) : (
-            // Removed truncate from 'p' tag for "No upcoming..." as it's short and fixed
             <p className='italic text-center text-[#9F7AEA] py-2 px-4'>
               No upcoming check-ins or check-outs in the next 7 days
             </p>
@@ -330,6 +326,9 @@ const CalendarEventItem = ({
     }
   }
 
+  // Get service type display
+  const serviceType = event.extendedProps?.serviceType || "N/A";
+
   return (
     <li
       className='bg-[#1E1B4B] border border-[#4C1D95] shadow-lg px-4 py-3 rounded-md transition-all hover:scale-[1.02] hover:shadow-[0_0_10px_rgba(159,122,234,0.5)]'
@@ -343,7 +342,6 @@ const CalendarEventItem = ({
           className='inline-block w-2 h-2 rounded-full'
           style={{ backgroundColor: event.backgroundColor || "#9F7AEA" }}
         ></span>
-        {/* Keep truncation for the main event title */}
         <span className='truncate'>
           {event.title}
           {bookingType && (
@@ -351,13 +349,17 @@ const CalendarEventItem = ({
           )}
         </span>
       </div>
-      {/* Keep truncation for owner name as it can be long */}
+
       <div className='text-sm text-[#C4B5FD] mt-1 truncate'>
         <span className='font-medium text-[#FBBF24]'>Owner:</span>{" "}
-        {event.extendedProps.ownerName}
+        {event.extendedProps?.ownerName || "N/A"}
       </div>
 
-      {/* Removed truncation for check-in/check-out as dates are generally fixed width */}
+      <div className='text-sm text-[#C4B5FD] mt-1'>
+        <span className='font-medium text-[#FBBF24]'>Service:</span>{" "}
+        {serviceType}
+      </div>
+
       <div className='text-sm text-[#C4B5FD] mt-1'>
         <span className='font-medium text-[#FBBF24]'>Check-in:</span> {checkIn}
       </div>
@@ -369,7 +371,6 @@ const CalendarEventItem = ({
         </div>
       )}
 
-      {/* Keep truncation for status tag if it might contain very long custom statuses */}
       <div
         className='mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block truncate'
         style={{
@@ -378,7 +379,7 @@ const CalendarEventItem = ({
           border: `1px solid ${event.backgroundColor || "#9F7AEA"}`,
         }}
       >
-        {event.extendedProps.status.toLowerCase()}
+        {event.extendedProps?.status?.toLowerCase() || "unknown"}
       </div>
     </li>
   );

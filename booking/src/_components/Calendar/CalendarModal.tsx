@@ -22,11 +22,13 @@ type PetWithDetails = {
   petBreed: string;
   petType: string;
   mealInstructions: MealInstruction | null;
-  checkIn?: string | null;
-  checkOut?: string | null;
+  checkIn: string | null;
+  checkOut: string | null;
+  serviceType: "boarding" | "grooming";
 };
 
 type ExtendedProps = {
+  bookingId?: string;
   ownerName?: string;
   contactNumber?: string;
   status?: string;
@@ -50,6 +52,7 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
   if (!event) return null;
 
   const {
+    bookingId = "N/A",
     ownerName = "N/A",
     contactNumber = "N/A",
     status = "Unknown",
@@ -124,6 +127,10 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
             Booking Overview
           </h4>
           <p className='text-sm text-[#C4B5FD] mb-0.5'>
+            <span className='font-medium text-[#FBBF24]'>Booking ID:</span>{" "}
+            {bookingId}
+          </p>
+          <p className='text-sm text-[#C4B5FD] mb-0.5'>
             <span className='font-medium text-[#FBBF24]'>Service:</span>{" "}
             {serviceType}
           </p>
@@ -143,6 +150,12 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
             </span>{" "}
             {formatDateTime(checkOut)}
           </p>
+          {totalAmount && (
+            <p className='text-sm text-[#C4B5FD] mb-0.5'>
+              <span className='font-medium text-[#FBBF24]'>Total Amount:</span>{" "}
+              ₱{totalAmount.toLocaleString()}
+            </p>
+          )}
           {status && (
             <p className='text-sm text-[#C4B5FD] mb-1'>
               <span className='font-medium text-[#FBBF24]'>Status:</span>{" "}
@@ -161,82 +174,83 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
           <div className='px-0.3 mt-2 space-y-4'>
             <div className='bg-[#1E1B4B] border border-[#4C1D95] shadow-md px-4 py-3 rounded-md'>
               <h4 className='text-md font-semibold text-[#E9D5FF] mb-3'>
-                Pets
+                Pets ({pets.length})
               </h4>
 
               {pets.length > 0 ? (
-                pets.map(
-                  ({
-                    petName,
-                    petBreed,
-                    petType,
-                    mealInstructions,
-                    checkIn: petCheckIn,
-                    checkOut: petCheckOut,
-                  }) => (
-                    <div
-                      key={petName}
-                      className='mb-4 border-b border-[#4C1D95] pb-3 last:border-b-0'
-                    >
-                      <h5 className='text-sm font-semibold text-[#FBBF24] mb-2'>
-                        {petName}{" "}
+                pets.map((pet, index) => (
+                  <div
+                    key={`${pet.petName}-${index}`}
+                    className='mb-4 border-b border-[#4C1D95] pb-3 last:border-b-0'
+                  >
+                    <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2'>
+                      <h5 className='text-sm font-semibold text-[#FBBF24]'>
+                        {pet.petName}{" "}
                         <span className='text-[#C4B5FD] font-normal'>
-                          ({petType} - {petBreed || "Unknown"})
+                          ({pet.petType} - {pet.petBreed || "Unknown"})
                         </span>
                       </h5>
+                      <span className='text-xs bg-[#2A0D45] text-[#E9D5FF] px-2 py-1 rounded-full border border-[#4C1D95]'>
+                        {pet.serviceType === "boarding"
+                          ? "Boarding"
+                          : "Grooming"}
+                      </span>
+                    </div>
 
-                      {/* Individual Pet Check-in/out Times */}
-                      <div className='mb-2 space-y-1'>
-                        {petCheckIn && (
-                          <p className='text-xs text-[#C4B5FD]'>
-                            <span className='font-medium text-[#FBBF24]'>
-                              Pet Check-in:
-                            </span>{" "}
-                            {formatDateTime(petCheckIn)}
-                          </p>
-                        )}
-                        {petCheckOut && (
-                          <p className='text-xs text-[#C4B5FD]'>
-                            <span className='font-medium text-[#FBBF24]'>
-                              Pet Check-out:
-                            </span>{" "}
-                            {formatDateTime(petCheckOut)}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Meal Instructions */}
-                      {mealInstructions ? (
-                        <div className='bg-[#2A0D45] border border-[#4C1D95] px-3 py-2 rounded-md'>
-                          <h6 className='text-xs font-semibold text-[#FBBF24] mb-1'>
-                            Meal Instructions
-                          </h6>
-                          <ul className='text-xs text-[#C4B5FD] list-disc list-inside space-y-0.5'>
-                            <li>
-                              <strong>Food:</strong> {mealInstructions.food}
-                            </li>
-                            <li>
-                              <strong>Meal Type:</strong>{" "}
-                              {mealInstructions.mealType}
-                            </li>
-                            <li>
-                              <strong>Time:</strong> {mealInstructions.time}
-                            </li>
-                            {mealInstructions.notes && (
-                              <li>
-                                <strong>Notes:</strong> {mealInstructions.notes}
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      ) : (
-                        <p className='text-xs text-[#9F7AEA] italic'>
-                          No meal instructions
+                    {/* Individual Pet Check-in/out Times */}
+                    <div className='mb-2 space-y-1'>
+                      {pet.checkIn && (
+                        <p className='text-xs text-[#C4B5FD]'>
+                          <span className='font-medium text-[#FBBF24]'>
+                            {pet.serviceType === "grooming"
+                              ? "Service Time:"
+                              : "Check-in:"}
+                          </span>{" "}
+                          {formatDateTime(pet.checkIn)}
+                        </p>
+                      )}
+                      {pet.checkOut && (
+                        <p className='text-xs text-[#C4B5FD]'>
+                          <span className='font-medium text-[#FBBF24]'>
+                            Check-out:
+                          </span>{" "}
+                          {formatDateTime(pet.checkOut)}
                         </p>
                       )}
                     </div>
-                  )
-                )
+
+                    {/* Meal Instructions (only for boarding pets) */}
+                    {pet.serviceType === "boarding" && pet.mealInstructions ? (
+                      <div className='bg-[#2A0D45] border border-[#4C1D95] px-3 py-2 rounded-md'>
+                        <h6 className='text-xs font-semibold text-[#FBBF24] mb-1'>
+                          Meal Instructions
+                        </h6>
+                        <ul className='text-xs text-[#C4B5FD] list-disc list-inside space-y-0.5'>
+                          <li>
+                            <strong>Food:</strong> {pet.mealInstructions.food}
+                          </li>
+                          <li>
+                            <strong>Meal Type:</strong>{" "}
+                            {pet.mealInstructions.mealType}
+                          </li>
+                          <li>
+                            <strong>Time:</strong> {pet.mealInstructions.time}
+                          </li>
+                          {pet.mealInstructions.notes && (
+                            <li>
+                              <strong>Notes:</strong>{" "}
+                              {pet.mealInstructions.notes}
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    ) : pet.serviceType === "boarding" ? (
+                      <p className='text-xs text-[#9F7AEA] italic'>
+                        No meal instructions
+                      </p>
+                    ) : null}
+                  </div>
+                ))
               ) : (
                 <p className='text-sm text-[#C4B5FD]'>No pets available.</p>
               )}

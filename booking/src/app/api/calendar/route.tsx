@@ -1,6 +1,6 @@
-// src/app/api/calendar/route.tsx
+
 import { NextResponse } from "next/server";
-import { fetchBookings } from "./CalendarActions"; // Adjust path if needed
+import { fetchBookings } from "./CalendarActions";
 
 export async function GET(request: Request) {
   try {
