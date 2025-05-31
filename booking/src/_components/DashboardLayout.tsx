@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { FiMenu } from "react-icons/fi";
-import { FaHome, FaBox, FaList, FaCalendar, FaUser, FaAddressCard, FaBook, FaDoorOpen} from "react-icons/fa";
+import { FaHome, FaBox, FaList, FaCalendar, FaUser, FaAddressCard, FaBook, FaDoorOpen, FaSignOutAlt} from "react-icons/fa";
 import SideNavButton from "@/_components/SideNavButton";
 import { createClientSideClient } from "@/lib/supabase/CreateClientSideClient";
 import { usePathname } from "next/navigation";
@@ -44,7 +44,7 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
   function handleLogOut() {
     const supabase = createClientSideClient();
     supabase.auth.signOut().then(() => {
-      window.location.href = "/login";
+      window.location.href = "/";
     });
   }
 
@@ -98,7 +98,7 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
           backgroundColor: calendarBackgroundColor,
           color: calendarTextColor,
         }}
-        className={`h-full p-4 space-y-4 shadow-lg cursor-pointer overflow-y-auto ${
+        className={`h-full flex flex-col justify-between shadow-lg overflow-y-auto  ${
           expandSideNav
             ? "w-64 shadow-2xl"
             : isLg
@@ -106,49 +106,62 @@ export default function DashboardLayout({ children, buttons }: SideNavProps) {
               : "w-20 shadow-lg"
         } transition-width duration-300 ease-in-out`}
       >
-        <h2
-          className={`text-4xl font-bold mb-4 transition-opacity duration-300  ${
-            expandSideNav ? "opacity-100 block" : "opacity-0 hidden"
-          } lg:block lg:opacity-100`}
-        >
-          <span style={{ color: "#FBBF24" }}>Pawspace</span>
-          <div className='mt-2'>
-            <Button onClick={handleLogOut} className='text-gray border-gray'>
-              Log-out
-            </Button>
-          </div>
-        </h2>
+        <div className="flex-1 flex flex-col space-y-4 p-4">
+          <h2
+            className={`text-3xl font-bold mb-4 transition-opacity duration-300 ${
+              expandSideNav ? "opacity-100 block" : "opacity-0 hidden"
+            } lg:block lg:opacity-100 flex items-center gap-2`} // flex container with spacing
+          >
+            <div className="flex items-center">
+              <img
+                src="/favicon.ico"
+                alt="Pawspace favicon"
+                className="w-16 h-16" // adjust size as needed
+              />
+              <span style={{ color: "#FBBF24" }}>Pawspace</span>
+            </div>
+          </h2>
 
-        <SideNavButton
-          icon={FiMenu}
-          text=''
-          onClick={() => toggleSideNav(!expandSideNav)}
-          color='custom'
-          customColor={calendarBackgroundColor}
-          textColor={calendarTextColor}
-          className={`lg:hidden ${expandSideNav ? "hidden" : ""}`}
-          isCurrent={false}
-        />
+          
+          <SideNavButton
+            icon={FiMenu}
+            text=''
+            onClick={() => toggleSideNav(!expandSideNav)}
+            color='custom'
+            customColor={calendarBackgroundColor}
+            textColor={calendarTextColor}
+            className={`lg:hidden ${expandSideNav ? "hidden" : ""}`}
+            isCurrent={false}
+            
+          />
 
-        <ul className='space-y-4'>
-          {buttons.map((button, index) => (
-            <SideNavButton
-              key={index}
-              icon={Icons[button.icon as keyof typeof Icons]}
-              text={button.text}
-              href={button.href}
-              onClick={() => {
-                toggleSideNav(false);
-              }}
-              isCurrent={pathname === button.href}
-              showText={expandSideNav}
-              color='custom'
-              customColor={calendarBackgroundColor}
-              textColor={calendarTextColor}
-            />
-          ))}
-        </ul>
+          <ul className='space-y-4 pb-4 border-b-2 border-purple-400'>
+            {buttons.map((button, index) => (
+              <SideNavButton
+                key={index}
+                icon={Icons[button.icon as keyof typeof Icons]}
+                text={button.text}
+                href={button.href}
+                onClick={() => {
+                  toggleSideNav(false);
+                }}
+                isCurrent={pathname === button.href}
+                showText={expandSideNav}
+                color='custom'
+                customColor={calendarBackgroundColor}
+                textColor={calendarTextColor}
+              />
+            ))}
+            
+          </ul>
+          
+            <SideNavButton icon={FaSignOutAlt} isCurrent={false} text="Log-out" onClick={handleLogOut} color="custom"/>
+          
+            
+        </div>
+
       </nav>
+
 
       {/* Main Content */}
       <main
