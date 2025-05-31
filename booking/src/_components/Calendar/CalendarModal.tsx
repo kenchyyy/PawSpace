@@ -22,6 +22,8 @@ type PetWithDetails = {
   petBreed: string;
   petType: string;
   mealInstructions: MealInstruction | null;
+  checkIn?: string | null;
+  checkOut?: string | null;
 };
 
 type ExtendedProps = {
@@ -130,11 +132,15 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
             {ownerName} ({contactNumber})
           </p>
           <p className='text-sm text-[#C4B5FD] mb-0.5'>
-            <span className='font-medium text-[#FBBF24]'>Check-in:</span>{" "}
+            <span className='font-medium text-[#FBBF24]'>
+              Overall Check-in:
+            </span>{" "}
             {formatDateTime(checkIn)}
           </p>
           <p className='text-sm text-[#C4B5FD] mb-0.5'>
-            <span className='font-medium text-[#FBBF24]'>Check-out:</span>{" "}
+            <span className='font-medium text-[#FBBF24]'>
+              Overall Check-out:
+            </span>{" "}
             {formatDateTime(checkOut)}
           </p>
           {status && (
@@ -159,44 +165,80 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
               </h4>
 
               {pets.length > 0 ? (
-                pets.map(({ petName, petBreed, mealInstructions }) => (
-                  <div key={petName} className='mb-4'>
-                    <h5 className='text-sm font-semibold text-[#FBBF24] mb-1'>
-                      {petName}{" "}
-                      <span className='text-[#C4B5FD] font-normal'>
-                        ({petBreed || "Unknown"})
-                      </span>
-                    </h5>
+                pets.map(
+                  ({
+                    petName,
+                    petBreed,
+                    petType,
+                    mealInstructions,
+                    checkIn: petCheckIn,
+                    checkOut: petCheckOut,
+                  }) => (
+                    <div
+                      key={petName}
+                      className='mb-4 border-b border-[#4C1D95] pb-3 last:border-b-0'
+                    >
+                      <h5 className='text-sm font-semibold text-[#FBBF24] mb-2'>
+                        {petName}{" "}
+                        <span className='text-[#C4B5FD] font-normal'>
+                          ({petType} - {petBreed || "Unknown"})
+                        </span>
+                      </h5>
 
-                    {mealInstructions ? (
-                      <ul className='text-sm text-[#C4B5FD] list-disc list-inside'>
-                        <li>
-                          <strong>Food:</strong> {mealInstructions.food}
-                        </li>
-                        <li>
-                          <strong>Meal Type:</strong>{" "}
-                          {mealInstructions.mealType}
-                        </li>
-                        <li>
-                          <strong>Time:</strong> {mealInstructions.time}
-                        </li>
-                        {mealInstructions.notes && (
-                          <li>
-                            <strong>Notes:</strong> {mealInstructions.notes}
-                          </li>
+                      {/* Individual Pet Check-in/out Times */}
+                      <div className='mb-2 space-y-1'>
+                        {petCheckIn && (
+                          <p className='text-xs text-[#C4B5FD]'>
+                            <span className='font-medium text-[#FBBF24]'>
+                              Pet Check-in:
+                            </span>{" "}
+                            {formatDateTime(petCheckIn)}
+                          </p>
                         )}
-                      </ul>
-                    ) : (
-                      <p className='text-sm text-[#C4B5FD]'>
-                        No meal instructions
-                      </p>
-                    )}
-                  </div>
-                ))
+                        {petCheckOut && (
+                          <p className='text-xs text-[#C4B5FD]'>
+                            <span className='font-medium text-[#FBBF24]'>
+                              Pet Check-out:
+                            </span>{" "}
+                            {formatDateTime(petCheckOut)}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Meal Instructions */}
+                      {mealInstructions ? (
+                        <div className='bg-[#2A0D45] border border-[#4C1D95] px-3 py-2 rounded-md'>
+                          <h6 className='text-xs font-semibold text-[#FBBF24] mb-1'>
+                            Meal Instructions
+                          </h6>
+                          <ul className='text-xs text-[#C4B5FD] list-disc list-inside space-y-0.5'>
+                            <li>
+                              <strong>Food:</strong> {mealInstructions.food}
+                            </li>
+                            <li>
+                              <strong>Meal Type:</strong>{" "}
+                              {mealInstructions.mealType}
+                            </li>
+                            <li>
+                              <strong>Time:</strong> {mealInstructions.time}
+                            </li>
+                            {mealInstructions.notes && (
+                              <li>
+                                <strong>Notes:</strong> {mealInstructions.notes}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      ) : (
+                        <p className='text-xs text-[#9F7AEA] italic'>
+                          No meal instructions
+                        </p>
+                      )}
+                    </div>
+                  )
+                )
               ) : (
-                <p className='text-sm text-[#C4B5FD]'>
-                  No pets or meal instructions available.
-                </p>
+                <p className='text-sm text-[#C4B5FD]'>No pets available.</p>
               )}
             </div>
 
