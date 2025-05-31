@@ -112,6 +112,11 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
     };
   };
 
+  const formatCurrency = (amount?: number) => {
+    if (amount === undefined || amount === null) return "Not specified";
+    return `₱${amount.toLocaleString()}`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='w-full lg:w-3/12 bg-gradient-to-b from-[#1E1B4B] to-[#2A0D45] shadow-lg border border-[#4C1D95] rounded-md dialog-content pb-0.5'>
@@ -150,12 +155,10 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
             </span>{" "}
             {formatDateTime(checkOut)}
           </p>
-          {totalAmount && (
-            <p className='text-sm text-[#C4B5FD] mb-0.5'>
-              <span className='font-medium text-[#FBBF24]'>Total Amount:</span>{" "}
-              ₱{totalAmount.toLocaleString()}
-            </p>
-          )}
+          <p className='text-sm text-[#C4B5FD] mb-0.5'>
+            <span className='font-medium text-[#FBBF24]'>Total Amount:</span>{" "}
+            {formatCurrency(totalAmount)}
+          </p>
           {status && (
             <p className='text-sm text-[#C4B5FD] mb-1'>
               <span className='font-medium text-[#FBBF24]'>Status:</span>{" "}
