@@ -75,17 +75,24 @@ const BookingHistoryClient: React.FC<BookingHistoryClientProps> = ({ bookings: i
   }, [fetchNextPage, loading, error, allItemsLoaded]);
 
   if (loading && !bookings) {
-    return <div className='text-gray-400 text-center'>Loading booking history...</div>;
+    return (
+      <div className='flex items-center mt-5 justify-center h-full text-gray-400'>
+        Loading booking history...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className='text-gray-400 text-center'>Error loading booking history: {error.message}</div>;
+    return ( 
+      <div className='flex items-center mt-5 justify-center h-full text-gray-400'>
+        Error loading booking history: {error.message}
+      </div>
+    );
   }
 
   if (!bookings || bookings.length === 0) {
     return (
-      // Added flex, items-center, justify-center, and h-full (or a specific height)
-      <div className='flex items-center justify-center h-full text-gray-400'>
+      <div className='flex items-center mt-5 justify-center h-full text-gray-400'>
         No booking history found.
       </div>
     );
