@@ -57,7 +57,7 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
     contactNumber = "N/A",
     status = "Unknown",
     specialRequests = "",
-    totalAmount,
+    totalAmount = 0,
     serviceType = "N/A",
     pets = [],
     checkIn,
@@ -157,7 +157,7 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
           </p>
           <p className='text-sm text-[#C4B5FD] mb-0.5'>
             <span className='font-medium text-[#FBBF24]'>Total Amount:</span>{" "}
-            {formatCurrency(totalAmount)}
+            {formatCurrency(totalAmount ?? 0)}
           </p>
           {status && (
             <p className='text-sm text-[#C4B5FD] mb-1'>
