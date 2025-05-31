@@ -10,7 +10,7 @@ export default async function LoginLayout({ children }: { children: React.ReactN
 
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 bg-slate-300">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-purple-800">
       {children}
     </div>
   );

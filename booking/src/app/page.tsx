@@ -3,7 +3,7 @@
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation'; 
 
 const MailIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-6 h-6 inline-block mr-2" viewBox="0 0 24 24">
@@ -32,7 +32,7 @@ const ClockIcon = () => (
 );
 
 const imageUrls = {
-    spaceBackground: '/Landing/background.jpg',
+    spaceBackground: '/Landing/background.png',
     planetsLarge: '/Landing/background2.jpg',
     spaceDogUfo: '/Landing/spaceObject.png',
     spaceObjects: '/Landing/spaceObject.png',
@@ -151,7 +151,7 @@ function Footer() {
 }
 
 export default function HomePage() {
-    const router = useRouter(); // Initialize useRouter
+    const router = useRouter(); 
     const speedSlow = 0.05;
     const speedStars = 0.15;
     const speedPlanets = 0.3;
@@ -165,7 +165,7 @@ export default function HomePage() {
     const y10 = useTransform(scrollYProgress, [0, 1], [-10, 10]);
 
     const handleExploreClick = () => {
-        router.push('/login'); // Redirect to /login page
+        router.push('/login'); 
     };
 
     return (
@@ -210,8 +210,8 @@ export default function HomePage() {
                                 Your best friend's new best friend!
                             </p>
                             <button
-                                onClick={handleExploreClick} // Add onClick handler
-                                className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg mb-8"
+                                onClick={handleExploreClick} 
+                                className="bg-pink-500 hover:bg-pink-600 cursor-pointer text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg mb-8"
                             >
                                 Explore Our Services
                             </button>

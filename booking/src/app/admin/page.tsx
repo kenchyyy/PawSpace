@@ -5,7 +5,7 @@ import HomePageTab from "@/_components/admin/HomePageTab";
 import { format } from "date-fns";
 
 const ActiveTabMessages = {
-  pending: "The following bookings are published today and await your confirmation. For bookings made before today, please check the 'Boarding Bookings' page.",
+  pending: "The following bookings are scheduled for check-in today and await your confirmation.",
   confirmed: "The following bookings are scheduled for arrival today.",
   ongoing: "The following bookings are scheduled for check-out today.",
 }
