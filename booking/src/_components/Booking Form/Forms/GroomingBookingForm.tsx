@@ -112,7 +112,6 @@ const GroomingBookingForm: React.FC<GroomingBookingFormProps> = ({
 
             if (allSuccessful && bookingResults.length > 0) {
                 toast.success('Grooming appointment booked successfully!');
-                router.push('/customer/history');
                 return { success: true, bookingId: bookingResults[0]?.bookingId };
             } else {
                 const firstError = bookingResults.find(result => !result.success)?.error || 'Failed to create booking';
