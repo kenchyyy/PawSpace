@@ -75,15 +75,15 @@ const BookingHistoryClient: React.FC<BookingHistoryClientProps> = ({ bookings: i
   }, [fetchNextPage, loading, error, allItemsLoaded]);
 
   if (loading && !bookings) {
-    return <div>Loading booking history...</div>;
+    return <div className='text-gray-400 text-center'>Loading booking history...</div>;
   }
 
   if (error) {
-    return <div>Error loading booking history: {error.message}</div>;
+    return <div className='text-gray-400 text-center'>Error loading booking history: {error.message}</div>;
   }
 
   if (!bookings || bookings.length === 0) {
-    return <div>No booking history found.</div>;
+    return <div className='text-gray-400 text-center'>No booking history found.</div>;
   }
 
   return (
