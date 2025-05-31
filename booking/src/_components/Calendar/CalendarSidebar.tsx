@@ -343,7 +343,6 @@ const CalendarEventItem = ({
           className='inline-block w-2 h-2 rounded-full'
           style={{ backgroundColor: event.backgroundColor || "#9F7AEA" }}
         ></span>
-        {/* Keep truncation for the main event title */}
         <span className='truncate'>
           {event.title}
           {bookingType && (
@@ -351,13 +350,11 @@ const CalendarEventItem = ({
           )}
         </span>
       </div>
-      {/* Keep truncation for owner name as it can be long */}
       <div className='text-sm text-[#C4B5FD] mt-1 truncate'>
         <span className='font-medium text-[#FBBF24]'>Owner:</span>{" "}
         {event.extendedProps.ownerName}
       </div>
 
-      {/* Removed truncation for check-in/check-out as dates are generally fixed width */}
       <div className='text-sm text-[#C4B5FD] mt-1'>
         <span className='font-medium text-[#FBBF24]'>Check-in:</span> {checkIn}
       </div>
@@ -369,7 +366,6 @@ const CalendarEventItem = ({
         </div>
       )}
 
-      {/* Keep truncation for status tag if it might contain very long custom statuses */}
       <div
         className='mt-2 text-xs font-medium px-2 py-1 rounded-full inline-block truncate'
         style={{

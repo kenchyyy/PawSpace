@@ -10,9 +10,9 @@ interface LoginFormProps {
 
 export default function LoginForm({ handleLogin }: LoginFormProps) {
   return (
-    <Card className="w-96 max-w-md bg-violet-300">
+    <Card className="w-96 max-w-md white">
       <CardHeader>
-        <CardTitle className="text-2xl border-b-2 border-white pb-2">Sign-in to Pawspace</CardTitle>
+        <CardTitle className="text-2xl border-b-2 border-violet-700 pb-2">Sign-in to Pawspace</CardTitle>
       </CardHeader>
       <form onSubmit={handleLogin}>
         <CardFooter className="flex flex-col gap-2">

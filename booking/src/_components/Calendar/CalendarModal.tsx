@@ -52,7 +52,7 @@ const CalendarModal = ({ open, onOpenChange, event }: CalendarModalProps) => {
     contactNumber = "N/A",
     status = "Unknown",
     specialRequests = "",
-    // totalAmount,
+    totalAmount,
     serviceType = "N/A",
     pets = [],
     checkIn,
