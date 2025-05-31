@@ -106,7 +106,6 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
 
             if (allSuccessful && bookingResults.length > 0) {
                 toast.success('Boarding reservation created successfully!');
-                router.push('/customer/history');
                 return { success: true, bookingId: bookingResults[0]?.bookingId };
             } else {
                 const firstError = bookingResults.find(result => !result.success)?.error || 'Failed to create one or more bookings.';
