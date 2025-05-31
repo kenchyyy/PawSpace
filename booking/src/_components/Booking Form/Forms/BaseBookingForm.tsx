@@ -122,6 +122,8 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
             errors.name = 'Full Name is required.';
         } else if (!nameRegex.test(details.name.trim())) {
             errors.name = 'Full Name can only contain letters, spaces, hyphens, and apostrophes.';
+        } else if (details.name.trim().split(/\s+/).length < 2) {
+            errors.name = 'Please enter your full name (e.g., "John Doe")';
         }
 
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -296,9 +298,6 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
         if (!pet.name?.trim()) { 
             errors.name = 'Pet name is required'; 
             isValid = false; 
-        } else if (pet.name.trim().split(/\s+/).length < 2) {
-            errors.name = 'Please enter the pet\'s full name (e.g., "Max Smith" or "Luna Brown")';
-            isValid = false;
         }
 
         if (!pet.pet_type) { errors.pet_type = 'Pet type is required.'; isValid = false; }
