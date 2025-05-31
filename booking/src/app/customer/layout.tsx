@@ -5,7 +5,7 @@ import SessionChecker from "@/_components/serverSide/SessionChecker";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
-  children,
+  children, 
 }: {
   children: React.ReactNode;
 }) {
