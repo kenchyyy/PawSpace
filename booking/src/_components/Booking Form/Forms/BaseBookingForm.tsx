@@ -169,8 +169,11 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                 )
                 .join(' ');
         }
-        if (name === 'contact_number' && value.length > 11) {
-            return;
+        if (name === 'contact_number') {
+            formattedValue = value.replace(/[^0-9]/g, '');
+            if (formattedValue.length > 11) {
+                return;
+            }
         }
         setOwnerDetails(prev => {
             const updatedDetails = { ...prev, [name]: formattedValue };
