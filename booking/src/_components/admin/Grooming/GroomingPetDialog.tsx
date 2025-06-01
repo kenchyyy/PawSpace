@@ -226,7 +226,7 @@ export default function GroomingPetDialog({
                 <p className="text-sm"><span className="text-yellow-300">Email: </span>{email}</p>
                 <p className="text-sm"><span className="text-yellow-300">Status:</span> {status}</p>
                 <p className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount || "None"}</p>
-                <p className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</p>
+                <p className="text-sm"><span className="text-yellow-300">Discount Applied:</span> {discountApplied ? "% "+ discountApplied : "None"}</p>
                 
                 {/* Check-in/out for mobile - hidden on lg and up */}
                 <div className="flex gap-2 mt-2 lg:hidden w-full">
@@ -266,7 +266,7 @@ export default function GroomingPetDialog({
               <span><span className="text-yellow-300">Email: </span>{email}</span>
               <span><span className="text-yellow-300">Status:</span> {status}</span>
               <span className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount ? totalAmount : "None"}</span>
-              <span className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</span>
+              <span className="text-sm"><span className="text-yellow-300">Discount Applied:</span> {discountApplied ? "% "+ discountApplied : "None"}</span>
             </DialogDescription>
           </DialogHeader>
           <p className="text-xl text-orange-400 mt-2">Pets:</p>
@@ -294,6 +294,7 @@ export default function GroomingPetDialog({
                       <TableCell className="text-xs">
                         <GroomingPetDetails
                                   owner={ownerName}
+                                  ownerAddress={address}
                                   ownerId={ownerId}
                                   name={pet.name}
                                   ownerEmail={email}

@@ -54,19 +54,19 @@ export default function RoomCard({ room, date, className }: RoomCardProps) {
   }
 
   return (
-    <Card className={`w-full h-full bg-violet-800 hover:bg-violet-700 ${className ?? ""}`}>
+    <Card className={`w-full h-full bg-white ${className ?? ""}`}>
       <CardHeader>
-        <CardTitle className="font-bold text-orange-400 break-words">
+        <CardTitle className="font-bold text-black break-words">
           {truncate(room.roomName, 30)}
         </CardTitle>
-        <CardDescription className="text-xs text-white break-words">
+        <CardDescription className="text-xs text-gray-500 break-words">
           Inhabitants:
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-2">
-          {loading && <p className="text-white">Loading pets...</p>}
-          {error && <p className="text-gray-400 break-words">{truncate(error, 100)}</p>}
+          {loading && <p className="text-black">Loading pets...</p>}
+          {error && <p className="text-gray-700 break-words">{truncate(error, 100)}</p>}
           {!loading && !error && pets.length === 0 && (
             <p className="text-gray-400">No pets scheduled for this room on this date.</p>
           )}
@@ -77,7 +77,7 @@ export default function RoomCard({ room, date, className }: RoomCardProps) {
               bookingType="boarding"
               onRoomAssignment={() => {}} // pass your handler here if needed
             >
-              <button className="text-sm text-orange-400 underline break-words">
+              <button className="text-sm text-black underline break-words">
                 {truncate(pet.name, 20)}
               </button>
             </PetDetails>

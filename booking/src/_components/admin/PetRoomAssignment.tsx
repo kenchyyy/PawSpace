@@ -180,7 +180,10 @@ export default function PetRoomAssignment({
           <Button
             variant="outline"
             className="bg-gray-200 text-black hover:bg-gray-300"
-            onClick={() => onClose("", "")}
+            onClick={() => {
+              onClose("", ""); 
+              hiddenbutton.current?.click(); 
+            }}
           >
             Cancel
           </Button>

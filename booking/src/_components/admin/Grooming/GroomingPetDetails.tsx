@@ -16,6 +16,7 @@ import { truncate } from "./../helper"; // Make sure this is robust!
 export interface GroomingPetDetailsProps extends GroomingPetData {
   owner: string;
   ownerId: string | null;
+  ownerAddress: string;
   ownerContactNumber: string;
   ownerEmail: string;
   status: string;
@@ -29,6 +30,7 @@ export default function GroomingPetDetails({
   age,
   petType,
   breed,
+  ownerAddress,
   isVaccinated,
   allergies,
   vitaminsOrMedications,
@@ -131,6 +133,10 @@ export default function GroomingPetDetails({
               <div>
                 <span className="font-medium text-yellow-300">Owner:</span>{" "}
                 <span className="break-all">{owner}</span>
+              </div>
+              <div>
+                <span className="font-medium text-yellow-300">Address:</span>{" "}
+                <span className="break-all">{ownerAddress}</span>
               </div>
               <div>
                 <span className="font-medium text-yellow-300">Contact:</span>{" "}
