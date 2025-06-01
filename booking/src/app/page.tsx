@@ -34,8 +34,8 @@ const ClockIcon = () => (
 const imageUrls = {
     spaceBackground: '/Landing/background.png',
     planetsLarge: '/Landing/background2.jpg',
-    spaceDogUfo: '/Landing/spaceObject.png',
-    spaceObjects: '/Landing/spaceObject.png',
+    spaceDogUfo: '/Landing/spaceDogUfo.png',
+    spaceObject: '/Landing/spaceObject.png',
     starCluster1: '/Landing/star_cluster_1.png',
     meteorite: '/Landing/meteorite.png',
     smallPlanet: '/Landing/small_planet.png',
@@ -167,28 +167,34 @@ export default function HomePage() {
         <div className="relative min-h-screen bg-gradient-to-b from-purple-950 via-indigo-900 to-black text-white font-sans overflow-hidden">
             {/* Space Background Effects */}
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
-            <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjIwIiByPSIxIi8+PGNpcmNsZSBjeD0iODAiIGN5PSIxNSIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyMCIgY3k9IjMwIiByPSIxIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMjUiIHI9IjEiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSI0MCIgcj0iMSIvPjwvZz48L3N2Zz4=')] opacity-30"></div>
+            
 
-            {/* GLOBAL PARALLAX LAYERS */}
-            <ParallaxLayer src={imageUrls.spaceBackground} speed={speedSlow} alt="Deep space background" className="opacity-70" objectFit="cover" />
-            <ParallaxLayer src={imageUrls.spaceBackground} speed={speedStars} alt="More stars" className="opacity-50 scale-110" objectFit="cover" />
-            <ParallaxLayer src={imageUrls.planetsLarge} speed={speedPlanets} alt="Large planets" className="opacity-80" objectFit="cover" />
-            <ParallaxLayer src={imageUrls.spaceObjects} speed={speedSpaceship} alt="Space objects" className="opacity-70" objectFit="cover" />
-            <ParallaxLayer src={imageUrls.spaceDogUfo} speed={speedFasterElements} alt="Space dog in UFO" className="opacity-90 scale-75" style={{ left: "70%", top: "15%", width: "auto", height: "auto" }} objectFit="contain" />
+           
+            
+            <ParallaxLayer src={imageUrls.spaceDogUfo} speed={speedFasterElements} alt="Space dog in UFO" className="opacity-90 scale-75" style={{ left: "70%", top: "-10%", width: "50%", height: "auto" }} objectFit="contain" />
             <ParallaxLayer src={imageUrls.smallPlanet} speed={speedFastest} alt="Small planet" className="opacity-80 scale-50" style={{ left: "10%", top: "40%", width: "auto", height: "auto" }} objectFit="contain" />
             <ParallaxLayer src={imageUrls.starCluster1} speed={speedSpaceship} alt="Star cluster" className="opacity-60 scale-125" style={{ right: "5%", top: "60%", width: "auto", height: "auto" }} objectFit="contain" />
             <ParallaxLayer src={imageUrls.meteorite} speed={speedFasterElements + 0.1} alt="Meteorite" className="opacity-70 scale-40" style={{ left: "20%", top: "80%", width: "auto", height: "auto" }} objectFit="contain" />
-            <ParallaxLayer src={imageUrls.spaceship} speed={speedFastest + 0.2} alt="Spaceship" className="opacity-90 scale-30" style={{ right: "15%", top: "25%", width: "auto", height: "auto" }} objectFit="contain" />
+            <ParallaxLayer src={imageUrls.spaceObject} speed={speedFastest + 0.2} alt="Spaceship" className="opacity-90 scale-30" style={{ right: "40%", top: "25%", width: "auto", height: "auto" }} objectFit="contain" />
 
             {/* Main Content */}
             <div className="relative z-10">
                 {/* Hero Section */}
-                <section className="min-h-screen flex flex-col items-center justify-center text-center p-4 sm:p-8">
+                <section className="min-h-screen flex flex-col items-center justify-center text-center p-4 sm:p-8 relative">
+                    <div className="absolute inset-0 z-0">
+                        <Image
+                            src="/Landing/background.png"
+                            alt="Background"
+                            fill
+                            className="object-cover"
+                            priority
+                        />
+                    </div>
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
-                        className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto shadow-2xl border border-indigo-500/20"
+                        className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto shadow-2xl border border-indigo-500/20 relative z-10"
                     >
                         <div className="flex justify-center mb-6">
                             <motion.div
@@ -284,11 +290,262 @@ export default function HomePage() {
                     </motion.div>
                 </section>
 
+                {/* Services Section */}
+                <ContentSection title="Our Services" titleColor="text-white" className="py-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Boarding Service */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="bg-slate-900/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-indigo-500/20"
+                        >
+                            <div className="relative h-64">
+                                <Image
+                                    src={imageUrls.groomingMaltese}
+                                    alt="Boarding Kennels"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="p-6">
+                                <h3 className="text-2xl font-bold mb-4 text-white">Boarding Services</h3>
+                                <p className="text-gray-300 mb-4">
+                                    Give your pet a home away from home with our premium boarding services.
+                                </p>
+                                <button
+                                    onClick={() => router.push('/login')}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+                                >
+                                    Book Now
+                                </button>
+                            </div>
+                        </motion.div>
+
+                        {/* Grooming Service */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="bg-slate-900/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-2xl border border-indigo-500/20"
+                        >
+                            <div className="relative h-64">
+                                <Image
+                                    src={imageUrls.groomingShihTzu}
+                                    alt="Grooming Service"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="p-6">
+                                <h3 className="text-2xl font-bold mb-4 text-white">Grooming Services</h3>
+                                <p className="text-gray-300 mb-4">
+                                    Professional grooming services to keep your pet looking and feeling their best.
+                                </p>
+                                <button
+                                    onClick={() => router.push('/login')}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+                                >
+                                    Book Now
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                </ContentSection>
+
+                {/* Gallery Section */}
+                <ContentSection title="Our Gallery" titleColor="text-white" className="py-20 relative">
+                    <div className="absolute inset-0"></div>
+                    <div className="relative z-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[imageUrls.happyPuppies, imageUrls.kittens, imageUrls.petTreats].map((image, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: index * 0.2 }}
+                                    className="relative h-64 rounded-2xl overflow-hidden shadow-2xl border border-indigo-500/20"
+                                >
+                                    <Image
+                                        src={image}
+                                        alt={`Gallery image ${index + 1}`}
+                                        fill
+                                        className="object-cover transition-transform duration-300 hover:scale-110"
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </ContentSection>
+
+                {/* Advantages Section */}
+                <ContentSection title="Why Choose Us" titleColor="text-white" className="py-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {[
+                            {
+                                title: "Professional Care",
+                                description: "Our experienced staff provides top-notch care for your pets.",
+                                icon: (
+                                    <svg className="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                    </svg>
+                                )
+                            },
+                            {
+                                title: "24/7 Monitoring",
+                                description: "Round-the-clock supervision to ensure your pet's safety.",
+                                icon: (
+                                    <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                )
+                            },
+                            {
+                                title: "Clean Environment",
+                                description: "Maintained facilities for your pet's comfort and health.",
+                                icon: (
+                                    <svg className="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                    </svg>
+                                )
+                            },
+                            {
+                                title: "Personalized Attention",
+                                description: "Individual care plans tailored to your pet's needs.",
+                                icon: (
+                                    <svg className="w-12 h-12 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                )
+                            }
+                        ].map((advantage, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-indigo-500/20 text-center"
+                            >
+                                <div className="flex justify-center mb-4">{advantage.icon}</div>
+                                <h3 className="text-xl font-bold mb-2 text-white">{advantage.title}</h3>
+                                <p className="text-gray-300">{advantage.description}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </ContentSection>
+
+                {/* Contact Section */}
+                <ContentSection title="Contact Us" titleColor="text-white" className="py-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-indigo-500/20"
+                        >
+                            <h3 className="text-2xl font-bold mb-6 text-white">Get in Touch</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-start">
+                                    <LocationIcon />
+                                    <div className="ml-3">
+                                        <div className="font-semibold text-white">Address</div>
+                                        <div className="text-gray-300">
+                                            2nd Floor, AMJB Building,<br />
+                                            Aguinaldo Highway, Palico 4,<br />
+                                            Imus, Philippines
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <PhoneIcon />
+                                    <div className="ml-3">
+                                        <div className="font-semibold text-white">Phone</div>
+                                        <div className="text-gray-300">+63 912 345 6789</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <MailIcon />
+                                    <div className="ml-3">
+                                        <div className="font-semibold text-white">Email</div>
+                                        <div className="text-gray-300">info@pawspace.com</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-start">
+                                    <ClockIcon />
+                                    <div className="ml-3">
+                                        <div className="font-semibold text-white">Hours</div>
+                                        <div className="text-gray-300">
+                                            Check-in/Check-out:<br />
+                                            <span className="text-yellow-200">9 AM - 7 PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="bg-slate-900/50 backdrop-blur-sm rounded-2xl p-8 shadow-2xl border border-indigo-500/20"
+                        >
+                            <h3 className="text-2xl font-bold mb-6 text-white">Location</h3>
+                            <div className="relative h-64 rounded-xl overflow-hidden border border-indigo-500/20">
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3864.1234567890123!2d120.12345678901234!3d14.12345678901234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTTCsDA3JzI0LjQiTiAxMjDCsDA3JzI0LjQiRQ!5e0!3m2!1sen!2sph!4v1234567890123!5m2!1sen!2sph"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    className="rounded-xl"
+                                ></iframe>
+                            </div>
+                            <a
+                                href="https://maps.google.com/?q=AMJB+Building,+Aguinaldo+Highway,+Palico+4,+Imus,+Philippines"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-block bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-purple-500/25"
+                            >
+                                View on Google Maps
+                            </a>
+                        </motion.div>
+                    </div>
+                </ContentSection>
+
                 {/* Footer */}
                 <footer className="w-full bg-gradient-to-t from-black via-purple-950 to-violet-900 text-gray-300 py-8 mt-12">
-                    <div className="container mx-auto flex flex-col md:flex-row items-center justify-center px-8 text-center">
+                    <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-8">
                         <div className="mb-4 md:mb-0 text-lg font-bold tracking-wide">
                             Pawspace © {new Date().getFullYear()}
+                        </div>
+                        <div className="flex space-x-8 items-center">
+                            <a
+                                href="https://www.facebook.com/share/192bybkzo2/?mibextid=wwXIfr"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-gray-300 hover:text-white transition-colors duration-300"
+                            >
+                                <svg className="w-6 h-6 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z"/>
+                                </svg>
+                                <span className="text-white-800 font-semibold">Pawspace Pet Hotel and Grooming</span>
+                            </a>
+                            <a
+                                href="https://www.instagram.com/pawspace_amjb"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center text-gray-300 hover:text-blue-600 transition-colors duration-300"
+                            >
+                                <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <rect width="20" height="20" x="2" y="2" rx="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+                                    <circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+                                    <circle cx="17" cy="7" r="1.5" fill="currentColor" />
+                                </svg>
+                                <span className="text-white-800 font-semibold">pawspace_amjb</span>
+                            </a>
                         </div>
                     </div>
                 </footer>
