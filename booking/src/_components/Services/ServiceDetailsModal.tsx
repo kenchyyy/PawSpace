@@ -18,7 +18,6 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
     const [isPoliciesModalOpen, setIsPoliciesModalOpen] = useState(false);
     const [policiesContent, setPoliciesContent] = useState<{ title: string; content: string[] } | null>(null);
 
-
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (isOpen && !isPoliciesModalOpen && modalRef.current && !modalRef.current.contains(event.target as Node)) {
@@ -58,8 +57,12 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
 
     return (
         <>
-            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm font-sans" /* No onClick here */>
-                <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in overflow-y-auto max-h-[90vh]`} onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm font-sans">
+                <div
+                    ref={modalRef}
+                    className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in max-h-[90vh] overflow-hidden`} // Added overflow-hidden here
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="flex items-center justify-between mb-4">
                         <h2 className={`text-2xl font-bold ${typeColor}`}>
                             {typeEmoji} {details.title} {details.type === "grooming" ? "Grooming" : "Accommodation"}
@@ -73,47 +76,50 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
                         </button>
                     </div>
 
-                    {details.type === "overnight" && details.title === "Dog" && (
-                        <DogAccommodationCard details={details} />
-                    )}
+                    <div className="overflow-y-auto pr-2" style={{ maxHeight: 'calc(90vh - 150px)' }}>
+                        {details.type === "overnight" && details.title === "Dog" && (
+                            <DogAccommodationCard details={details} />
+                        )}
 
-                    {details.type === "overnight" && details.title === "Cat" && (
-                        <CatAccommodationCard details={details} />
-                    )}
+                        {details.type === "overnight" && details.title === "Cat" && (
+                            <CatAccommodationCard details={details} />
+                        )}
 
-                    {details.type === "grooming" && details.title === "Basic" && (
-                        <BasicGroomingCard details={details} />
-                    )}
+                        {details.type === "grooming" && details.title === "Basic" && (
+                            <BasicGroomingCard details={details} />
+                        )}
 
-                    {details.type === "grooming" && details.title === "Deluxe" && (
-                        <DeluxeGroomingCard details={details} />
-                    )}
+                        {details.type === "grooming" && details.title === "Deluxe" && (
+                            <DeluxeGroomingCard details={details} />
+                        )}
 
-                    {details.type === "grooming" && details.title === "Cat" && (
-                        <CatGroomingCard details={details} />
-                    )}
+                        {details.type === "grooming" && details.title === "Cat" && (
+                            <CatGroomingCard details={details} />
+                        )}
 
-                    {specialOffers.length > 0 && (
-                        <SpecialOffers offers={specialOffers} />
-                    )}
+                        {specialOffers.length > 0 && (
+                            <SpecialOffers offers={specialOffers} />
+                        )}
 
-                    {(isDogOvernight || isCatOvernight) && (
-                        <DayboardingInfo title={details.title} />
-                    )}
+                        {(isDogOvernight || isCatOvernight) && (
+                            <DayboardingInfo title={details.title} />
+                        )}
+                        
+                        <p
+                            className="text-center text-sm text-blue-500 hover:text-blue-700 cursor-pointer mt-4 mb-2 transition-colors duration-200"
+                            onClick={() => openPoliciesModal(bookingCategory)}
+                        >
+                            View {bookingCategory === 'boarding' ? 'Boarding Terms and Conditions' : 'Grooming Waiver & Release'}
+                        </p>
 
-                    <p
-                        className="text-center text-sm text-blue-500 hover:text-blue-700 cursor-pointer mt-4 mb-2 transition-colors duration-200"
-                        onClick={() => openPoliciesModal(bookingCategory)}
-                    >
-                        View {bookingCategory === 'boarding' ? 'Boarding Terms and Conditions' : 'Grooming Waiver & Release'}
-                    </p>
+                        <AddBookingButton
+                            onClick={() => onClick(bookingCategory)}
+                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium cursor-pointer transition duration-300 ease-in-out"
+                        >
+                            Book Now
+                        </AddBookingButton>
+                    </div>
 
-                    <AddBookingButton
-                        onClick={() => onClick(bookingCategory)}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium cursor-pointer transition duration-300 ease-in-out"
-                    >
-                        Book Now
-                    </AddBookingButton>
                 </div>
             </div>
 
