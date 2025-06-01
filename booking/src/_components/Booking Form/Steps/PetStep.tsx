@@ -82,9 +82,27 @@ const PetStep: React.FC<PetStepProps> = ({
     const validatePetDetails = (pet: Pet, service: ServiceType): Record<string, string> => {
         const currentPetErrors: Record<string, string> = {};
 
-        if (!pet.name?.trim()) currentPetErrors.name = 'Pet name is required.';
+        // Pet Name validation
+        if (!pet.name?.trim()) {
+            currentPetErrors.name = 'Pet name is required.';
+        } else {
+            if (!/^[A-Za-z ]+$/.test(pet.name.trim())) {
+                currentPetErrors.name = 'Pet name can only contain letters and spaces.';
+            } else if (pet.name.trim().length > 10) {
+                currentPetErrors.name = 'Pet name must not be more than 10 characters.';
+            }
+        }
+        // Pet Breed validation
+        if (!pet.breed?.trim()) {
+            currentPetErrors.breed = 'Breed is required.';
+        } else {
+            if (!/^[A-Za-z ]+$/.test(pet.breed.trim())) {
+                currentPetErrors.breed = 'Pet breed can only contain letters and spaces.';
+            } else if (pet.breed.trim().length > 25) {
+                currentPetErrors.breed = 'Pet breed must not be more than 25 characters.';
+            }
+        }
         if (!pet.pet_type) currentPetErrors.pet_type = 'Pet type is required.';
-        if (!pet.breed?.trim()) currentPetErrors.breed = 'Breed is required.';
         if (!pet.age?.trim()) currentPetErrors.age = 'Age is required.';
 
         if (pet.vaccinated === 'unknown' || pet.vaccinated === '') {

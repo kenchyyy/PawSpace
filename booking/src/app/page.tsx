@@ -168,13 +168,7 @@ export default function HomePage() {
             {/* Space Background Effects */}
             <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
             
-
-           
-            
-            <ParallaxLayer src={imageUrls.spaceDogUfo} speed={speedFasterElements} alt="Space dog in UFO" className="opacity-90 scale-75" style={{ left: "70%", top: "-10%", width: "50%", height: "auto" }} objectFit="contain" />
-            <ParallaxLayer src={imageUrls.smallPlanet} speed={speedFastest} alt="Small planet" className="opacity-80 scale-50" style={{ left: "10%", top: "40%", width: "auto", height: "auto" }} objectFit="contain" />
-            <ParallaxLayer src={imageUrls.starCluster1} speed={speedSpaceship} alt="Star cluster" className="opacity-60 scale-125" style={{ right: "5%", top: "60%", width: "auto", height: "auto" }} objectFit="contain" />
-            <ParallaxLayer src={imageUrls.meteorite} speed={speedFasterElements + 0.1} alt="Meteorite" className="opacity-70 scale-40" style={{ left: "20%", top: "80%", width: "auto", height: "auto" }} objectFit="contain" />
+            <ParallaxLayer src={imageUrls.spaceDogUfo} speed={speedFasterElements} alt="Space dog in UFO" className="opacity-90 scale-75 md:scale-75 scale-100" style={{ left: "70%", top: "-10%", width: "70%", height: "auto" }} objectFit="contain" />
             <ParallaxLayer src={imageUrls.spaceObject} speed={speedFastest + 0.2} alt="Spaceship" className="opacity-90 scale-30" style={{ right: "40%", top: "25%", width: "auto", height: "auto" }} objectFit="contain" />
 
             {/* Main Content */}
