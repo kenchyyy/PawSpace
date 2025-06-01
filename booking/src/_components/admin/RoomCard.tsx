@@ -77,7 +77,7 @@ export default function RoomCard({ room, date, className }: RoomCardProps) {
               bookingType="boarding"
               onRoomAssignment={() => {}} // pass your handler here if needed
             >
-              <button className="text-sm text-orange-400 underline break-words">
+              <button className="text-sm text-white underline break-words">
                 {truncate(pet.name, 20)}
               </button>
             </PetDetails>

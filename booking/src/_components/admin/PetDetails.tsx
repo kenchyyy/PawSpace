@@ -22,6 +22,7 @@ export interface PetDetailsProps extends BoardingPetData {
   owner: string;
   ownerId: string | null;
   ownerContactNumber: string;
+  ownerAddress : string;
   ownerEmail: string;
   status: string;
   onRoomAssignment?: (petUuid: string, roomId: string, roomName: string) => void;
@@ -60,6 +61,7 @@ export default function PetDetails({
   status,
   bookingType,
   onRoomAssignment,
+  ownerAddress,
   children,
   
 }: PetDetailsProps) {
@@ -241,6 +243,10 @@ export default function PetDetails({
               <div>
                 <span className="font-medium text-yellow-300">Owner:</span>{" "}
                 <span className="break-all">{owner}</span>
+              </div>
+              <div>
+                <span className="font-medium text-yellow-300">Address:</span>{" "}
+                <span className="break-all">{ownerAddress}</span>
               </div>
               <div>
                 <span className="font-medium text-yellow-300">Contact:</span>{" "}

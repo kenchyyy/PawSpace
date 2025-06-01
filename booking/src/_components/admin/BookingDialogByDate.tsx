@@ -100,7 +100,7 @@ export default function BookingDialogByDate({Date, onRemoveBooking, bookingType,
   }
 
   return (
-    <ScrollArea className="bg-purple-800 rounded-lg border border-purple-600 shadow-inner p-0.5 h-full w-full pt-4">
+    <ScrollArea className="bg-purple-900 rounded-lg border border-purple-600 shadow-inner p-0.5 h-full w-full pt-4">
         <div className="flex flex-col gap-1 px-2 text-white">
             {bookings.length === 0 && !loading && (
                 <div className="py-8 text-center text-purple-300 font-semibold">No Bookings to show here</div>
