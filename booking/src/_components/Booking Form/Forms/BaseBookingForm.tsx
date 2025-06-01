@@ -111,6 +111,9 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
         };
     }, [supabase]);
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentStep]);
 
     if (loadingOwner) return <div>Loading your info...</div>;
 
