@@ -257,7 +257,7 @@ export default function BoardingDialog({
                 <p className="text-sm"><span className="text-yellow-300">Email: </span>{email}</p>
                 <p className="text-sm"><span className="text-yellow-300">Status:</span> {status}</p>
                 <p className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount || "None"}</p>
-                <p className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</p>
+                <p className="text-sm"><span className="text-yellow-300">Discount Applied:</span> {discountApplied ? "% "+ discountApplied : "None"}</p>
                 
                 {/* Check-in/out for mobile - hidden on lg and up */}
                 <div className="flex gap-2 mt-2 lg:hidden w-full">
@@ -297,7 +297,7 @@ export default function BoardingDialog({
               <span><span className="text-yellow-300">Email: </span>{email}</span>
               <span><span className="text-yellow-300">Status:</span> {status}</span>
               <span className="text-sm"><span className="text-yellow-300">Total:</span> ₱{totalAmount ? totalAmount : "None"}</span>
-              <span className="text-sm"><span className="text-yellow-300">Discount Applied:</span> ₱{discountApplied}</span>
+              <span className="text-sm"><span className="text-yellow-300">Discount Applied:</span> {discountApplied ? "% "+ discountApplied : "None"}</span>
 
             </DialogDescription>
           </DialogHeader>
@@ -333,6 +333,7 @@ export default function BoardingDialog({
                       </TableCell>}
                       <TableCell className="text-xs">
                         <PetDetails
+                          ownerAddress={address}
                           owner={ownerName}
                           ownerId={ownerId}
                           name={pet.name}
