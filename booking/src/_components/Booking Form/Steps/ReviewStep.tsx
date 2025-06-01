@@ -173,13 +173,8 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
         }
     };
 
-    const handleSuccessModalClose = (id?: string) => {
+    const handleSuccessModalClose = () => {
         setShowSuccess(false);
-        if (id) {
-            window.location.href = `/customer/history?bookingId=${id}`;
-        } else {
-            window.location.href = "/customer/history";
-        }
     };
 
     return (
