@@ -118,7 +118,6 @@ const BoardingBookingForm: React.FC<BoardingBookingFormProps> = ({
             return { success: false, error: errorMsg };
         } finally {
             setIsSubmitting(false);
-            onClose();
         }
     };
 
