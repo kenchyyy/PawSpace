@@ -19,8 +19,8 @@ export default function PoliciesModal({ isOpen, onClose, title, content }: Polic
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] backdrop-blur-sm font-sans">
-            <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in max-h-[90vh] overflow-hidden`} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/0 flex items-center justify-center z-[60] backdrop-blur-none font-sans">
+            <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-sm animate-fade-in max-h-[90vh] overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
                     <button
