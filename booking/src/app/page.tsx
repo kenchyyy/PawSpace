@@ -526,7 +526,7 @@ export default function HomePage() {
                                 href="https://www.facebook.com/share/192bybkzo2/?mibextid=wwXIfr"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center text-gray-300 hover:text-white transition-colors duration-300"
+                                className="flex items-center text-gray-300 hover:text-blue-600 transition-colors duration-300"
                             >
                                 <svg className="w-6 h-6 mr-1" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M18.77 7.46H14.5v-1.9c0-.9.6-1.1 1-1.1h3V.5h-4.33C10.24.5 9.5 3.44 9.5 5.32v2.15h-3v4h3v12h5v-12h3.85l.42-4z"/>
