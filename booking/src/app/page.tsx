@@ -461,7 +461,7 @@ export default function HomePage() {
                                     <PhoneIcon />
                                     <div className="ml-3">
                                         <div className="font-semibold text-white">Phone</div>
-                                        <div className="text-gray-300">+63 912 345 6789</div>
+                                        <div className="text-gray-300">0945 302 7955</div>
                                     </div>
                                 </div>
                                 <div className="flex items-start">
