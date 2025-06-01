@@ -175,6 +175,7 @@ const ReviewStep: React.FC<ReviewStepProps> = ({
 
     const handleSuccessModalClose = () => {
         setShowSuccess(false);
+        onBack();
     };
 
     return (
