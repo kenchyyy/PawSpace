@@ -120,11 +120,11 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     const validateCustomerForm = (details: OwnerDetails): Record<string, string> => {
         const errors: Record<string, string> = {};
 
-        const nameRegex = /^[a-zA-Z.\-' ]{2,25}$/;
+        const nameRegex = /^[a-zA-Z.\-' ]{5,25}$/;
         if (!details.name.trim()) {
             errors.name = 'Full Name is required.';
         } else if (!nameRegex.test(details.name.trim())) {
-            errors.name = "Full Name can only contain letters, spaces, period, apostrophe, and dash, and must be 2-25 characters.";
+            errors.name = "Full Name can only contain letters, spaces, '.', ' ’ ', and '-'.";
         } else if (details.name.trim().length > 25) {
             errors.name = 'Full Name must not be more than 25 characters.';
         } else if (details.name.trim().split(/\s+/).length < 2) {
