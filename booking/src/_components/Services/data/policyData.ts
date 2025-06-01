@@ -15,12 +15,12 @@ export const policyContent = {
     grooming: {
         title: "Grooming Service Waiver & Release of Liability",
         content: [
-        "1. Pet Health and Behavior: I confirm that my pet is in reasonably good health and has not shown signs of illness, contagious disease, or aggressive behavior. I understand that PawSpace reserves the right to refuse service if my pet displays aggressive or unsafe behavior for staff or other animals.",
-        "2. Injury and Risk Disclosure: I understand that while PawSpace staff take all precautions to ensure my pet's safety and comfort, grooming may involve inherent risks including, but not limited to, minor cuts, nicks, burns, skin irritation, stress, or accidental reactions. I will not hold PawSpace, its owners, employees, or affiliates liable for any injury, illness, or stress-related conditions resulting from grooming.",
-        "3. Matted Fur or Special Conditions: I understand that heavily matted fur may need to be shaved down to prevent pain or injury. I acknowledge that de-matting can cause skin irritation or uncover pre-existing conditions. PawSpace will make reasonable efforts to inform me before proceeding.",
-        "4. Emergency Care: In the unlikely event of an emergency, I authorize PawSpace to seek veterinary care for my pet. I understand that I am fully responsible for any and all expenses incurred.",
-        "5. Late Pick-Up or No-Show Policy: I agree to pick up my pet promptly at the agreed time. I understand that a fee may apply for late pickups or no-shows.",
-        "7. Photo Release (Optional): I consent to PawSpace taking photos or videos of my pet before, during, or after grooming for promotional or marketing purposes.",
+        "1. PET HEALTH & BEHAVIOR: I confirm that my pet is in reasonably good health and has not shown signs of illness, contagious disease, or aggressive behavior. I understand that PawSpace reserves the right to refuse service if my pet displays aggressive or unsafe behavior for staff or other animals.",
+        "2. INJURY & RISK DISCLOSURE: I understand that while PawSpace staff take all precautions to ensure my pet's safety and comfort, grooming may involve inherent risks including, but not limited to, minor cuts, nicks, burns, skin irritation, stress, or accidental reactions. I will not hold PawSpace, its owners, employees, or affiliates liable for any injury, illness, or stress-related conditions resulting from grooming.",
+        "3. MATTED FUR/SPECIAL CONDITIONS: I understand that heavily matted fur may need to be shaved down to prevent pain or injury. I acknowledge that de-matting can cause skin irritation or uncover pre-existing conditions. PawSpace will make reasonable efforts to inform me before proceeding.",
+        "4. EMERGENCY CARE: In the unlikely event of an emergency, I authorize PawSpace to seek veterinary care for my pet. I understand that I am fully responsible for any and all expenses incurred.",
+        "5. LATE PICK-UP/NO-SHOW POLICY: I agree to pick up my pet promptly at the agreed time. I understand that a fee may apply for late pickups or no-shows.",
+        "7. PHOTO RELEASE (OPTIONAL): I consent to PawSpace taking photos or videos of my pet before, during, or after grooming for promotional or marketing purposes.",
         ],
     },
 };

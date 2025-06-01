@@ -19,8 +19,8 @@ export default function PoliciesModal({ isOpen, onClose, title, content }: Polic
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] backdrop-blur-sm font-sans" /* No direct onClick here, useEffect handles outside click */>
-            <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in overflow-y-auto max-h-[90vh]`} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] backdrop-blur-sm font-sans">
+            <div ref={modalRef} className={`bg-white text-black p-6 rounded-2xl w-[90%] max-w-md shadow-2xl animate-fade-in max-h-[90vh] overflow-hidden`} onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
                     <button
@@ -31,10 +31,14 @@ export default function PoliciesModal({ isOpen, onClose, title, content }: Polic
                         ✖
                     </button>
                 </div>
-                <div className="space-y-4 text-sm text-gray-700">
-                    {content.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                    ))}
+                <div className="space-y-4 text-sm text-gray-700 overflow-y-auto pr-2 pb-4" style={{ maxHeight: 'calc(90vh - 100px)' }}>
+                    {content.map((paragraph, index) => {
+                        const boldedParagraph = paragraph.replace(
+                            /^(\d+\.\s[A-Za-z0-9&\s/()-]+:)/,
+                            '<strong>$1</strong>'
+                        );
+                        return <p key={index} dangerouslySetInnerHTML={{ __html: boldedParagraph }} />;
+                    })}
                 </div>
             </div>
         </div>
