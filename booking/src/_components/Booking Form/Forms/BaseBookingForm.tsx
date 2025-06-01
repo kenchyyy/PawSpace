@@ -170,7 +170,6 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                 .join(' ');
         }
         if (name === 'contact_number') {
-            // Only allow numeric input
             formattedValue = value.replace(/[^0-9]/g, '');
             if (formattedValue.length > 11) {
                 return;
