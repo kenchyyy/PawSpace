@@ -117,11 +117,13 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
     const validateCustomerForm = (details: OwnerDetails): Record<string, string> => {
         const errors: Record<string, string> = {};
 
-        const nameRegex = /^[a-zA-ZÄÖÜäöüÀ-ÿ' -]{2,100}$/;
+        const nameRegex = /^[a-zA-Z.\-' ]{2,25}$/;
         if (!details.name.trim()) {
             errors.name = 'Full Name is required.';
         } else if (!nameRegex.test(details.name.trim())) {
-            errors.name = 'Full Name can only contain letters, spaces, hyphens, and apostrophes.';
+            errors.name = "Full Name can only contain letters, spaces, period, apostrophe, and dash, and must be 2-25 characters.";
+        } else if (details.name.trim().length > 25) {
+            errors.name = 'Full Name must not be more than 25 characters.';
         } else if (details.name.trim().split(/\s+/).length < 2) {
             errors.name = 'Please enter your full name (e.g., "John Doe")';
         }
@@ -153,13 +155,22 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
 
     const handleOwnerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        
+        let formattedValue = value;
+        if (name === 'name') {
+            formattedValue = value
+                .split(' ')
+                .map(part =>
+                    part.length > 0
+                        ? part[0].toUpperCase() + part.slice(1).toLowerCase()
+                        : ''
+                )
+                .join(' ');
+        }
         if (name === 'contact_number' && value.length > 11) {
             return;
         }
-        
         setOwnerDetails(prev => {
-            const updatedDetails = { ...prev, [name]: value };
+            const updatedDetails = { ...prev, [name]: formattedValue };
             const newErrors = validateCustomerForm(updatedDetails);
             setFormErrors(prevErrors => {
                 const currentErrors = JSON.stringify(prevErrors);
@@ -169,7 +180,7 @@ const BaseBookingForm: React.FC<BaseBookingFormProps> = ({
                 }
                 return prevErrors;
             });
-            return updatedDetails; 
+            return updatedDetails;
         });
     };
 
