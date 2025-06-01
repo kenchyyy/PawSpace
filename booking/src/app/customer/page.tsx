@@ -78,94 +78,112 @@ export default function CustomerPage() {
   };
 
   return (
-    <div className="container bg-purple-950 mx-auto px-4 md:px-16 lg:px-32 py-8">
-      <CustomerDashboardHeader
-        onOpenBookingForm={() => openBookingFormModal(null)}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-indigo-900 to-blue-900 relative overflow-hidden">
+      {/* Space background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxjaXJjbGUgY3g9IjEwIiBjeT0iMTAiIHI9IjEiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjIwIiByPSIxIi8+PGNpcmNsZSBjeD0iODAiIGN5PSIxNSIgcj0iMSIvPjxjaXJjbGUgY3g9IjEyMCIgY3k9IjMwIiByPSIxIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMjUiIHI9IjEiLz48Y2lyY2xlIGN4PSIxODAiIGN5PSI0MCIgcj0iMSIvPjwvZz48L3N2Zz4=')] opacity-30"></div>
+      
+      <div className="container mx-auto px-4 md:px-16 lg:px-32 py-8 relative">
+        <CustomerDashboardHeader
+          onOpenBookingForm={() => openBookingFormModal(null)}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
-      {activeTab === 'home' && (
-        <>
-          <OvernightServicesSection setSelectedService={handleSelectServiceForDetails} />
-          <GroomingServicesSection setSelectedService={handleSelectServiceForDetails} />
-        </>
-      )}
-
-      {activeTab === 'history' && (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Booking History</h2>
-          <p className="text-gray-600">Your past and upcoming bookings will appear here.</p>
-        </div>
-      )}
-
-      {activeTab === 'about' && (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">About Pawspace</h2>
-          <div className="prose max-w-none">
-            <p className="text-gray-600 mb-4">
-              Pawspace is your premier destination for pet care services.
-            </p>
-            <ul className="list-disc pl-5 mb-4 text-gray-600">
-              <li>Professional grooming services for dogs and cats</li>
-              <li>Comfortable boarding facilities for your pets</li>
-              <li>Experienced and caring staff</li>
-              <li>Customized care for each pet's needs</li>
-            </ul>
-          </div>
-        </div>
-      )}
-
-      <ServiceDetailsModal
-        isOpen={!!selectedServiceForDetails}
-        onClose={closeServiceDetailsModal}
-        details={selectedServiceForDetails ? serviceDetailsMap[selectedServiceForDetails] : null}
-        onClick={(category: 'boarding' | 'grooming') => {
-          closeServiceDetailsModal();
-          openBookingFormModal(category);
-        }}
-      />
-
-      <Modal isOpen={showBookingFormModal} onClose={closeBookingFormModal}>
-        {selectedServiceTypeForBooking === 'boarding' ? (
-          <BoardingBookingForm
-            onConfirmBooking={handleNewBooking}
-            onClose={closeBookingFormModal}
-          />
-        ) : selectedServiceTypeForBooking === 'grooming' ? (
-          <GroomingBookingForm
-            onConfirmBooking={handleNewBooking}
-            onClose={closeBookingFormModal}
-          />
-        ) : (
-          <div className="text-center py-8">
-            <h3 className="text-2xl font-semibold mb-4 text-gray-800">Select a Service Type</h3>
-            <p className="text-gray-700 mb-4">
-              Please choose either Boarding or Grooming to proceed with your booking.
-            </p>
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => openBookingFormModal('boarding')}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                Book Boarding
-              </button>
-              <button
-                onClick={() => openBookingFormModal('grooming')}
-                className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
-              >
-                Book Grooming
-              </button>
-            </div>
-            <button
-              onClick={closeBookingFormModal}
-              className="mt-4 px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-            >
-              Close
-            </button>
+        {activeTab === 'home' && (
+          <div className="space-y-8">
+            <OvernightServicesSection setSelectedService={handleSelectServiceForDetails} />
+            <GroomingServicesSection setSelectedService={handleSelectServiceForDetails} />
           </div>
         )}
-      </Modal>
+
+        {activeTab === 'history' && (
+          <div className="bg-slate-900/50 backdrop-blur-sm p-8 rounded-2xl border border-indigo-500/20 shadow-2xl">
+            <h2 className="text-2xl font-bold mb-4 text-white">Booking History</h2>
+            <p className="text-gray-300">Your past and upcoming bookings will appear here.</p>
+          </div>
+        )}
+
+        {activeTab === 'about' && (
+          <div className="bg-slate-900/50 backdrop-blur-sm p-8 rounded-2xl border border-indigo-500/20 shadow-2xl">
+            <h2 className="text-2xl font-bold mb-4 text-white">About Pawspace</h2>
+            <div className="prose prose-invert max-w-none">
+              <p className="text-gray-300 mb-4">
+                Pawspace is your premier destination for pet care services.
+              </p>
+              <ul className="list-disc pl-5 mb-4 text-gray-300 space-y-2">
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                  Professional grooming services for dogs and cats
+                </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Comfortable boarding facilities for your pets
+                </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
+                  Experienced and caring staff
+                </li>
+                <li className="flex items-center">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                  Customized care for each pet's needs
+                </li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        <ServiceDetailsModal
+          isOpen={!!selectedServiceForDetails}
+          onClose={closeServiceDetailsModal}
+          details={selectedServiceForDetails ? serviceDetailsMap[selectedServiceForDetails] : null}
+          onClick={(category: 'boarding' | 'grooming') => {
+            closeServiceDetailsModal();
+            openBookingFormModal(category);
+          }}
+        />
+
+        <Modal isOpen={showBookingFormModal} onClose={closeBookingFormModal}>
+          {selectedServiceTypeForBooking === 'boarding' ? (
+            <BoardingBookingForm
+              onConfirmBooking={handleNewBooking}
+              onClose={closeBookingFormModal}
+            />
+          ) : selectedServiceTypeForBooking === 'grooming' ? (
+            <GroomingBookingForm
+              onConfirmBooking={handleNewBooking}
+              onClose={closeBookingFormModal}
+            />
+          ) : (
+            <div className="text-center py-8 bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-indigo-500/20">
+              <h3 className="text-2xl font-semibold mb-4 text-white">Select a Service Type</h3>
+              <p className="text-gray-300 mb-6">
+                Please choose either Boarding or Grooming to proceed with your booking.
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => openBookingFormModal('boarding')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg shadow-lg transition-all duration-200 border border-blue-500/20"
+                >
+                  Book Boarding
+                </button>
+                <button
+                  onClick={() => openBookingFormModal('grooming')}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg shadow-lg transition-all duration-200 border border-purple-500/20"
+                >
+                  Book Grooming
+                </button>
+              </div>
+              <button
+                onClick={closeBookingFormModal}
+                className="mt-6 px-6 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-lg shadow-lg transition-all duration-200 border border-slate-500/20"
+              >
+                Close
+              </button>
+            </div>
+          )}
+        </Modal>
+      </div>
     </div>
   );
 }
