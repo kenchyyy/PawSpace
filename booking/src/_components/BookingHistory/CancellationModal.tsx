@@ -43,10 +43,15 @@ const CancellationModal: React.FC<CancellationModalProps> = ({
                     <button
                         onClick={handleConfirmCancelBooking}
                         disabled={isSubmittingCancel || cancelMessage.trim() === ''}
-                        className={`bg-yellow-500 hover:bg-yellow-600 cursor-pointer text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isSubmittingCancel || cancelMessage.trim() === '' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline
+                            ${isSubmittingCancel || cancelMessage.trim() === ''
+                                ? 'bg-yellow-500 opacity-50 cursor-not-allowed'
+                                : 'bg-yellow-500 hover:bg-yellow-600 cursor-pointer'}
+                        `}
                     >
                         {isSubmittingCancel ? 'Cancelling...' : 'Confirm Cancellation'}
                     </button>
+
                 </div>
             </div>
         </div>

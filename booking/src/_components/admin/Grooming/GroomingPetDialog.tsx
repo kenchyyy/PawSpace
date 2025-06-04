@@ -1,7 +1,7 @@
 "use client";
 
 import { FaCheck, FaEnvelope, FaMinus } from "react-icons/fa";
-import { RejectionDialog } from "./../RejectionDialog";
+import { RejectionDialog } from "../RejectionDialog";
 import {
   Dialog,
   DialogClose,
@@ -26,7 +26,7 @@ import { Skeleton } from "../../ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
 import ConfirmationMessage from "../../ConfirmationMessage";
 import { AddCancelBookingMessage, getCancelledBookingMessageByBookingUuid, updateBookingStatus } from "../../serverSide/BookDataFetching";
-import { truncate } from "./../helper";
+import { truncate } from "../helper";
 import AlertMessage from "../../AlertMessage";
 import GroomingPetDetails from "./GroomingPetDetails";
 
