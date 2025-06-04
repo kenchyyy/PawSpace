@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       console.error('Error updating booking status:', updateError);
       return NextResponse.json({ message: 'Failed to update booking status.' }, { status: 500 });
     }
-    
+        
     const { error: insertError } = await supabase
       .from('CancelMessages')
       .insert({
