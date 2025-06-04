@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../../src/app/api/history/cancel-booking/route';
 
-// Mock Supabase and Next.js headers
+// Mocking Supabase and Next.js headers
 vi.mock('@supabase/auth-helpers-nextjs', () => ({
   createRouteHandlerClient: vi.fn(),
 }));
