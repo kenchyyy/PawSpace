@@ -22,7 +22,7 @@ const CancelBookingButton: React.FC<CancelBookingButtonProps> = ({
                 onClick={onClick}
                 disabled={isSubmitting || isDisabled}
                 className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline
-                    ${isSubmitting || isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${isSubmitting || isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
             >
                 {isSubmitting ? 'Cancelling...' : 'Cancel Booking'}
