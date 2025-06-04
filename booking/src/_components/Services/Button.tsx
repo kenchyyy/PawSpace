@@ -5,17 +5,14 @@ type AddBookingButtonProps = {
   children?: ReactNode;
   onClick?: () => void;
   className?: string;
-  withIcon?: boolean;
-  variant?: 'default' | 'rose' | 'aqua' | 'gold';
+  variant?: 'default'
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 };
 
 export function AddBookingButton({
   children = 'Add Booking',
-  onClick,
   className = '',
-  withIcon = true,
   variant = 'default',
   size = 'md',
   disabled = false,
@@ -25,10 +22,7 @@ export function AddBookingButton({
 
   const variantStyles: Record<string, string> = {
     default:
-      'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-purple-600 hover:to-pink-500 focus:ring-pink-400',
-    rose: 'bg-rose-500 text-white hover:bg-rose-600 focus:ring-rose-300',
-    aqua: 'bg-cyan-500 text-white hover:bg-cyan-600 focus:ring-cyan-300',
-    gold: 'bg-yellow-400 text-black hover:bg-yellow-500 focus:ring-yellow-300',
+      'bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:from-purple-600 cursor-pointer hover:to-pink-500 focus:ring-pink-400',
   };
 
   const sizeStyles: Record<string, string> = {
@@ -48,11 +42,10 @@ export function AddBookingButton({
 
   return (
     <button
-      onClick={onClick}
       disabled={disabled}
       className={`${baseStyles} ${disabled ? disabledStyles : variantStyles[variant]} ${sizeStyles[size]} ${!disabled ? rippleEffect : ''} ${className}`}
     >
-      {withIcon && <PawPrint className="w-5 h-5" />}
+      { <PawPrint className="w-5 h-5" />}
       {children}
     </button>
   );

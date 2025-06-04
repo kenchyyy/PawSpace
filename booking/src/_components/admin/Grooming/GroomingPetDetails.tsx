@@ -11,7 +11,7 @@ import React, { useState, useEffect } from "react";
 import { GroomingPetData } from "../../serverSide/FetchPetData";
 import { ScrollArea } from "../../ui/scroll-area";
 import { DialogFooter } from "@/StoryComponents/ui/dialog";
-import { truncate } from "./../helper"; // Make sure this is robust!
+import { truncate } from "../helper"; // Make sure this is robust!
 
 export interface GroomingPetDetailsProps extends GroomingPetData {
   owner: string;

@@ -1,6 +1,6 @@
 // components/ServiceDetailsModal.tsx
 
-import { AddBookingButton } from "@/StoryComponents/ui/button/Button";
+import { AddBookingButton } from "@/_components/Services/Button";
 import SpecialOffers from "./SpecialOffers";
 import DogAccommodationCard from "./accommodation/DogAccommodationCard";
 import CatAccommodationCard from "./accommodation/CatAccommodationCard";
