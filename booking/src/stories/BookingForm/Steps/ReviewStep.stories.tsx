@@ -1,4 +1,3 @@
-// ReviewStep.stories.ts
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
@@ -6,10 +5,9 @@ import ReviewStep from '../../../_components/Booking Form/Steps/ReviewStep';
 import { 
     mockOwner, 
     mockBoardingPet, 
-    mockGroomingPet, 
-    mockMultiplePets,
-    mockLoadingStates 
+    mockGroomingPet
 } from '../utils/mockData';
+import { RoomSize, Pet, BoardingPet } from '../../../_components/Booking Form/types';
 
 const meta: Meta<typeof ReviewStep> = {
     title: 'BookingForm/Steps/ReviewStep',
@@ -43,7 +41,6 @@ export const BoardingReview: Story = {
     },
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
-        // Simulate user checking confirmation
         const checkbox = canvas.getByRole('checkbox');
         await userEvent.click(checkbox);
         expect(checkbox).toBeChecked();
@@ -64,11 +61,25 @@ export const GroomingReview: Story = {
     }
 };
 
-// Multiple pets review
+
+const mockMultiplePetsData: Pet[] = [
+    {
+        ...mockBoardingPet,
+        room_size: 'medium' as RoomSize
+    },
+    {
+        ...mockBoardingPet,
+        id: 'pet-2',
+        name: 'Bella',
+        room_size: 'large' as RoomSize
+    }
+];
+
+
 export const MultiplePetsReview: Story = {
     args: {
         ownerDetails: mockOwner,
-        pets: mockMultiplePets,
+        pets: mockMultiplePetsData,
         serviceType: 'boarding',
         confirmedInfo: true,
         onConfirmChange: () => {},
