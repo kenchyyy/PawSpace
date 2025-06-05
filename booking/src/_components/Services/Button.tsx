@@ -5,8 +5,8 @@ type AddBookingButtonProps = {
   children?: ReactNode;
   onClick?: () => void;
   className?: string;
-  variant?: "default";
-  size?: "sm" | "md" | "lg";
+  variant?: 'default';
+  size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 };
 
@@ -43,14 +43,14 @@ export function AddBookingButton({
 
   return (
     <button
-      type='button'
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={`${baseStyles} ${
         disabled ? disabledStyles : variantStyles[variant]
       } ${sizeStyles[size]} ${!disabled ? rippleEffect : ""} ${className}`}
     >
-      {<PawPrint className='w-5 h-5' />}
+      <PawPrint className="w-5 h-5" />
       {children}
     </button>
   );
