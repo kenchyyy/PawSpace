@@ -1,4 +1,3 @@
-// tests/load-more.route.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '../../src/app/api/history/load-more/route';
 import { type NextRequest } from 'next/server';
