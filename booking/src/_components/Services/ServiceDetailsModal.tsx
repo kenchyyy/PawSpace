@@ -113,7 +113,7 @@ export default function ServiceDetailsModal({ isOpen, onClose, details, onClick 
                         </p>
 
                         <AddBookingButton
-                            onClick={() => onClick(bookingCategory)}
+                            onClick={() =>  onClick(bookingCategory)}
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium cursor-pointer transition duration-300 ease-in-out"
                         >
                             Book Now
