@@ -1,6 +1,7 @@
-import { validatePetDetails } from '../../../../src/_components/Booking Form/utils/validation';
+import { describe, test, expect } from 'vitest';
+import { validatePetDetails } from '../../../src/_components/Booking Form/utils/validation';
 import { mockBoardingPet, mockGroomingPet } from '../utils/mockData';
-import type { BoardingPet, GroomingPet } from '../../../../src/_components/Booking Form/types';
+import type { BoardingPet, GroomingPet } from '../../../src/_components/Booking Form/types';
 
 describe('Pet Step Validation', () => {
     test('validates boarding schedule', () => {

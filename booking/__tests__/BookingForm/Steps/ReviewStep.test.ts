@@ -1,8 +1,8 @@
-import '@testing-library/jest-dom';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { screen, waitFor } from '@testing-library/dom';
 import { mockOwner, mockBoardingPet, mockGroomingPet } from '../utils/mockData';
-import type { ReviewStepProps, BookingResult } from '../../../../src/_components/Booking Form/types';
-import { validateReviewStep, validateBooking, BookingValidationData } from '../../../../src/_components/Booking Form/utils/validation';
+import type { ReviewStepProps, BookingResult } from '../../../src/_components/Booking Form/types';
+import { validateReviewStep, validateBooking, BookingValidationData } from '../../../src/_components/Booking Form/utils/validation';
 
 describe('ReviewStep', () => {
     const mockBookingResult: BookingResult = {
@@ -15,9 +15,9 @@ describe('ReviewStep', () => {
         pets: [mockBoardingPet],
         serviceType: 'boarding',
         confirmedInfo: false,
-        onConfirmChange: jest.fn(),
-        onBack: jest.fn(),
-        onConfirm: jest.fn().mockResolvedValue(mockBookingResult),
+        onConfirmChange: vi.fn(),
+        onBack: vi.fn(),
+        onConfirm: vi.fn().mockResolvedValue(mockBookingResult),
         isSubmitting: false,
         errors: {}
     };

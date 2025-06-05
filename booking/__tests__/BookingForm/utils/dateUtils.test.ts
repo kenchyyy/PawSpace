@@ -1,4 +1,5 @@
-import { parseDate, calculateNights, isSameDay } from '../../../../src/_components/Booking Form/types';
+import { describe, test, expect } from 'vitest';
+import { parseDate, calculateNights, isSameDay } from '../../../src/_components/Booking Form/types';
 
 describe('Date Utilities', () => {
     test('parseDate handles invalid formats', () => {

@@ -1,6 +1,7 @@
-import { validateCustomerDetails } from '../../../../src/_components/Booking Form/utils/validation';
+import { describe, test, expect } from 'vitest';
+import { validateCustomerDetails } from '../../../src/_components/Booking Form/utils/validation';
 import { mockOwner } from '../utils/mockData';
-import type { OwnerDetails } from '../../../../src/_components/Booking Form/types';
+import type { OwnerDetails } from '../../../src/_components/Booking Form/types';
 
 describe('Customer Step Validation', () => {
     test('validates empty fields', () => {

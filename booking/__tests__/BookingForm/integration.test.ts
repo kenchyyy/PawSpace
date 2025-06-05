@@ -1,4 +1,5 @@
-import { createBooking } from '../../../src/_components/Booking Form/bookingService';
+import { describe, test, expect, beforeEach, afterAll } from 'vitest';
+import { createBooking } from '../../src/_components/Booking Form/bookingService';
 import { createClient } from '@supabase/supabase-js';
 import { mockOwner, mockBoardingPet, mockGroomingPet } from './utils/mockData';
 
