@@ -68,7 +68,7 @@ describe('ReviewStep', () => {
         };
         const result = validateBooking(testData);
         expect(result.success).toBe(true);
-        expect(result.discount).toBeUndefined();
+        expect(result.errors.discount).toBeUndefined();
     });
 
     test('handles invalid total amounts', () => {
@@ -80,7 +80,7 @@ describe('ReviewStep', () => {
         };
         const result = validateBooking(testData);
         expect(result.success).toBe(false);
-        expect(result.total).toBeDefined();
+        expect(result.errors.pricing).toBeDefined();
     });
 });
 
@@ -95,13 +95,13 @@ describe('Review Step Validation', () => {
     });
 
     test('validates booking totals', () => {
-        const result = validateReviewStep({
+        const result = validateBooking({
             ownerDetails: mockOwner,
             pets: [mockBoardingPet],
             confirmedInfo: true,
             totalAmounts: [-1]
         });
-        expect(result.total).toBeDefined();
+        expect(result.errors.pricing).toBeDefined();
     });
 
     test('validates complete booking data', () => {
@@ -110,7 +110,7 @@ describe('Review Step Validation', () => {
             pets: [mockBoardingPet],
             confirmedInfo: false
         });
-        expect(result.confirmation).toBeDefined();
+        expect(result.errors.confirmation).toBeDefined();
     });
 
     test('validates pricing calculations', () => {
