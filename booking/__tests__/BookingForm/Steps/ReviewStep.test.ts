@@ -120,7 +120,8 @@ describe('Review Step Validation', () => {
                 mockBoardingPet,
                 mockGroomingPet
             ],
-            totalAmounts: [450, 450]
+            totalAmounts: [450, 450],
+            confirmedInfo: true // Add missing required field
         });
         expect(result.success).toBe(true);
     });
@@ -130,7 +131,8 @@ describe('Review Step Validation', () => {
             ownerDetails: mockOwner,
             pets: [mockBoardingPet],
             totalAmounts: [6750],
-            discountsApplied: [1500]
+            discountsApplied: [1500],
+            confirmedInfo: true // Add missing required field
         };
         const result = validateBooking(testData);
         expect(result.success).toBe(true);

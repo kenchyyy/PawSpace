@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
-import StepIndicator from '../../../src/_components/Booking Form/Form Components/StepIndicator';
+import StepIndicator from '../../../_components/Booking Form/Form Components/StepIndicator';
 
 const meta: Meta<typeof StepIndicator> = {
     title: 'Form Components/StepIndicator',

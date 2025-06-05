@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
-import ReviewStep from '../../../src/_components/Booking Form/Steps/ReviewStep';
+import ReviewStep from '../../../_components/Booking Form/Steps/ReviewStep';
 import { 
     mockOwner, 
     mockBoardingPet, 

@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
-import PetStep from '../../../src/_components/Booking Form/Steps/PetStep';
+import PetStep from '../../../_components/Booking Form/Steps/PetStep';
 import { 
     mockBoardingPet, 
     mockGroomingPet, 

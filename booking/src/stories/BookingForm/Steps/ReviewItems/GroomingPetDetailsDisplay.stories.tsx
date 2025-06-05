@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { GroomingPet } from '../../../../src/_components/Booking Form/types';
-import GroomingPetDetailsDisplay from '../../../../src/_components/Booking Form/Steps/ReviewItems/GroomingDetailsDisplay';
+import { GroomingPet } from '../../../../_components/Booking Form/types';
+import GroomingPetDetailsDisplay from '../../../../_components/Booking Form/Steps/ReviewItems/GroomingDetailsDisplay';
 import { mockGroomingPet } from '../../utils/mockData';
 
 const meta: Meta<typeof GroomingPetDetailsDisplay> = {

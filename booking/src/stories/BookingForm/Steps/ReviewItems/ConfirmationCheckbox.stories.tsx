@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import ConfirmationCheckbox from '../../../../src/_components/Booking Form/Steps/ReviewItems/ConfirmationCheckox';
+import ConfirmationCheckbox from '../../../../_components/Booking Form/Steps/ReviewItems/ConfirmationCheckox';
 
 const meta: Meta<typeof ConfirmationCheckbox> = {
   title: 'BookingForm/Steps/ReviewItems/ConfirmationCheckbox',

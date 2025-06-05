@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
-import PetServiceCard from '../../../../src/_components/Booking Form/Steps/ReviewItems/PetServiceCard';
+import PetServiceCard from '../../../../_components/Booking Form/Steps/ReviewItems/PetServiceCard';
 import { mockBoardingPet, mockGroomingPet } from '../../utils/mockData';
 
 const meta: Meta<typeof PetServiceCard> = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import PriceDetailsDisplay from '../../../../src/_components/Booking Form/Steps/ReviewItems/PriceDetailsDisplay';
+import PriceDetailsDisplay from '../../../../_components/Booking Form/Steps/ReviewItems/PriceDetailsDisplay';
 
 const meta: Meta<typeof PriceDetailsDisplay> = {
     title: 'BookingForm/Steps/ReviewItems/PriceDetailsDisplay',

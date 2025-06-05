@@ -1,6 +1,6 @@
 // TimePicker.stories.ts
 import type { Meta, StoryObj } from '@storybook/react';
-import TimePicker from '../../../src/_components/Booking Form/Schedule Picker/TimePicker';
+import TimePicker from '../../../_components/Booking Form/Schedule Picker/TimePicker';
 
 const meta: Meta<typeof TimePicker> = {
   title: 'BookingForm/SchedulePicker/TimePicker',

@@ -4,7 +4,7 @@ import {
     BoardingPet, 
     GroomingPet, 
     MealInstructions 
-} from '../../../src/_components/Booking Form/types';
+} from '../../../_components/Booking Form/types';
 
 export const mockOwner: OwnerDetails = {
     name: 'John Doe',

@@ -1,29 +1,38 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { expect } from '@storybook/test';
 import { userEvent, within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
-import BasePetDetails from '../../../src/_components/Booking Form/Form Components/BasePetDetails';
+import BasePetDetails from '../../../_components/Booking Form/Form Components/BasePetDetails';
 import { mockBoardingPet, mockGroomingPet } from '../utils/mockData';
-import { PetType, ServiceType } from '../../../src/_components/Booking Form/types';
+import { PetType, ServiceType } from '../../../_components/Booking Form/types';
 
 const meta: Meta<typeof BasePetDetails> = {
     title: 'Form Components/BasePetDetails',
     component: BasePetDetails,
     parameters: {
-        layout: 'padded',
-        a11y: {
-            config: {
-                rules: [
-                    { id: 'label', enabled: true },
-                    { id: 'form-field-multiple-labels', enabled: true }
-                ]
-            }
-        }
+        layout: 'centered',
     },
+    decorators: [
+        (Story) => (
+            <div className="p-6 max-w-3xl mx-auto">
+                <Story />
+            </div>
+        ),
+    ],
     tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof BasePetDetails>;
+
+// Updated test data with proper meal instructions
+const mockPetWithMeals = {
+    ...mockBoardingPet,
+    meal_instructions: {
+        breakfast: { time: '08:00', food: 'Dry Food', notes: '' },
+        lunch: { time: '12:00', food: 'Wet Food', notes: '' },
+        dinner: { time: '18:00', food: 'Mixed Food', notes: '' }
+    }
+};
 
 export const EmptyForm: Story = {
     args: {
@@ -32,9 +41,14 @@ export const EmptyForm: Story = {
             name: '',
             breed: '',
             age: '',
-            pet_type: 'dog' as PetType, // Fix empty string
+            pet_type: 'dog' as PetType,
             vaccinated: 'unknown',
-            size: 'medium'
+            size: 'medium',
+            meal_instructions: {
+                breakfast: { time: '', food: '', notes: '' },
+                lunch: { time: '', food: '', notes: '' },
+                dinner: { time: '', food: '', notes: '' }
+            }
         },
         onChange: () => {},
         onScheduleChange: () => {},
@@ -52,7 +66,7 @@ export const EmptyForm: Story = {
 
 export const FilledBoardingPet: Story = {
     args: {
-        pet: mockBoardingPet,
+        pet: mockPetWithMeals, // Use the updated mock data
         onChange: () => {},
         onScheduleChange: () => {},
         errors: {},
@@ -139,7 +153,7 @@ export const MobileLayout: Story = {
 export const WithMedicalInfo: Story = {
     args: {
         pet: {
-            ...mockBoardingPet,
+            ...mockPetWithMeals, // Use the updated mock data
             vitamins_or_medications: 'Daily heart medication',
             allergies: 'Sensitive to chicken',
             special_requests: 'Needs medication at 8am daily'

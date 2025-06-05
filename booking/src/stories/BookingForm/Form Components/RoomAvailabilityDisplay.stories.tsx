@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import RoomAvailabilityDisplay from '../../../src/_components/Booking Form/Form Components/RoomAvailabilityDisplay';
-import { RoomSize } from '../../../src/_components/Booking Form/types';
+import RoomAvailabilityDisplay from '../../../_components/Booking Form/Form Components/RoomAvailabilityDisplay';
+import { RoomSize } from '../../../_components/Booking Form/types';
 
 const meta: Meta<typeof RoomAvailabilityDisplay> = {
   title: 'Form Components/RoomAvailabilityDisplay',
