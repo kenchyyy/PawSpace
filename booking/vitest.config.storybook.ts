@@ -13,6 +13,10 @@ const dirname =
 // More info at: https://storybook.js.org/docs/writing-tests/test-addon
 export default defineConfig({
   test: {
+    environment: "jsdom",
+    setupFiles: [".storybook/test-setup.ts"],
+    include: ["src/**/*.stories.{js,jsx,ts,tsx}"],
+    globals: true,
     workspace: [
       {
         extends: true,

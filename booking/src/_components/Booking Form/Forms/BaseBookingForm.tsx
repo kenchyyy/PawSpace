@@ -691,7 +691,14 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
                 }
             });
 
-            return await onConfirmBooking(ownerDetails, pets, totalAmounts, discountsApplied);
+            const result = await onConfirmBooking(ownerDetails, pets, totalAmounts, discountsApplied);
+            
+            if (result.success) {
+                // Don't close the form here, let the success modal handle it
+                return result;
+            }
+            
+            return result;
 
         } catch (error) {
             console.error('Booking error:', error);
@@ -777,7 +784,10 @@ const handleScheduleChange: ScheduleChangeHandler = (type, value, time) => {
                         serviceType={serviceType}
                         confirmedInfo={confirmedInfo}
                         onConfirmChange={handleReviewConfirmChange}
-                        onBack={() => setCurrentStep('pet')}
+                        onBack={() => {
+                            setCurrentStep('pet');
+                            onClose();
+                        }}
                         onConfirm={handleConfirmBooking}
                         isSubmitting={isSubmitting}
                         errors={formErrors}

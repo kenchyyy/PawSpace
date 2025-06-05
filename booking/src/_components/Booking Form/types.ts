@@ -294,6 +294,18 @@ export interface BasePetDetailsProps {
     unavailableTimes: string[]; 
 }
 
+export interface ReviewStepProps {
+    ownerDetails: OwnerDetails;
+    pets: Pet[];
+    serviceType: ServiceType;
+    confirmedInfo: boolean;
+    onConfirmChange: (checked: boolean) => void;
+    onBack: () => void;
+    onConfirm: () => Promise<void>;
+    isSubmitting: boolean;
+    errors: Record<string, string>;
+}
+
 
 
 
